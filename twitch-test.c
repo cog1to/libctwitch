@@ -22,8 +22,35 @@ int main(int argc, char **argv) {
   // Global cURL init.
   curl_global_init(CURL_GLOBAL_ALL);
 
-  twitch_user *user = twitch_v5_get_user("cog1to", CLIENT_ID);
-  printf("Username: %s, ID: %s\n", user->name, user->id);
+  twitch_user *user = twitch_v5_get_user_by_username(CLIENT_ID, "cog1to");
+  printf("Username: %s, ID: %s, Display Name: %s, Created At: %s, Updated At: %s, Type: %s\n", user->name, user->id, user->display_name, user->created_at, user->updated_at, user->type);
+
+  printf("Checking follow\n");
+
+  twitch_follow *specific_follow = twitch_v5_check_user_follow(CLIENT_ID, user->id, "129454141");
+  if (specific_follow != NULL) {
+    printf("  Yes\n");
+    twitch_follow_free(specific_follow);
+  } else {
+    printf("  No\n");
+  }
+
+  printf("Getting users\n");
+  int usercount = 0;
+  const char *usernames[] = {
+    "cog1to",
+    "dyingcamel",
+    "scumcreep",
+    "560-56056089"
+  };
+  twitch_user **users = twitch_v5_get_users(CLIENT_ID, 4, usernames, &usercount);
+  if (users != NULL) {
+    for (int index = 0; index < usercount; index++) {
+      twitch_user *usr = users[index];
+      printf("Username: %s, ID: %s, Display Name: %s, Created At: %s, Updated At: %s, Type: %s\n", usr->name, usr->id, usr->display_name, usr->created_at, usr->updated_at, usr->type);
+    }
+    twitch_users_list_free(users, usercount);
+  }
 
   printf("Getting follows\n");
 
@@ -44,7 +71,6 @@ int main(int argc, char **argv) {
 
   int streams_count = 0;
   twitch_stream **streams = twitch_v5_get_all_streams(CLIENT_ID, total, (const char **)channel_ids, NULL, NULL, NULL, &streams_count);
-  //twitch_stream **streams = twitch_v5_get_all_streams(CLIENT_ID, 0, NULL, "Overwatch", NULL, NULL, &streams_count);
 
   for (int idx = 0; idx < streams_count; idx++) {
     twitch_stream *stream = streams[idx];

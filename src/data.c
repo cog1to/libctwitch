@@ -7,17 +7,51 @@
 
 /** User data **/
 
+twitch_user *twitch_user_alloc() {
+  twitch_user *user = malloc(sizeof(twitch_user));
+
+  if (user == NULL) {
+    fprintf(stderr, "Failed to allocate memory for twitch_user.");
+    exit(EXIT_FAILURE);
+  }
+
+  memset(user, 0, sizeof(twitch_user));
+  return user;
+}
+
 void twitch_user_free(twitch_user *user) {
   free(user->id);
   free(user->display_name);
   free(user->name);
+  free(user->created_at);
+  free(user->updated_at);
+  free(user->type);
+
+  if (user->bio != NULL) {
+    free(user->bio);
+  }
+
+  if (user->logo != NULL) {
+    free(user->logo);
+  }  
+
   free(user);
 }
+
+void twitch_users_list_free(twitch_user **list, int count) {
+  pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_user_free);
+} 
 
 /** Channel data **/
 
 twitch_channel *twitch_channel_alloc() {
   twitch_channel *channel = malloc(sizeof(twitch_channel));
+
+  if (channel == NULL) {
+    fprintf(stderr, "Failed to allocate memory for twitch_channel.");
+    exit(EXIT_FAILURE);
+  }
+
   memset(channel, 0, sizeof(twitch_channel));
   return channel;
 }
@@ -59,6 +93,42 @@ void twitch_channel_free(twitch_channel *channel) {
     free(channel->display_name);
   }
 
+  if (channel->language != NULL) {
+    free(channel->language);
+  }
+
+  if (channel->broadcaster_language != NULL) {
+    free(channel->broadcaster_language);
+  }
+
+  if (channel->url != NULL) {
+    free(channel->url);
+  }
+
+  if (channel->video_banner != NULL) {
+    free(channel->video_banner);
+  }
+
+  if (channel->updated_at != NULL) {
+    free(channel->updated_at);
+  }
+
+  if (channel->created_at != NULL) {
+    free(channel->created_at);
+  }
+
+  if (channel->logo != NULL) {
+    free(channel->logo);
+  }
+
+  if (channel->profile_banner != NULL) {
+    free(channel->profile_banner);
+  }
+
+  if (channel->profile_banner_background_color != NULL) {
+    free(channel->profile_banner_background_color);
+  }
+
   free(channel);
 }
 
@@ -89,6 +159,12 @@ twitch_follow *twitch_follow_init(char *created_at, int notifications, twitch_ch
 
 twitch_stream *twitch_stream_alloc() {
   twitch_stream *stream = malloc(sizeof(twitch_stream));
+
+  if (stream == NULL) {
+    fprintf(stderr, "Failed to allocate memory for twitch_stream.");
+    exit(EXIT_FAILURE);
+  }
+ 
   memset(stream, 0, sizeof(twitch_stream));
   return stream;
 }

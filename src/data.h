@@ -14,7 +14,19 @@ typedef struct {
   char *id;
   char *display_name;
   char *name;
+  char *type;
+  char *bio;
+  char *created_at;
+  char *updated_at;
+  char *logo;
 } twitch_user;
+
+/**
+ * Allocates and erases memory for new twitch_user instance
+ *
+ * @return Pointer to dynamically allocated twitch_user struct.
+ */
+twitch_user *twitch_user_alloc();
 
 /**
  * Frees the memory allocated for twitch_user struct and all its properties.
@@ -22,6 +34,14 @@ typedef struct {
  * @param user Dynamically allocated twitch user data struct.
  */
 void twitch_user_free(twitch_user *user);
+
+/**
+ * Frees memory occupied by all twitch_user structs inside given array, then frees the array itself.
+ *
+ * @param list Array of pointers to dynamically allocated twitch_user objects.
+ * @param count Number of elements in the array.
+ */
+void twitch_users_list_free(twitch_user **list, int count);
 
 /** Channel data **/
 
@@ -34,6 +54,19 @@ typedef struct {
   char *name;
   char *status;
   char *display_name;
+  char *broadcaster_language;
+  char *created_at;
+  int followers;
+  char *language;
+  char *logo;
+  int mature;
+  int partner;
+  char *profile_banner;
+  char *profile_banner_background_color;
+  char *updated_at;
+  char *url;
+  char *video_banner;
+  int views;
 } twitch_channel;
 
 /**

@@ -6,11 +6,17 @@ Heavily WIP, use on your own discretion.
 
 # Build requirements
 
-- libcurl
+- `libcurl`
 
 # Usage
 
 I don't have any build system in place right now, so either DIY or just copy the sources and include and build them directly.
+
+For examples, see `twitch-test.c`.
+
+To compile `twitch-test.c`:
+
+```gcc twitch-test.c src/*.c -o twitch-test -L/<path-to-curl-lib> -I<path-to-curl-include> -I./src/ -lcurl```
 
 # Contents
 
