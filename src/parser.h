@@ -13,5 +13,9 @@ void *parse_follow(json_value *follow_object);
 
 void *parse_stream(json_value *stream_object);
 
+void *parse_summary(json_value *summary_object);
+
+void *parse_featured_stream(json_value *featured_object);
+
 #endif
 

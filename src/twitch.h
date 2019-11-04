@@ -37,7 +37,7 @@ twitch_user *twitch_v5_get_user_by_username(const char *client_id, const char *u
  * Returns a list of users matching given list of logins.
  *
  * @param client_id Twitch API client ID.
- * @param usernames_count Size of the list of usernames.
+ * @param usernames_count Size of the list of usernames. Should not exceed 100, accodring to API docs.
  * @param usernames List of usernames/logins to check.
  * @param total Used to return total number of users parsed from the response.
  *
@@ -127,7 +127,39 @@ twitch_stream **twitch_v5_get_streams(const char *client_id, int channel_ids_cou
  */
 twitch_stream **twitch_v5_get_all_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int *size);
 
+/**
+ * Returns a stream object for given channel, if it's online. Otherwise returns NULL.
+ *
+ * @param client_id Twitch API client ID.
+ * @param channel_id Channel ID to check.
+ * @param stream_type Restricts the output to only return stream of a given type. Can be "all", "live", or "playlist". Defaults to "live".
+ *
+ * @return A new twitch_stream struct describing the stream for specified channel, or NULL of channel is offline.
+ */
+twitch_stream *twitch_v5_get_stream_by_user(const char *client_id, const char *channel_id, const char *stream_type);
 
+/**
+ * Returns stream summary overall or for a given game.
+ *
+ * @param client_id Twitch API client ID.
+ * @param game Name of the game to get summary for. Can be NULL, in which case Twitch will return the overall stats for the whole site.
+ *
+ * @return Statistics for the site or specified game. If game is not found, will return NULL.
+ */
+twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game);
+
+/**
+ * Returns one page of featured streams. Each element in an array is a pointer to dynamically allocated twitch_featured_stream struct.
+ * Don't forget to release the allocated memory later by calling twitch_feature_stream_list_free() function;
+ *
+ * @param client_id Twitch API client ID.
+ * @param limit Page limit. Maximum allowed by the API: 100.
+ * @param offset Page offset.
+ * @param size Number of downloaded items.
+ *
+ * @return Array of twitch_featured_stream pointers containing data for given page of featured streams.
+ */
+twitch_featured_stream **twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *size);
 
 #endif
 

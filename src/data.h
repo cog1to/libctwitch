@@ -67,6 +67,10 @@ typedef struct {
   char *url;
   char *video_banner;
   int views;
+  char *broadcaster_type;
+  char *broadcaster_software;
+  int private_video;
+  int privacy_options_enabled;
 } twitch_channel;
 
 /**
@@ -191,6 +195,60 @@ void twitch_stream_free(twitch_stream *stream);
  * @param count List of elements in the array.
  */
 void twitch_streams_list_free(twitch_stream **list, int count);
+
+/** Stream summary. **/
+
+typedef struct {
+  int channels;
+  int viewers;
+} twitch_summary;
+
+/**
+ * Creates new empty twitch_summary struct.
+ *
+ * @return Newly allocated twitch_summary instance.
+ */
+twitch_summary *twitch_summary_alloc();
+
+/**
+ * Releases memory allocated for twitch_summary struct.
+ *
+ * @param summary A struct to deallocate.
+ */
+void twitch_summary_free(twitch_summary *summary);
+
+/** Featured streams. **/
+typedef struct {
+  char *image;
+  int priority;
+  int scheduled;
+  int sponsored;
+  char *text;
+  char *title;
+  twitch_stream *stream;
+} twitch_featured_stream;
+
+/**
+ * Allocates memory for new featured stream struct.
+ *
+ * @return Pointer to newly allocated twitch_featured_stream struct.
+ */
+twitch_featured_stream *twitch_featured_stream_alloc();
+
+/**
+ * Recursively frees memory allocated for twitch_featured_stream struct and it's members.
+ *
+ * @param stream Struct to deallocate.
+ */
+void twitch_featured_stream_free(twitch_featured_stream *stream);
+
+/**
+ * Frees memory allocated for given array of featured stream objects and for all objects inside it.
+ *
+ * @param count Number of elements in the array.
+ * @param streams Pointer to the array holding featured stream objects.
+ */
+void twitch_featured_stream_list_free(int count, twitch_featured_stream **streams);
 
 #endif
 

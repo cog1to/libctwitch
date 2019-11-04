@@ -33,14 +33,14 @@ void twitch_user_free(twitch_user *user) {
 
   if (user->logo != NULL) {
     free(user->logo);
-  }  
+  }
 
   free(user);
 }
 
 void twitch_users_list_free(twitch_user **list, int count) {
   pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_user_free);
-} 
+}
 
 /** Channel data **/
 
@@ -129,6 +129,14 @@ void twitch_channel_free(twitch_channel *channel) {
     free(channel->profile_banner_background_color);
   }
 
+  if (channel->broadcaster_software != NULL) {
+    free(channel->broadcaster_software);
+  }
+
+  if (channel->broadcaster_type != NULL) {
+    free(channel->broadcaster_type);
+  }
+
   free(channel);
 }
 
@@ -164,7 +172,7 @@ twitch_stream *twitch_stream_alloc() {
     fprintf(stderr, "Failed to allocate memory for twitch_stream.");
     exit(EXIT_FAILURE);
   }
- 
+
   memset(stream, 0, sizeof(twitch_stream));
   return stream;
 }
@@ -209,5 +217,58 @@ void twitch_stream_free(twitch_stream *stream) {
 
 void twitch_streams_list_free(twitch_stream **list, int count) {
   pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_stream_free);
+}
+
+twitch_summary *twitch_summary_alloc() {
+  twitch_summary *summary = malloc(sizeof(twitch_summary));
+
+  if (summary == NULL) {
+    fprintf(stderr, "Failed to allocate memory for twitch_summary struct.");
+    exit(EXIT_FAILURE);
+  }
+
+  memset(summary, 0, sizeof(twitch_summary));
+  return summary;
+}
+
+
+void twitch_summary_free(twitch_summary *summary) {
+  free(summary);
+}
+
+twitch_featured_stream *twitch_featured_stream_alloc() {
+   twitch_featured_stream *stream = malloc(sizeof(twitch_featured_stream));
+
+  if (stream == NULL) {
+    fprintf(stderr, "Failed to allocate memory for twitch_featured_stream struct.");
+    exit(EXIT_FAILURE);
+  }
+
+  memset(stream, 0, sizeof(twitch_featured_stream));
+  return stream;
+}
+
+void twitch_featured_stream_free(twitch_featured_stream *stream) {
+  if (stream->image != NULL) {
+    free(stream->image);
+  }
+
+  if (stream->text != NULL) {
+    free(stream->text);
+  }
+
+  if (stream->title != NULL) {
+    free(stream->title);
+  }
+
+  if (stream->stream != NULL) {
+    twitch_stream_free(stream->stream);
+  }
+
+  free(stream);
+}
+
+void twitch_featured_stream_list_free(int count, twitch_featured_stream **list) {
+  pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_featured_stream_free);
 }
 

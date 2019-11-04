@@ -153,7 +153,24 @@ void *parse_channel(json_value *channel_object) {
       if (channel_object->u.object.values[prop_ind].value->type == json_string) {
         channel->profile_banner_background_color = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
       }
+    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "private_video") == 0) {
+      // Private video flag.
+      channel->private_video = channel_object->u.object.values[prop_ind].value->u.boolean;
+    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "privacy_options_enabled") == 0) {
+      // Privacy options enabled flag.
+      channel->privacy_options_enabled = channel_object->u.object.values[prop_ind].value->u.boolean;
+    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "broadcaster_type") == 0) {
+      // Broadcaster type.
+      if (channel_object->u.object.values[prop_ind].value->type != json_null) {
+        channel->broadcaster_type = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "broadcaster_software") == 0) {
+      // Broadcaster sowftware.
+      if (channel_object->u.object.values[prop_ind].value->type != json_null) {
+        channel->broadcaster_software = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
+      }
     }
+
   }
 
   return (void *)channel;
@@ -216,3 +233,60 @@ void *parse_stream(json_value *stream_object) {
 
   return stream;
 }
+
+void *parse_summary(json_value *summary_object) {
+  twitch_summary *summary = twitch_summary_alloc();
+
+  for (int prop_ind = 0; prop_ind < summary_object->u.object.length; prop_ind++) {
+    if (strcmp(summary_object->u.object.values[prop_ind].name, "channels") == 0) {
+      // Channels.
+      summary->channels = summary_object->u.object.values[prop_ind].value->u.integer;
+    } else if (strcmp(summary_object->u.object.values[prop_ind].name, "viewers") == 0) {
+      // Viewers.
+      summary->viewers = summary_object->u.object.values[prop_ind].value->u.integer;
+    }
+  }
+
+  return (void *)summary;
+}
+
+void *parse_featured_stream(json_value *featured_object) {
+  twitch_featured_stream *stream = twitch_featured_stream_alloc();
+
+  for (int prop_ind = 0; prop_ind < featured_object->u.object.length; prop_ind++) {
+    if (strcmp(featured_object->u.object.values[prop_ind].name, "image") == 0) {
+      // Image.
+      if (featured_object->u.object.values[prop_ind].value->type == json_string) {
+        stream->image = immutable_string_copy(featured_object->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } if (strcmp(featured_object->u.object.values[prop_ind].name, "priority") == 0) {
+      // Priority.
+      stream->priority = featured_object->u.object.values[prop_ind].value->u.integer;
+    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "scheduled") == 0) {
+      // Scheduled flag.
+      stream->scheduled = featured_object->u.object.values[prop_ind].value->u.boolean;
+    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "sponsored") == 0) {
+      // Sponsored flag.
+      stream->sponsored = featured_object->u.object.values[prop_ind].value->u.boolean;
+    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "text") == 0) {
+      // Text.
+      if (featured_object->u.object.values[prop_ind].value->type == json_string) {
+        stream->text = immutable_string_copy(featured_object->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "title") == 0) {
+      // Title.
+      if (featured_object->u.object.values[prop_ind].value->type == json_string) {
+        stream->title = immutable_string_copy(featured_object->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "stream") == 0) {
+      // Stream.
+      if (featured_object->u.object.values[prop_ind].value->type == json_object) {
+        stream->stream = parse_stream(featured_object->u.object.values[prop_ind].value);
+      }
+    }
+  }
+
+  return stream;
+
+}
+
