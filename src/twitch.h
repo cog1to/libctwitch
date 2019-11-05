@@ -161,5 +161,31 @@ twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game);
  */
 twitch_featured_stream **twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *size);
 
+/**
+ * Returns all featured streams. Each element in an array is a pointer to dynamically allocated twitch_featured_stream struct.
+ * Don't forget to release the allocated memory later by calling twitch_feature_stream_list_free() function;
+ *
+ * @param client_id Twitch API client ID.
+ * @param size Number of downloaded items.
+ *
+ * @return Array of twitch_featured_stream pointers containing data for given page of featured streams.
+ */
+twitch_featured_stream **twitch_v5_get_all_featured_streams(const char *client_id, int *size);
+
+/**
+ * Performs channel search for given query string.
+ *
+ * @param client_id Twitch API client ID.
+ * @param query Query string. Don't URL-escape this beforehabd, because the method performs its own URL-escaping.
+ * @param limit Page size.
+ * @param offset Search results list offset.
+ * @param size Will hold the total number of downloaded channel objects.
+ * @param total Will hold the total number of found channels.
+ *
+ * @return Array of twitch_channel structs matching given search string. Don't forget to free the memory allocated for each item and
+ *     array itself.
+ */
+twitch_channel **twitch_v5_search_channels(const char *client_id, const char *query, int limit, int offset, int *size, int *total);
+
 #endif
 

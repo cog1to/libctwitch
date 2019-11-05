@@ -207,7 +207,7 @@ void *parse_stream(json_value *stream_object) {
       stream->created_at = immutable_string_copy(stream_object->u.object.values[prop_ind].value->u.string.ptr);
     } else if (strcmp(stream_object->u.object.values[prop_ind].name, "average_fps") == 0) {
       // Average FPS.
-      stream->average_fps = stream_object->u.object.values[prop_ind].value->u.integer;
+      stream->average_fps = stream_object->u.object.values[prop_ind].value->u.dbl;
     } else if (strcmp(stream_object->u.object.values[prop_ind].name, "channel") == 0) {
       // Channel.
       stream->channel = parse_channel(stream_object->u.object.values[prop_ind].value);

@@ -101,6 +101,14 @@ twitch_channel *twitch_channel_init(long long id, char *game, char *name, char *
  */
 void twitch_channel_free(twitch_channel *channel);
 
+/**
+ * Frees memory allocated for each twitch_channel struct inside the given array, and the array itself.
+ *
+ * @param count Number of items in the list.
+ * @param list The list to deallocate.
+ */
+void twitch_channel_list_free(int count, twitch_channel **list);
+
 /** Follow data **/
 
 /**
@@ -147,7 +155,7 @@ void twitch_follows_list_free(twitch_follow **list, int count);
  */
 typedef struct {
   long long int id;
-  int average_fps;
+  double average_fps;
   twitch_channel *channel;
   char *created_at;
   int delay;

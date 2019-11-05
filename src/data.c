@@ -101,6 +101,10 @@ void twitch_channel_free(twitch_channel *channel) {
   free(channel);
 }
 
+void twitch_channel_list_free(int count, twitch_channel **list) {
+  pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_channel_free);
+}
+
 /** Follow data **/
 
 void twitch_follow_free(twitch_follow *follow) {
