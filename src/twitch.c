@@ -68,6 +68,29 @@ CURLcode twitch_v5_get(const char *client_id, const char *url, string_t *output)
   return code;
 }
 
+json_value *twitch_v5_get_json(const char *client_id, const char *url) {
+  // Get the output.
+  string_t *output = string_init();
+  CURLcode code = twitch_v5_get(client_id, url, output);
+
+  // Check return code.
+  if (code == CURLE_HTTP_RETURNED_ERROR) {
+    string_free(output);
+    return NULL;
+  }
+
+  // Parse.
+  json_value *value = json_parse(output->ptr, output->len);
+  string_free(output);
+
+  if (value == NULL) {
+    fprintf(stderr, "Failed to parse JSON.");
+    exit(EXIT_FAILURE);
+  }
+
+  return value;
+}
+
 /** Helpers **/
 
 void append_paging_params(string_t *url, int limit, int offset, bool is_first_param) {
@@ -196,28 +219,9 @@ string_t *channel_search_url_builder(void *params, int limit, int offset) {
 typedef void *(*parser_func)(json_value *);
 
 void **get_page(const char *client_id, page_url_builder builder, void *params, int limit, int offset, const char *values_key, parser_func parser, int *size, int *total) {
-  // Build the URL.
   string_t *url = builder(params, limit, offset);
-
-  // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
+  json_value *value = twitch_v5_get_json(client_id, url->ptr); 
   string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse JSON.");
-    exit(EXIT_FAILURE);
-  }
 
   // Extract the relevant fields.
   void **elements = NULL;
@@ -297,25 +301,9 @@ twitch_user *twitch_v5_get_user(const char *client_id, const char *id) {
   string_t *url = string_init_with_value("https://api.twitch.tv/kraken/users/");
   string_append((void *)id, strlen(id), url);
 
-  // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
+  // Get JSON.
+  json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse users JSON.");
-    exit(EXIT_FAILURE);
-  }
 
   if (value->type != json_object) {
     fprintf(stderr, "Wrong JSON type of returned value.");
@@ -330,31 +318,15 @@ twitch_user *twitch_v5_get_user(const char *client_id, const char *id) {
 
 twitch_user *twitch_v5_get_user_by_username(const char *client_id, const char *username) {
   // Output value.
-  twitch_user *user = NULL; //
+  twitch_user *user = NULL;
 
   // Construct the link.
   string_t *url = string_init_with_value("https://api.twitch.tv/kraken/users?login=");
   string_append((void *)username, strlen(username), url);
 
   // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
+  json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse users JSON.");
-    exit(EXIT_FAILURE);
-  }
 
   // Extract the relevant fields.
   int length = value->u.object.length;
@@ -391,24 +363,8 @@ twitch_user **twitch_v5_get_users(const char *client_id, int usernames_count, co
   }
 
   // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
+  json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse channels JSON.");
-    exit(EXIT_FAILURE);
-  }
 
   // Extract the relevant fields.
   twitch_user **users = NULL;
@@ -441,19 +397,8 @@ twitch_follow *twitch_v5_check_user_follow(const char *client_id, const char *us
   string_append((void *)channel_id, strlen(channel_id), url);
 
   // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
+  json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
 
   if (value == NULL) {
     return NULL;
@@ -530,24 +475,8 @@ twitch_stream *twitch_v5_get_stream_by_user(const char *client_id, const char *c
   }
 
   // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
+  json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse channels JSON.");
-    exit(EXIT_FAILURE);
-  }
 
   for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
     if (strcmp(value->u.object.values[prop_ind].name, "stream") == 0) {
@@ -578,24 +507,7 @@ twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game) {
   }
 
   // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
-  string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse summary JSON.");
-    exit(EXIT_FAILURE);
-  }
+  json_value *value = twitch_v5_get_json(client_id, url->ptr);
 
   summary = (twitch_summary *)parse_summary(value);
 
