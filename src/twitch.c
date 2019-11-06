@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 #include <curl/curl.h>
 #include <wchar.h>
 
@@ -69,7 +70,13 @@ CURLcode twitch_v5_get(const char *client_id, const char *url, string_t *output)
 
 /** Helpers **/
 
-typedef string_t *(*page_url_builder)(void *);
+void append_paging_params(string_t *url, int limit, int offset, bool is_first_param) {
+  char buffer[64];
+  sprintf(buffer, "%slimit=%i&offset=%i", is_first_param ? "?" : "&", limit, offset);
+  string_append((void *)buffer, strlen(buffer), url);
+}
+
+typedef string_t *(*page_url_builder)(void *, int limit, int offset);
 
 typedef struct {
   const char *user_id;
@@ -77,8 +84,9 @@ typedef struct {
   const char *sortby;
 } follows_params;
 
-string_t *user_follows_url_builder(void *params) {
+string_t *user_follows_url_builder(void *params, int limit, int offset) {
   char buffer[128];
+  bool is_first_param = true;
 
   follows_params *fparams = (follows_params *)params;
 
@@ -89,16 +97,99 @@ string_t *user_follows_url_builder(void *params) {
 
   // Append direction.
   if (fparams->direction != NULL) {
-    sprintf(buffer, "&direction=%s", fparams->direction);
+    sprintf(buffer, "?direction=%s", fparams->direction);
     string_append(buffer, strlen(buffer), url);
+    is_first_param = false;
   }
 
   // Append sorting order.
   if (fparams->sortby != NULL) {
-    sprintf(buffer, "&sortby=%s", fparams->sortby);
+    sprintf(buffer, "%ssortby=%s", is_first_param ? "?" : "&", fparams->sortby);
     string_append(buffer, strlen(buffer), url);
+    is_first_param = false;
   }
 
+  append_paging_params(url, limit, offset, is_first_param);
+
+  return url;
+}
+
+typedef struct {
+  int channel_ids_count;
+  const char **channel_ids;
+  const char *game;
+  const char *stream_type;
+  const char *language;
+} streams_params;
+
+string_t *streams_url_builder(void *params, int limit, int offset) {
+  streams_params *sparams = (streams_params *)params;
+  bool is_first_param = true;
+  char buffer[512];
+
+  // Construct the link.
+  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/streams/");
+
+  // Append game.
+  if (sparams->game != NULL) {
+    sprintf(buffer, "?game=%s", sparams->game);
+    string_append((void *)buffer, strlen(buffer), url);
+    is_first_param = false;
+  }
+
+  // Append channel ids.
+  if (sparams->channel_ids_count > 0) {
+    string_t *channels = string_joined(sparams->channel_ids_count, sparams->channel_ids, ",");
+    sprintf(buffer, "%schannel=%s", is_first_param ? "?" : "&", channels->ptr);
+    string_append((void *)buffer, strlen(buffer), url);
+    string_free(channels);
+    is_first_param = false;
+  }
+
+  // Append stream type.
+  if (sparams->stream_type != NULL) {
+    sprintf(buffer, "%sstream_type=%s", is_first_param ? "?" : "&", sparams->stream_type);
+    string_append((void *)buffer, strlen(buffer), url);
+    is_first_param = false;
+  }
+
+  // Append language.
+  if (sparams->language != NULL) {
+    sprintf(buffer, "%slanguage=%s", is_first_param ? "?" : "&", sparams->language);
+    string_append((void *)buffer, strlen(buffer), url);
+    is_first_param = false;
+  }
+
+  append_paging_params(url, limit, offset, is_first_param);
+
+  return url;
+}
+
+string_t *featured_streams_url_builder(void *params, int limit, int offset) {
+  // Featured streams endpoint doesn't have any additional parameters.
+  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/streams/featured");
+  append_paging_params(url, limit, offset, true);
+
+  return url;
+}
+
+typedef struct {
+  const char *query;
+} channel_search_params;
+
+string_t *channel_search_url_builder(void *params, int limit, int offset) {
+  channel_search_params *csparams = (channel_search_params *)params;
+  char buffer[128];
+
+  // Construct the link.
+  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/search/channels");
+
+  // Append query.
+  const char *urlencoded_query = url_encode(csparams->query);
+  string_append((void *)"?query=", strlen("?query="), url);
+  string_append((void *)urlencoded_query, strlen(urlencoded_query), url);
+
+  append_paging_params(url, limit, offset, false);
   return url;
 }
 
@@ -106,12 +197,7 @@ typedef void *(*parser_func)(json_value *);
 
 void **get_page(const char *client_id, page_url_builder builder, void *params, int limit, int offset, const char *values_key, parser_func parser, int *size, int *total) {
   // Build the URL.
-  string_t *url = builder(params);
-
-  // Append paging params.
-  char buffer[64];
-  sprintf(buffer, "?limit=%i&offset=%i", limit, offset);
-  string_append((void *)buffer, strlen(buffer), url);
+  string_t *url = builder(params, limit, offset);
 
   // Get the output.
   string_t *output = string_init();
@@ -156,7 +242,7 @@ void **get_page(const char *client_id, page_url_builder builder, void *params, i
   return elements;
 }
 
-void **get_all_pages(const char *client_id, page_url_builder builder, void *params, const char *values_key, parser_func parser, int *size) {
+void **get_all_pages(const char *client_id, page_url_builder builder, void *params, const char *values_key, parser_func parser, bool ignore_totals, int *size) {
   const int PAGE_SIZE = 20;
 
   int count = 0;
@@ -195,10 +281,10 @@ void **get_all_pages(const char *client_id, page_url_builder builder, void *para
 
     // Free current page data.
     free(page);
-  } while (offset < total);
+  } while ((ignore_totals && (count == PAGE_SIZE)) || (offset < total));
 
   // Return the whole list.
-  *size = total;
+  *size = ignore_totals ? offset : total;
   return elements;
 }
 
@@ -397,131 +483,33 @@ twitch_follow** twitch_v5_get_all_user_follows(const char *client_id, const char
     .sortby = sortby
   };
 
-  twitch_follow **follows = (twitch_follow **)get_all_pages(client_id, &user_follows_url_builder, (void *)&params, "follows", &parse_follow, size);
+  twitch_follow **follows = (twitch_follow **)get_all_pages(client_id, &user_follows_url_builder, (void *)&params, "follows", &parse_follow, false, size);
   return follows;
 }
 
 twitch_stream **twitch_v5_get_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int limit, int offset, int *size, int *total) {
-  char buffer[2048];
+  streams_params params = {
+    .channel_ids_count = channel_ids_count,
+    .channel_ids = channel_ids,
+    .game = game,
+    .stream_type = stream_type,
+    .language = language
+  };
 
-  // Construct the link.
-  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/streams/");
-
-  // Append paging params.
-  sprintf(buffer, "?limit=%i&offset=%i", limit, offset);
-  string_append((void *)buffer, strlen(buffer), url);
-
-  // Append game.
-  if (game != NULL) {
-    sprintf(buffer, "&game=%s", game);
-    string_append((void *)buffer, strlen(buffer), url);
-  }
-
-  // Append channel ids.
-  if (channel_ids_count > 0) {
-    string_t *channels = string_joined(channel_ids_count, channel_ids, ",");
-    sprintf(buffer, "&channel=%s", channels->ptr);
-    string_append((void *)buffer, strlen(buffer), url);
-    string_free(channels);
-  }
-
-  // Append stream type.
-  if (stream_type != NULL) {
-    sprintf(buffer, "&stream_type=%s", stream_type);
-    string_append((void *)buffer, strlen(buffer), url);
-  }
-
-  // Append language.
-  if (language != NULL) {
-    sprintf(buffer, "&language=%s", language);
-    string_append((void *)buffer, strlen(buffer), url);
-  }
-
-  // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
-  string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse channels JSON.");
-    exit(EXIT_FAILURE);
-  }
-
-  // Extract the relevant fields.
-  twitch_stream **streams = NULL;
-
-  int length = value->u.object.length;
-
-  for (int x = 0; x < length; x++) {
-    if (strcmp(value->u.object.values[x].name, "streams") == 0) {
-      json_value *streams_value = value->u.object.values[x].value;
-      int streams_length = streams_value->u.array.length;
-      if (streams_length == 0) {
-        break;
-      }
-
-      streams = (twitch_stream **)parse_json_array(streams_value, size, &parse_stream);
-    } else if (strcmp(value->u.object.values[x].name, "_total") == 0) {
-      *total = value->u.object.values[x].value->u.integer;
-    }
-  }
-
-  json_value_free(value);
-
+  twitch_stream **streams = (twitch_stream **)get_page(client_id, &streams_url_builder, (void *)&params, limit, offset, "streams", &parse_stream, size, total);
   return streams;
 }
 
 twitch_stream** twitch_v5_get_all_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int *size) {
-  const int PAGE_SIZE = 20;
+  streams_params params = {
+    .channel_ids_count = channel_ids_count,
+    .channel_ids = channel_ids,
+    .game = game,
+    .stream_type = stream_type,
+    .language = language
+  };
 
-  int stream_count = 0;
-  int total = 0;
-  int offset = 0;
-
-  twitch_stream **streams = NULL;
-
-  do {
-    twitch_stream **page = twitch_v5_get_streams(client_id, channel_ids_count, channel_ids, game, stream_type, language, PAGE_SIZE, offset, &stream_count, &total);
-
-    // Don't do anything if there are 0 streams.
-    if (stream_count == 0) {
-      break;
-    }
-
-    // (Re)allocate memory to store next page.
-    if (offset == 0) {
-      streams = malloc(sizeof(void *) * stream_count);
-    } else {
-      streams = realloc(streams, sizeof(void *) * (stream_count + offset));
-    }
-
-    if (streams == NULL) {
-      fprintf(stderr, "Failed to allocate memory for next streams page.");
-      exit(EXIT_FAILURE);
-    }
-
-    // Copy page's content to the overall storage.
-    memcpy(&streams[offset], page, sizeof(void *) * stream_count);
-
-    // Offset to the next page.
-    offset += stream_count;
-
-    // Free current page data.
-    free(page);
-  } while (offset < total);
-
-  // Return the whole list.
-  *size = total;
+  twitch_stream **streams = (twitch_stream **)get_all_pages(client_id, &streams_url_builder, (void *)&params, "streams", &parse_stream, false, size);
   return streams;
 }
 
@@ -616,160 +604,30 @@ twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game) {
 }
 
 twitch_featured_stream **twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *size) {
-  char buffer[128];
-
-  // Construct the link.
-  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/streams/featured");
-
-  // Append paging params.
-  sprintf(buffer, "?limit=%i&offset=%i", limit, offset);
-  string_append((void *)buffer, strlen(buffer), url);
-
-  // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
-  string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse featured streams JSON.");
-    exit(EXIT_FAILURE);
-  }
-
-  // Extract the relevant fields.
-  twitch_featured_stream **streams = NULL;
-
-  int length = value->u.object.length;
-
-  for (int x = 0; x < length; x++) {
-    if (strcmp(value->u.object.values[x].name, "featured") == 0) {
-      json_value *streams_value = value->u.object.values[x].value;
-      int streams_length = streams_value->u.array.length;
-      if (streams_length == 0) {
-        *size = 0;
-        break;
-      }
-
-      streams = (twitch_featured_stream **)parse_json_array(streams_value, size, &parse_featured_stream);
-    }
-  }
-
-  json_value_free(value);
-  return streams;
+  int total = 0;
+  twitch_featured_stream **streams = (twitch_featured_stream **)get_page(client_id, &featured_streams_url_builder, NULL, limit, offset, "featured", &parse_featured_stream, size, &total);
+  return streams; 
 }
 
 twitch_featured_stream **twitch_v5_get_all_featured_streams(const char *client_id, int *size) {
-  const int PAGE_SIZE = 20;
-
-  int stream_count = 0;
-  int total = 0;
-  int offset = 0;
-
-  twitch_featured_stream **streams = NULL;
-
-  do {
-    twitch_featured_stream **page = twitch_v5_get_featured_streams(client_id, PAGE_SIZE, offset, &stream_count);
-
-    // Don't do anything if there are 0 items.
-    if (stream_count == 0) {
-      break;
-    }
-
-    // (Re)allocate memory to store next page.
-    if (offset == 0) {
-      streams = malloc(sizeof(void *) * stream_count);
-    } else {
-      streams = realloc(streams, sizeof(void *) * (offset + stream_count));
-    }
-
-    if (streams == NULL) {
-      fprintf(stderr, "Failed to allocate memory for next featured streams page.");
-      exit(EXIT_FAILURE);
-    }
-
-    // Copy page's content to the overall storage.
-    memcpy(&streams[offset], page, sizeof(void *) * stream_count);
-
-    // Offset to the next page.
-    offset += stream_count;
-
-    // Increase total count.
-    total += stream_count;
-
-    // Free current page data.
-    free(page);
-  } while (stream_count == PAGE_SIZE);
-
-  // Return the whole list.
-  *size = total;
+  twitch_featured_stream **streams = (twitch_featured_stream **)get_all_pages(client_id, &featured_streams_url_builder, NULL, "featured", &parse_featured_stream, true, size);
   return streams;
 }
 
 twitch_channel **twitch_v5_search_channels(const char *client_id, const char *query, int limit, int offset, int *size, int *total) {
-  char buffer[128];
+  channel_search_params params = {
+    .query = query
+  };
 
-  // Construct the link.
-  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/search/channels");
-
-  // Append query.
-  const char *urlencoded_query = url_encode(query);
-  string_append((void *)"?query=", strlen("?query="), url);
-  string_append((void *)urlencoded_query, strlen(urlencoded_query), url);
-
-  // Append paging params.
-  sprintf(buffer, "&limit=%i&offset=%i", limit, offset);
-  string_append((void *)buffer, strlen(buffer), url);
-
-  // Get the output.
-  string_t *output = string_init();
-  CURLcode code = twitch_v5_get(client_id, url->ptr, output);
-  string_free(url);
-
-  // Check return code.
-  if (code == CURLE_HTTP_RETURNED_ERROR) {
-    string_free(output);
-    return NULL;
-  }
-
-  // Parse.
-  json_value *value = json_parse(output->ptr, output->len);
-  string_free(output);
-
-  if (value == NULL) {
-    fprintf(stderr, "Failed to parse channels JSON.");
-    exit(EXIT_FAILURE);
-  }
-
-  // Extract the relevant fields.
-  twitch_channel **channels = NULL;
-
-  int length = value->u.object.length;
-
-  for (int x = 0; x < length; x++) {
-    if (strcmp(value->u.object.values[x].name, "channels") == 0) {
-      json_value *channels_value = value->u.object.values[x].value;
-      int channels_length = channels_value->u.array.length;
-      if (channels_length == 0) {
-        *size = 0;
-        break;
-      }
-
-      channels = (twitch_channel **)parse_json_array(channels_value, size, &parse_channel);
-    } else if (strcmp(value->u.object.values[x].name, "_total") == 0) {
-      *total = value->u.object.values[x].value->u.integer;
-    }
-  }
-
-  json_value_free(value);
+  twitch_channel **channels = (twitch_channel **)get_page(client_id, &channel_search_url_builder, &params, limit, offset, "channels", &parse_channel, size, total);
   return channels;
 }
 
+twitch_channel **twitch_v5_search_all_channels(const char *client_id, const char *query, int *size) {
+  channel_search_params params = {
+    .query = query
+  };
+
+  twitch_channel **channels = (twitch_channel **)get_all_pages(client_id, &channel_search_url_builder, &params, "channels", &parse_channel, false, size);
+  return channels;
+}

@@ -31,6 +31,21 @@ void test_search_channels(const char *client_id, const char *query, int page_siz
   twitch_channel_list_free(size, channels);
 }
 
+void test_search_all_channels(const char *client_id, const char *query) {
+  printf("*** Searching for all channels with query '%s' ***\n", query);
+
+  int size = 0;
+
+  twitch_channel **channels = twitch_v5_search_all_channels(client_id, query, &size);
+  if (channels != NULL && size > 0) {
+    printf("Downloaded: %d\n", size);
+    for (int index = 0; index < size; index++) {
+      printf("ID: %lld,\n  Name: %s,\n  Status: %s\n", channels[index]->id, channels[index]->name, channels[index]->status);
+    }
+  }
+
+  twitch_channel_list_free(size, channels);
+}
 twitch_user *test_get_user(const char *client_id, const char *username) {
   printf("*** Getting user data for '%s' ***\n", username);
 
@@ -163,7 +178,8 @@ int main(int argc, char **argv) {
   
   // Test channel search.
   test_search_channels(CLIENT_ID, "starcraft", 20);
-  
+  test_search_all_channels(CLIENT_ID, "capitalize"); 
+
   return 0;
 }
 

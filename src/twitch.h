@@ -187,5 +187,17 @@ twitch_featured_stream **twitch_v5_get_all_featured_streams(const char *client_i
  */
 twitch_channel **twitch_v5_search_channels(const char *client_id, const char *query, int limit, int offset, int *size, int *total);
 
+/**
+ * Performs channel search for given query string and downloads all pages of results.
+ *
+ * @param client_id Twitch API client ID.
+ * @param query Query string. Don't URL-escape this beforehabd, because the method performs its own URL-escaping.
+ * @param size Will hold the number of downloaded channel objects.
+ *
+ * @return Array of twitch_channel structs matching given search string. Don't forget to free the memory allocated for each item and
+ *     array itself.
+ */
+twitch_channel **twitch_v5_search_all_channels(const char *client_id, const char *query, int *size); 
+
 #endif
 
