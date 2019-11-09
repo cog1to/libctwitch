@@ -8,12 +8,11 @@
 /** Code generation **/
 
 #define GENERIC_ALLOC(T) \
-  T *instance = malloc(sizeof(T)); \
+  T *instance = calloc(1, sizeof(T)); \
   if (instance == NULL) { \
     fprintf(stderr, "Failed to allocate memory for " #T "");\
     exit(EXIT_FAILURE); \
   } \
-  memset(instance, 0, sizeof(T)); \
   return instance;
 
 #define FREE(prop) \
@@ -165,7 +164,7 @@ void twitch_stream_free(twitch_stream *stream) {
   free(stream);
 }
 
-void twitch_streams_list_free(twitch_stream **list, int count) {
+void twitch_stream_list_free(int count, twitch_stream **list) {
   pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_stream_free);
 }
 
@@ -191,5 +190,36 @@ void twitch_featured_stream_free(twitch_featured_stream *stream) {
 
 void twitch_featured_stream_list_free(int count, twitch_featured_stream **list) {
   pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_featured_stream_free);
+}
+
+/** Art data **/
+
+twitch_art *twitch_art_alloc() {
+  GENERIC_ALLOC(twitch_art)
+}
+
+void twitch_art_free(twitch_art *art) {
+  FREE(art->large)
+  FREE(art->medium)
+  FREE(art->small)
+  FREE(art->template)
+  free(art);
+}
+
+/** Game data  **/
+
+twitch_game *twitch_game_alloc() {
+  GENERIC_ALLOC(twitch_game)
+}
+
+void twitch_game_free(twitch_game *game) {
+  FREE_CUSTOM(game->box, twitch_art_free)
+  FREE_CUSTOM(game->logo, twitch_art_free)
+  FREE(game->name)
+  free(game);
+}
+
+void twitch_game_list_free(int count, twitch_game **list) {
+  pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_game_free);
 }
 

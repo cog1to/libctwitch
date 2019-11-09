@@ -150,6 +150,12 @@ void twitch_follows_list_free(twitch_follow **list, int count);
 
 /** Stream data **/
 
+typedef enum {
+  none,
+  hls,
+  rtmp
+} stream_filter;
+
 /**
  * Live stream data.
  */
@@ -202,7 +208,7 @@ void twitch_stream_free(twitch_stream *stream);
  * @param list Array of pointers to twitch_stream elements.
  * @param count List of elements in the array.
  */
-void twitch_streams_list_free(twitch_stream **list, int count);
+void twitch_stream_list_free(int count, twitch_stream **list);
 
 /** Stream summary. **/
 
@@ -257,6 +263,62 @@ void twitch_featured_stream_free(twitch_featured_stream *stream);
  * @param streams Pointer to the array holding featured stream objects.
  */
 void twitch_featured_stream_list_free(int count, twitch_featured_stream **streams);
+
+/** Art data **/
+
+typedef struct {
+  char *large;
+  char *medium;
+  char *small;
+  char *template;
+} twitch_art;
+
+/**
+ * Allocates and clears memory for new twitch_art struct.
+ *
+ * @return Pointer to allocated twitch_art struct.
+ */
+twitch_art *twitch_art_alloc();
+
+/**
+ * Frees the memory for given twitch_art struct and all it's properties.
+ *
+ * @param art Struct to deallocate.
+ */
+void twitch_art_free(twitch_art *art);
+
+/** Game data **/
+
+typedef struct {
+  long long int id;
+  long long int giantbomb_id;
+  char *name;
+  int popularity;
+  twitch_art *box;
+  twitch_art *logo;
+} twitch_game;
+
+/**
+ * Allocates and clears memory for new twitch_game struct.
+ *
+ * @return Pointer to newly allocated twitch_game struct.
+ */
+twitch_game *twitch_game_alloc();
+
+/**
+ * Frees the memory allocated for given twitch_game instance and all it's properties.
+ *
+ * @param game Struct to deallocate.
+ */
+void twitch_game_free(twitch_game *game);
+
+/**
+ * Deallocates an array of dynamically allocated twitch_game structs.
+ *
+ * @param count Number of items in the array.
+ * @param list List to deallocate.
+ */
+void twitch_game_list_free(int count, twitch_game **list);
 
 #endif
 

@@ -46,6 +46,55 @@ void test_search_all_channels(const char *client_id, const char *query) {
 
   twitch_channel_list_free(size, channels);
 }
+
+void test_search_streams(const char *client_id, const char *query, int page_size) {
+  printf("*** Searching for streams with query '%s' ***\n", query);
+
+  int size = 0, total = 0;
+
+  twitch_stream **streams = twitch_v5_search_streams(client_id, query, none, page_size, 0, &size, &total);
+  if (streams != NULL && size > 0) {
+    printf("Downloaded: %d, Total: %d\n", size, total);
+    for (int index = 0; index < size; index++) {
+      printf("ID: %lld,\n  Game: %s,\n  Channel: %s\n", streams[index]->id, streams[index]->game, streams[index]->channel->name);
+    }
+  }
+
+  twitch_stream_list_free(size, streams);
+}
+
+void test_search_all_streams(const char *client_id, const char *query) {
+  printf("*** Searching for all streams with query '%s' ***\n", query);
+
+  int size = 0;
+
+  twitch_stream **streams = twitch_v5_search_all_streams(client_id, query, none, &size);
+  if (streams != NULL && size > 0) {
+    printf("Downloaded: %d\n", size);
+    for (int index = 0; index < size; index++) {
+      printf("ID: %lld,\n  Game: %s,\n  Channel: %s\n", streams[index]->id, streams[index]->game, streams[index]->channel->name);
+    }
+  }
+
+  twitch_stream_list_free(size, streams);
+}
+
+void test_search_games(const char *client_id, const char *query) {
+  printf("*** Searching for games with query '%s' ***\n", query);
+
+  int size = 0;
+
+  twitch_game **games = twitch_v5_search_games(client_id, query, false, &size);
+  if (games != NULL && size > 0) {
+    printf("Downloaded: %d\n", size);
+    for (int index = 0; index < size; index++) {
+      printf("ID: %lld,\n  Name: %s,\n  Popularity: %d\n", games[index]->id, games[index]->name, games[index]->popularity);
+    }
+  }
+
+  twitch_game_list_free(size, games);
+}
+
 twitch_user *test_get_user(const char *client_id, const char *username) {
   printf("*** Getting user data for '%s' ***\n", username);
 
@@ -155,7 +204,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  twitch_streams_list_free(streams, streams_count);
+  twitch_stream_list_free(streams_count, streams);
 
   // Test stream summary.
   printf("*** Getting summary for 'Overwatch' ***\n");
@@ -179,6 +228,16 @@ int main(int argc, char **argv) {
   // Test channel search.
   test_search_channels(CLIENT_ID, "starcraft", 20);
   test_search_all_channels(CLIENT_ID, "capitalize"); 
+
+  // Test stream search.
+  test_search_streams(CLIENT_ID, "starcraft", 20);
+  test_search_all_streams(CLIENT_ID, "capitalize"); 
+
+  // Test game search.
+  test_search_games(CLIENT_ID, "starcraft");
+  test_search_games(CLIENT_ID, "final fantasy"); 
+
+
 
   return 0;
 }

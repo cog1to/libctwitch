@@ -78,7 +78,7 @@ json_value *twitch_v5_get_json(const char *client_id, const char *url) {
     string_free(output);
     return NULL;
   }
-
+  
   // Parse.
   json_value *value = json_parse(output->ptr, output->len);
   string_free(output);
@@ -202,7 +202,7 @@ typedef struct {
 
 string_t *channel_search_url_builder(void *params, int limit, int offset) {
   channel_search_params *csparams = (channel_search_params *)params;
-  char buffer[128];
+  char buffer[256];
 
   // Construct the link.
   string_t *url = string_init_with_value("https://api.twitch.tv/kraken/search/channels");
@@ -216,11 +216,71 @@ string_t *channel_search_url_builder(void *params, int limit, int offset) {
   return url;
 }
 
+typedef struct {
+  const char *query;
+  stream_filter filter;
+} stream_search_params;
+
+string_t *stream_search_url_builder(void *params, int limit, int offset) {
+  stream_search_params *ssparams = (stream_search_params *)params;
+  char buffer[256];
+
+  // Construct the link.
+  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/search/streams");
+
+  // Append query.
+  const char *urlencoded_query = url_encode(ssparams->query);
+  string_append((void *)"?query=", strlen("?query="), url);
+  string_append((void *)urlencoded_query, strlen(urlencoded_query), url);
+
+  // Append stream type filter.
+  switch (ssparams->filter) {
+    case none:
+      break;
+    case hls:
+      string_append((void *)"&hls=true", strlen("&hls=true"), url);
+      break;
+    case rtmp:
+      string_append((void *)"&hls=false", strlen("&hls=false"), url);
+      break;
+  }
+
+  append_paging_params(url, limit, offset, false);
+  return url;
+}
+
+typedef struct { 
+  const char *query;
+  bool live; 
+} game_search_params;
+
+string_t *game_search_url_builder(void *params, int limit, int offset) {
+  game_search_params *gsparams = (game_search_params *)params;
+  char buffer[256];
+
+  // Construct the link.
+  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/search/games");
+
+  // Append query.
+  const char *urlencoded_query = url_encode(gsparams->query);
+  string_append((void *)"?query=", strlen("?query="), url);
+  string_append((void *)urlencoded_query, strlen(urlencoded_query), url);
+
+  // Append stream type filter.
+  if (gsparams->live) {
+      string_append((void *)"&live=true", strlen("&live=true"), url);
+  } else {
+      string_append((void *)"&live=false", strlen("&live=false"), url);
+  }
+
+  return url;
+}
+
 typedef void *(*parser_func)(json_value *);
 
 void **get_page(const char *client_id, page_url_builder builder, void *params, int limit, int offset, const char *values_key, parser_func parser, int *size, int *total) {
   string_t *url = builder(params, limit, offset);
-  json_value *value = twitch_v5_get_json(client_id, url->ptr); 
+  json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
 
   // Extract the relevant fields.
@@ -502,7 +562,8 @@ twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game) {
   // Append game name.
   if (game != NULL) {
     char buffer[256];
-    sprintf(buffer, "?game=%s", game);
+    const char *urlencoded_game = url_encode(game);
+    sprintf(buffer, "?game=%s", urlencoded_game);
     string_append((void *)buffer, strlen(buffer), url);
   }
 
@@ -518,7 +579,7 @@ twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game) {
 twitch_featured_stream **twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *size) {
   int total = 0;
   twitch_featured_stream **streams = (twitch_featured_stream **)get_page(client_id, &featured_streams_url_builder, NULL, limit, offset, "featured", &parse_featured_stream, size, &total);
-  return streams; 
+  return streams;
 }
 
 twitch_featured_stream **twitch_v5_get_all_featured_streams(const char *client_id, int *size) {
@@ -543,3 +604,35 @@ twitch_channel **twitch_v5_search_all_channels(const char *client_id, const char
   twitch_channel **channels = (twitch_channel **)get_all_pages(client_id, &channel_search_url_builder, &params, "channels", &parse_channel, false, size);
   return channels;
 }
+ 
+twitch_stream **twitch_v5_search_streams(const char *client_id, const char *query, stream_filter filter, int limit, int offset, int *size, int *total) {
+  stream_search_params params = {
+    .query = query,
+    .filter = filter
+  };
+
+  twitch_stream **streams = (twitch_stream **)get_page(client_id, &stream_search_url_builder, &params, limit, offset, "streams", &parse_stream, size, total);
+  return streams;
+}
+
+twitch_stream **twitch_v5_search_all_streams(const char *client_id, const char *query, stream_filter filter, int *size) {
+  stream_search_params params = {
+    .query = query,
+    .filter = filter
+  };
+
+  twitch_stream **streams = (twitch_stream **)get_all_pages(client_id, &stream_search_url_builder, &params, "streams", &parse_stream, false, size);
+  return streams;
+}
+
+twitch_game **twitch_v5_search_games(const char *client_id, const char *query, bool live, int *size) {
+  game_search_params params = {
+    .query = query,
+    .live = live
+  };
+
+  int total = 0;
+  twitch_game **games = (twitch_game **)get_page(client_id, &game_search_url_builder, &params, 0, 0, "games", &parse_game, size, &total);
+  return games;
+}
+

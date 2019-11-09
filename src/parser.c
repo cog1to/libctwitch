@@ -287,6 +287,67 @@ void *parse_featured_stream(json_value *featured_object) {
   }
 
   return stream;
+}
 
+twitch_art *parse_art(json_value *value) {
+  twitch_art *art = twitch_art_alloc();
+
+  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
+    if (strcmp(value->u.object.values[prop_ind].name, "large") == 0) {
+      // Large art.
+      if (value->u.object.values[prop_ind].value->type == json_string) {
+        art->large = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "medium") == 0) {
+      // Medium art.
+      if (value->u.object.values[prop_ind].value->type == json_string) {
+        art->medium = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "small") == 0) {
+      // Small art.
+      if (value->u.object.values[prop_ind].value->type != json_null) {
+        art->small = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "template") == 0) {
+      // Template.
+      if (value->u.object.values[prop_ind].value->type != json_null) {
+        art->template = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    }
+  }
+
+  return (void *)art;
+}
+
+void *parse_game(json_value *value) {
+  twitch_game *game = twitch_game_alloc();
+
+  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
+    if (strcmp(value->u.object.values[prop_ind].name, "_id") == 0) {
+      // ID.
+      game->id = value->u.object.values[prop_ind].value->u.integer;
+    } else if (strcmp(value->u.object.values[prop_ind].name, "box") == 0) {
+      // Box art.
+      if (value->u.object.values[prop_ind].value->type == json_object) {
+        game->box = parse_art(value->u.object.values[prop_ind].value);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "giantbomb_id") == 0) {
+      // GiantBomb ID.
+      game->giantbomb_id = value->u.object.values[prop_ind].value->u.integer;
+    } else if (strcmp(value->u.object.values[prop_ind].name, "logo") == 0) {
+      // Logo.
+      if (value->u.object.values[prop_ind].value->type == json_object) {
+        game->logo = parse_art(value->u.object.values[prop_ind].value);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "name") == 0) {
+      // Name.
+      game->name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "popularity") == 0) {
+      // Popularity.
+      game->popularity = value->u.object.values[prop_ind].value->u.integer;
+    }
+  }
+
+  return (void *)game;
 }
 
