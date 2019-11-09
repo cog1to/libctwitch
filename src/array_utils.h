@@ -1,3 +1,13 @@
+/**
+ * Array helper functions.
+ *
+ * @author Alexander Rogachev
+ * @version 0.1
+ */
+
+#ifndef _H_ARRAY_UTILS
+#define _H_ARRAY_UTILS
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,4 +38,6 @@ void **pointer_array_map(void **src, size_t src_count, void *(*getter)(void *));
  * @param deinit Function to apply to each item to properly free it.
  */
 void pointer_array_free(int count, void **src, void(*deinit)(void *));
+
+#endif
 

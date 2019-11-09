@@ -1,7 +1,14 @@
-#include <stdlib.h>
+/**
+ * String data types and utilities.
+ *
+ * @author Alexander Rogachev
+ * @version 0.1
+ */
 
 #ifndef _STRING_UTILS_H
 #define _STRING_UTILS_H
+
+#include <stdlib.h>
 
 /**
  * Dynamically resizable string.
