@@ -293,6 +293,8 @@ typedef struct {
   long long int id;
   long long int giantbomb_id;
   char *name;
+  char *localized_name;
+  char *locale;
   int popularity;
   twitch_art *box;
   twitch_art *logo;

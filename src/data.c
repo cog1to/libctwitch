@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "data.h"
-#include "array_utils.h"
+#include "utils/array_utils.h"
 
 /** Code generation **/
 
@@ -216,6 +216,8 @@ void twitch_game_free(twitch_game *game) {
   FREE_CUSTOM(game->box, twitch_art_free)
   FREE_CUSTOM(game->logo, twitch_art_free)
   FREE(game->name)
+  FREE(game->localized_name)
+  FREE(game->locale)
   free(game);
 }
 

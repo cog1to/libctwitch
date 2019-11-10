@@ -8,7 +8,7 @@
 #ifndef _PARSER_H
 #define _PARSER_H
 
-#include "json.h"
+#include "json/json.h"
 
 /**
  * Parses given json_value object of type 'json_array' using provided parser function.

@@ -1,22 +1,23 @@
 # WIP: Twitch API C library
 
-C library to work with Twitch API.
+C library to work with Twitch API. It's single-threaded, based on curl_easy API.
 
 Heavily WIP, use on your own discretion.
 
 # Build requirements
 
 - `libcurl`
+- `libm` on some systems
 
 # Usage
 
 I don't have any build system in place right now, so either DIY or just copy the sources and include and build them directly.
 
-For examples, see `twitch-test.c`.
+For usage examples, see `twitch-test.c`.
 
 To compile `twitch-test.c`:
 
-```gcc twitch-test.c src/*.c -o twitch-test -L/<path-to-curl-lib> -I<path-to-curl-include> -I./src/ -I/./include -lcurl -lm```
+```gcc twitch-test.c src/*.c src/v5/*.c src/json/*.c src/utils/*.c -I/usr/include/curl -I./include -I./src -L/usr/lib -lcurl -lm -o twitch-test```
 
 # Contents
 

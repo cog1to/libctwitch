@@ -2,8 +2,8 @@
 #include <stdio.h>
 
 #include "v5.h"
-#include "string_utils.h"
-#include "array_utils.h"
+#include "utils/string_utils.h"
+#include "utils/array_utils.h"
 
 /** Main **/
 
