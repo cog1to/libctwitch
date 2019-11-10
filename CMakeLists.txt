@@ -43,3 +43,22 @@ install(TARGETS ctwitch
 # Install library headers
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 
+# Example target
+add_executable(twitch-remote
+  example/twitch-remote.c
+  src/json/json.c
+  src/utils/string_utils.c
+  src/utils/array_utils.c
+  src/utils/network_utils.c
+  src/utils/parser.c
+  src/data.c
+  src/v5/users.c
+  src/v5/search.c
+  src/v5/streams.c
+  src/init.c
+)
+
+target_include_directories(twitch-remote PUBLIC ${EDV_PUBLIC_INCLUDE_DIRECTORIES})
+target_include_directories(twitch-remote PRIVATE ${EDV_PRIVATE_INCLUDE_DIRECTORIES})
+target_link_libraries(twitch-remote m curl)
+
