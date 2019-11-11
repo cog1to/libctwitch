@@ -351,3 +351,24 @@ void *parse_game(json_value *value) {
   return (void *)game;
 }
 
+void *parse_top_game(json_value *value) {
+  twitch_top_game *game = twitch_top_game_alloc();
+
+  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
+    if (strcmp(value->u.object.values[prop_ind].name, "game") == 0) {
+      // Game.
+      if (value->u.object.values[prop_ind].value->type == json_object) {
+        game->game = parse_game(value->u.object.values[prop_ind].value);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "channels") == 0) {
+      // Channels.
+      game->channels = value->u.object.values[prop_ind].value->u.integer;
+    } else if (strcmp(value->u.object.values[prop_ind].name, "viewers") == 0) {
+      // Viewers.
+      game->viewers = value->u.object.values[prop_ind].value->u.integer;
+    }
+  }
+
+  return (void *)game;
+}
+

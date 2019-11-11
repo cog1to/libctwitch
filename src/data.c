@@ -225,3 +225,17 @@ void twitch_game_list_free(int count, twitch_game **list) {
   pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_game_free);
 }
 
+/** Top games data **/
+
+twitch_top_game *twitch_top_game_alloc() {
+  GENERIC_ALLOC(twitch_top_game)
+}
+
+void twitch_top_game_free(twitch_top_game *game) {
+  FREE_CUSTOM(game->game, twitch_game_free)
+  free(game);
+}
+
+void twitch_top_game_list_free(int count, twitch_top_game **list) {
+  pointer_array_free(count, (void **)list, (void(*))&twitch_top_game_free);
+}

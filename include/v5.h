@@ -12,6 +12,7 @@
 #include "v5/search.h"
 #include "v5/users.h"
 #include "v5/streams.h"
+#include "v5/games.h"
 
 #endif
 

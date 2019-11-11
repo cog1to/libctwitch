@@ -35,10 +35,11 @@ typedef enum {
   search_games,
   search_streams,
   user,
-  live_follows
+  live_follows,
+  top_games
 } command_type;
 
-// Command handler function.
+// Command handler function  type.
 typedef void(*command_handler)(const char *, int, const char **);
 
 // Command specification.
@@ -307,6 +308,45 @@ void get_live_follows(const char *username, int options_count, const char **opti
   free(CLIENT_ID);
 }
 
+/**
+ * Prints top games.
+ *
+ * @param query Query string.
+ * @param options_count Number of command line arguments.
+ * @param options List of command line arguments.
+ */
+void get_top_games(const char *query, int options_count, const char **options) {
+  char *CLIENT_ID = get_param("client-id", options_count, options);
+  if (CLIENT_ID == NULL) {
+    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  int limit = atoi(query);
+  if (limit <= 0) {
+    fprintf(stderr, "Error: could not convert argument to positive integer number.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  int size = 0, total = 0;
+  twitch_top_game **games = twitch_v5_get_top_games(CLIENT_ID, limit, 0, &size, &total);
+  if (games != NULL && size > 0) {
+    printf("Total: %d\n", total);
+    for (int index = 0; index < size; index++) {
+      twitch_top_game *game = games[index];
+      printf(
+        "Game: %s\n  Viewers: %d\n  Channels: %d\n",
+        game->game->name,
+        game->viewers,
+        game->channels
+      );
+    }
+    twitch_top_game_list_free(size, games);
+  }
+
+  free(CLIENT_ID);
+}
+
 /** Main **/
 
 int main(int argc, char **argv) {
@@ -345,6 +385,13 @@ int main(int argc, char **argv) {
       .description = "Prints out live streams that given user is following.",
       .has_parameter = true,
       .handler = &get_live_follows
+    },
+    {
+      .command = top_games,
+      .name = "top-games",
+      .description = "Prints top N games on Twitch. Query must be an integer between 1 through 100.",
+      .has_parameter = true,
+      .handler = &get_top_games
     }
   };
 

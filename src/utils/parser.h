@@ -85,5 +85,14 @@ void *parse_featured_stream(json_value *featured_object);
  */
 void *parse_game(json_value *value);
 
+/**
+ * Creates a new twitch_top_game struct and tries to fill it with properties from provided JSON value.
+ *
+ * @param value JSON object holding top Game data fields.
+ * 
+ * @return Pointer to newly allocated twitch_top_game struct filled with data from JSON value.
+ */
+void *parse_top_game(json_value *value);
+
 #endif
 

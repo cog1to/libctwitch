@@ -322,5 +322,35 @@ void twitch_game_free(twitch_game *game);
  */
 void twitch_game_list_free(int count, twitch_game **list);
 
+/** Top games data **/
+
+typedef struct {
+  twitch_game *game;
+  int channels;
+  int viewers;
+} twitch_top_game;
+
+/**
+ * Allocates and clears memory for new twitch_top_game struct.
+ *
+ * @return Pointer to newly allocated twitch_game struct.
+ */
+twitch_top_game *twitch_top_game_alloc();
+
+/**
+ * Frees memory allocated for given twitch_top_game struct.
+ *
+ * @param game Instance of twitch_top_game struct to deallocate.
+ */
+void twitch_top_game_free(twitch_top_game *game);
+
+/**
+ * Deallocates an array of dynamically allocated twitch_top_game structs.
+ *
+ * @param count Number of items in the array.
+ * @param list List to deallocate.
+ */
+void twitch_top_game_list_free(int count, twitch_top_game **list);
+
 #endif
 
