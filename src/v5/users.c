@@ -18,7 +18,7 @@ typedef struct {
   const char *sortby;
 } follows_params;
 
-string_t *user_follows_url_builder(void *params, int limit, int offset) {
+string_t *user_follows_url_builder(void *params, int limit, int offset, const char *cursor) {
   char buffer[128];
   bool is_first_param = true;
 
@@ -173,7 +173,7 @@ twitch_follow **twitch_v5_get_user_follows(const char *client_id, const char *us
     .sortby = sortby
   };
 
-  twitch_follow **follows = (twitch_follow **)get_page(client_id, &user_follows_url_builder, (void *)&params, limit, offset, "follows", &parse_follow, size, total);
+  twitch_follow **follows = (twitch_follow **)get_page(client_id, &user_follows_url_builder, (void *)&params, limit, offset, NULL, "follows", &parse_follow, size, total, NULL);
   return follows;
 }
 

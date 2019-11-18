@@ -36,7 +36,8 @@ typedef enum {
   search_streams,
   user,
   live_follows,
-  top_games
+  top_games,
+  channel_follows
 } command_type;
 
 // Command handler function  type.
@@ -290,10 +291,11 @@ void get_live_follows(const char *username, int options_count, const char **opti
     for (int idx = 0; idx < streams_count; idx++) {
       twitch_stream *stream = streams[idx];
       printf(
-        "ID: %lld\n  Game: %s\n  Channel: %s\n  Status: %s\n  URL: %s\n",
+        "ID: %lld\n  Game: %s\n  Channel: %s\n  Channel ID: %lld\n  Status: %s\n  URL: %s\n",
         stream->id,
         stream->game,
         stream->channel->name,
+        stream->channel->id,
         stream->channel->status,
         stream->channel->url
       );
@@ -347,6 +349,52 @@ void get_top_games(const char *query, int options_count, const char **options) {
   free(CLIENT_ID);
 }
 
+void get_channel_followers(const char *query, int options_count, const char **options) {
+  char *CLIENT_ID = get_param("client-id", options_count, options);
+  if (CLIENT_ID == NULL) {
+    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  int channels_count = 0, channels_total = 0;
+  twitch_channel *target = NULL;
+  twitch_channel **channels = twitch_v5_search_channels(CLIENT_ID, query, 20, 0, &channels_count, &channels_total);
+  if (channels_count > 0) {
+    for (int index = 0; index < channels_count; index++) {
+      twitch_channel *channel = channels[index];
+      if (strcmp(channel->name, query) == 0) {
+        target = channel;
+        break;
+      }
+    }
+  }
+
+  if (target == NULL) {
+    printf("Channel '%s' not found\n", query);
+    twitch_channel_list_free(channels_count, channels);
+    return;
+  }
+
+  // Convert channel ID.
+  char channel_id[64];
+  sprintf(channel_id, "%lld", target->id);
+
+  int size = 0;
+  twitch_follower **followers = twitch_v5_get_all_channel_followers(CLIENT_ID, channel_id, "asc", &size);
+  printf("Total followers: %d\n", size);
+  if (size > 0) {
+    for (int index = 0; index < size; index++) {
+      twitch_follower *follower = followers[index];
+      if (follower->user != NULL) {
+        printf("%s%s", followers[index]->user->display_name, (index < size - 1) ? ", " : "\n");
+      }
+    }
+    twitch_follower_list_free(size, followers);
+  }
+
+  free(CLIENT_ID);
+}
+
 /** Main **/
 
 int main(int argc, char **argv) {
@@ -392,6 +440,13 @@ int main(int argc, char **argv) {
       .description = "Prints top N games on Twitch. Query must be an integer between 1 through 100.",
       .has_parameter = true,
       .handler = &get_top_games
+    },
+    {
+      .command = channel_follows,
+      .name = "followers",
+      .description = "Gets all users that follow specific channel.",
+      .has_parameter = true,
+      .handler = &get_channel_followers
     }
   };
 

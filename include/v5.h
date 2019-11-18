@@ -13,6 +13,7 @@
 #include "v5/users.h"
 #include "v5/streams.h"
 #include "v5/games.h"
+#include "v5/channels.h"
 
 #endif
 

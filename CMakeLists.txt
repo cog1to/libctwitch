@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.9)
 project(ctwitch VERSION 0.1 DESCRIPTION "Single-threaded C99 library for Twitch API.")
 include(GNUInstallDirs)
 
+# Find libCURL
+find_library(CURL_LIB curl)
+find_path(CURL_INCLUDE curl)
+
 # Public headers
 set(EDV_PUBLIC_INCLUDE_DIRECTORIES
   include/
@@ -24,11 +28,14 @@ add_library(ctwitch SHARED
   src/v5/search.c
   src/v5/streams.c
   src/v5/games.c
+  src/v5/channels.c
   src/init.c
 )
 
+target_include_directories(${PROJECT_NAME} PUBLIC ${CURL_INCLUDE})
 target_include_directories(${PROJECT_NAME} PUBLIC ${EDV_PUBLIC_INCLUDE_DIRECTORIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${EDV_PRIVATE_INCLUDE_DIRECTORIES})
+target_link_libraries(ctwitch m ${CURL_LIB})
 
 # Project settings
 set_target_properties(ctwitch PROPERTIES
@@ -57,10 +64,11 @@ add_executable(twitch-remote
   src/v5/search.c
   src/v5/streams.c
   src/v5/games.c
+  src/v5/channels.c
   src/init.c
 )
 
 target_include_directories(twitch-remote PUBLIC ${EDV_PUBLIC_INCLUDE_DIRECTORIES})
 target_include_directories(twitch-remote PRIVATE ${EDV_PRIVATE_INCLUDE_DIRECTORIES})
-target_link_libraries(twitch-remote m curl)
+target_link_libraries(twitch-remote m ${CURL_LIB})
 

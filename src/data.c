@@ -239,3 +239,20 @@ void twitch_top_game_free(twitch_top_game *game) {
 void twitch_top_game_list_free(int count, twitch_top_game **list) {
   pointer_array_free(count, (void **)list, (void(*))&twitch_top_game_free);
 }
+
+/** Channel followers data **/
+
+twitch_follower *twitch_follower_alloc() {
+  GENERIC_ALLOC(twitch_follower)
+}
+
+void twitch_follower_free(twitch_follower *follower) {
+  FREE_CUSTOM(follower->user, twitch_user_free)
+  FREE(follower->created_at)
+  free(follower);
+}
+
+void twitch_follower_list_free(int count, twitch_follower **list) {
+  pointer_array_free(count, (void **)list, (void(*))&twitch_follower_free);
+}
+

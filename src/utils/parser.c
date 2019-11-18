@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -370,5 +371,24 @@ void *parse_top_game(json_value *value) {
   }
 
   return (void *)game;
+}
+
+void *parse_follower(json_value *value) {
+  twitch_follower *follower = twitch_follower_alloc();
+
+  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
+    if (strcmp(value->u.object.values[prop_ind].name, "created_at") == 0) {
+      // Created At date.
+      follower->created_at = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "notifications") == 0) {
+      // Notifications.
+      follower->notifications = value->u.object.values[prop_ind].value->u.boolean;
+    } else if (strcmp(value->u.object.values[prop_ind].name, "user") == 0) {
+      // User.
+      follower->user = parse_user(value->u.object.values[prop_ind].value);
+    }
+  }
+
+  return (void *)follower;
 }
 

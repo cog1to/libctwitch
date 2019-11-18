@@ -20,7 +20,7 @@
 /**
  * Convenience function type for URL builder functions.
  */
-typedef string_t *(*page_url_builder)(void *, int limit, int offset);
+typedef string_t *(*page_url_builder)(void *, int limit, int offset, const char *cursor);
 
 /**
  * Convenience JSON parser function type.
@@ -37,6 +37,15 @@ typedef void *(*parser_func)(json_value *);
  *   to the URL.
  */
 void append_paging_params(string_t *url, int limit, int offset, bool is_first_param);
+
+/**
+ * Helper function to append cursor param to the end of the URL query.
+ *
+ * @param url URL to modify.
+ * @param cursor Cursor string.
+ * @param is_first_param Flag indicating whether there were other params already appended to the URL query.
+ */
+void append_cursor(string_t *url, const char *cursor, bool is_first_param);
 
 /**
  * Returns URL-encoded version of the string.
@@ -86,14 +95,16 @@ json_value *twitch_v5_get_json(const char *client_id, const char *url);
  * @param params URL/request params to provide to the builder function.
  * @param limit Page size.
  * @param offset Page offset.
+ * @param cursor Cursor value.
  * @param values_key JSON key that should contain the list values.
  * @param parser Parser function to parse each value object inside the values JSON array.
  * @param size Returns number of parsed items.
  * @param total Returns total number of available items.
+ * @param next_cursor Will contain next cursor value, if provided in response JSON.
  *
  * @return Array of pointers to downloaded and parsed items.
  */
-void **get_page(const char *client_id, page_url_builder builder, void *params, int limit, int offset, const char *values_key, parser_func parser, int *size, int *total);
+void **get_page(const char *client_id, page_url_builder builder, void *params, int limit, int offset, const char *cursor, const char *values_key, parser_func parser, int *size, int *total, char **next_cursor);
 
 /**
  * Downloads all pages of data from Twitch API for given query/entity type.

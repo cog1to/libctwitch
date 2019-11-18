@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 /** User data **/
 
@@ -351,6 +352,36 @@ void twitch_top_game_free(twitch_top_game *game);
  * @param list List to deallocate.
  */
 void twitch_top_game_list_free(int count, twitch_top_game **list);
+
+/** Followers data **/
+
+typedef struct {
+  char *created_at;
+  bool notifications;
+  twitch_user *user;
+} twitch_follower;
+
+/**
+ * Allocates and clears memory for twitch_follower struct.
+ *
+ * @return Pointer to newly allocated twitch_follower struct.
+ */
+twitch_follower *twitch_follower_alloc();
+
+/**
+ * Frees the memory allocated for twitch_follower struct and all its properties.
+ *
+ * @param follower Object to deallocate.
+ */
+void twitch_follower_free(twitch_follower *follower);
+
+/**
+ * Deallocates an array of dynamically allocated twitch_follower structs.
+ *
+ * @param count Number of items in the array.
+ * @param list List to deallocate.
+ */
+void twitch_follower_list_free(int count, twitch_follower **list);
 
 #endif
 
