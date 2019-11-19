@@ -43,13 +43,13 @@ string_t *channel_followers_url_builder(void *params, int limit, int offset, con
 
 /** API **/
 
-twitch_follower **twitch_v5_get_channel_followers(const char *client_id, const char *channel_id, int limit, int offset, const char *cursor, const char *direction, int *size, int *total, char **next_cursor) {
+twitch_follower **twitch_v5_get_channel_followers(const char *client_id, const char *channel_id, int limit, const char *cursor, const char *direction, int *size, int *total, char **next_cursor) {
   channel_followers_params params = {
     .channel_id = channel_id,
     .direction = direction,
   };
 
-  twitch_follower **followers = (twitch_follower **)get_page(client_id, &channel_followers_url_builder, (void *)&params, limit, offset, cursor, "follows", &parse_follower, size, total, next_cursor);
+  twitch_follower **followers = (twitch_follower **)get_page(client_id, &channel_followers_url_builder, (void *)&params, limit, 0, cursor, "follows", &parse_follower, size, total, next_cursor);
   return followers;
 }
 
