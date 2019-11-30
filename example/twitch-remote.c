@@ -37,7 +37,9 @@ typedef enum {
   user,
   live_follows,
   top_games,
-  channel_follows
+  channel_follows,
+  channel_teams,
+  channel_communities
 } command_type;
 
 // Command handler function  type.
@@ -395,6 +397,92 @@ void get_channel_followers(const char *query, int options_count, const char **op
   free(CLIENT_ID);
 }
 
+void get_channel_teams(const char *query, int options_count, const char **options) {
+  char *CLIENT_ID = get_param("client-id", options_count, options);
+  if (CLIENT_ID == NULL) {
+    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  int channels_count = 0, channels_total = 0;
+  twitch_channel *target = NULL;
+  twitch_channel **channels = twitch_v5_search_channels(CLIENT_ID, query, 20, 0, &channels_count, &channels_total);
+  if (channels_count > 0) {
+    for (int index = 0; index < channels_count; index++) {
+      twitch_channel *channel = channels[index];
+      if (strcmp(channel->name, query) == 0) {
+        target = channel;
+        break;
+      }
+    }
+  }
+
+  if (target == NULL) {
+    printf("Channel '%s' not found\n", query);
+    twitch_channel_list_free(channels_count, channels);
+    return;
+  }
+
+  // Convert channel ID.
+  char channel_id[64];
+  sprintf(channel_id, "%lld", target->id);
+
+  int size = 0;
+  twitch_team **teams = twitch_v5_get_channel_teams(CLIENT_ID, channel_id, &size);
+  if (size > 0) {
+    for (int index = 0; index < size; index++) {
+      twitch_team *team = teams[index];
+      printf("%s\n  Info: %s\n", team->display_name, team->info);
+    }
+    twitch_team_list_free(size, teams);
+  }
+
+  free(CLIENT_ID);
+}
+
+void get_channel_communities(const char *query, int options_count, const char **options) {
+  char *CLIENT_ID = get_param("client-id", options_count, options);
+  if (CLIENT_ID == NULL) {
+    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  int channels_count = 0, channels_total = 0;
+  twitch_channel *target = NULL;
+  twitch_channel **channels = twitch_v5_search_channels(CLIENT_ID, query, 20, 0, &channels_count, &channels_total);
+  if (channels_count > 0) {
+    for (int index = 0; index < channels_count; index++) {
+      twitch_channel *channel = channels[index];
+      if (strcmp(channel->name, query) == 0) {
+        target = channel;
+        break;
+      }
+    }
+  }
+
+  if (target == NULL) {
+    printf("Channel '%s' not found\n", query);
+    twitch_channel_list_free(channels_count, channels);
+    return;
+  }
+
+  // Convert channel ID.
+  char channel_id[64];
+  sprintf(channel_id, "%lld", target->id);
+
+  int size = 0;
+  twitch_community **communities = twitch_v5_get_channel_communities(CLIENT_ID, channel_id, &size);
+  if (size > 0) {
+    for (int index = 0; index < size; index++) {
+      twitch_community *community = communities[index];
+      printf("%s\n  Name: %s\n  ID: %s\n  Summary: %s\n", community->display_name, community->name, community->id, community->summary);
+    }
+    twitch_community_list_free(size, communities);
+  }
+
+  free(CLIENT_ID);
+}
+
 /** Main **/
 
 int main(int argc, char **argv) {
@@ -447,6 +535,20 @@ int main(int argc, char **argv) {
       .description = "Gets all users that follow specific channel.",
       .has_parameter = true,
       .handler = &get_channel_followers
+    },
+    {
+      .command = channel_teams,
+      .name = "teams",
+      .description = "Gets all teams of specific channel.",
+      .has_parameter = true,
+      .handler = &get_channel_teams
+    },
+    {
+      .command = channel_communities,
+      .name = "communities",
+      .description = "Gets all communities of specific channel.",
+      .has_parameter = true,
+      .handler = &get_channel_communities
     }
   };
 

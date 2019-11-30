@@ -392,3 +392,82 @@ void *parse_follower(json_value *value) {
   return (void *)follower;
 }
 
+void *parse_team(json_value *value) {
+  twitch_team *team = twitch_team_alloc();
+
+  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
+    if (strcmp(value->u.object.values[prop_ind].name, "_id") == 0) {
+      // ID.
+      team->id = value->u.object.values[prop_ind].value->u.integer;
+    } else if (strcmp(value->u.object.values[prop_ind].name, "created_at") == 0) {
+      // Created At date.
+      team->created_at = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "updated_at") == 0) {
+      // Updated At date.
+      team->updated_at = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "background") == 0) {
+      // Background.
+      team->background = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "logo") == 0) {
+      // Logo.
+      team->logo = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "banner") == 0) {
+      // Banner.
+      team->banner = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "name") == 0) {
+      // Name.
+      team->name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "display_name") == 0) {
+      // Display name.
+      team->display_name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "info") == 0) {
+      // Info.
+      team->info = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    }
+  }
+
+  return (void *)team;
+}
+
+void *parse_community(json_value *value) {
+  twitch_community *community = twitch_community_alloc();
+
+  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
+    if (strcmp(value->u.object.values[prop_ind].name, "owner_id") == 0) {
+      // Owner ID.
+      community->owner_id = value->u.object.values[prop_ind].value->u.integer;
+    } else if (strcmp(value->u.object.values[prop_ind].name, "_id") == 0) {
+      // ID.
+      community->id = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "avatar_image_url") == 0) {
+      // Avatar image URL.
+      community->avatar_image_url = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "cover_image_url") == 0) {
+      // Cover image URL.
+      community->cover_image_url = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "description") == 0) {
+      // Description.
+      community->description = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "description_html") == 0) {
+      // Description HTML.
+      community->description_html = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "rules_html") == 0) {
+      // Rules HTML.
+      community->rules_html = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "rules") == 0) {
+      // Rules.
+      community->rules = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "name") == 0) {
+      // Name.
+      community->name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "display_name") == 0) {
+      // Display name.
+      community->display_name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    } else if (strcmp(value->u.object.values[prop_ind].name, "summary") == 0) {
+      // Summary.
+      community->summary = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+    }
+  }
+
+  return (void *)community;
+}

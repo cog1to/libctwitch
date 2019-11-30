@@ -256,3 +256,50 @@ void twitch_follower_list_free(int count, twitch_follower **list) {
   pointer_array_free(count, (void **)list, (void(*))&twitch_follower_free);
 }
 
+/** Teams data **/
+
+twitch_team *twitch_team_alloc() {
+  GENERIC_ALLOC(twitch_team)
+}
+
+void twitch_team_free(twitch_team *team) {
+  FREE(team->background)
+  FREE(team->banner)
+  FREE(team->created_at)
+  FREE(team->display_name)
+  FREE(team->info)
+  FREE(team->logo)
+  FREE(team->name)
+  FREE(team->updated_at)
+  free(team);
+}
+
+void twitch_team_list_free(int count, twitch_team **list) {
+  pointer_array_free(count, (void **)list, (void(*))&twitch_team_free);
+}
+
+/** Communities data **/
+
+twitch_community *twitch_community_alloc() {
+  GENERIC_ALLOC(twitch_community);
+}
+
+void twitch_community_free(twitch_community *community) {
+  FREE(community->id)
+  FREE(community->name)
+  FREE(community->display_name)
+  FREE(community->avatar_image_url)
+  FREE(community->cover_image_url)
+  FREE(community->description)
+  FREE(community->description_html)
+  FREE(community->rules)
+  FREE(community->rules_html)
+  FREE(community->language)
+  FREE(community->summary)
+  free(community);
+}
+
+void twitch_community_list_free(int count, twitch_community **list) {
+  pointer_array_free(count, (void **)list, (void(*))&twitch_community_free);
+}
+

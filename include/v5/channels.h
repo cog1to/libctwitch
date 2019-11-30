@@ -32,5 +32,25 @@ twitch_follower **twitch_v5_get_channel_followers(const char *client_id, const c
  */
 twitch_follower **twitch_v5_get_all_channel_followers(const char *client_id, const char *channel_id, const char *direction, int *size);
 
+/**
+ * Downloads the list of channel teams.
+ *
+ * @param client_id Twitch API client ID.
+ * @param channel_id Channel ID.
+ *
+ * @return An array of pointers to twitch_team structs describing which teams the channel is part of. You will have to manually free the memory and the array itself.
+ */
+twitch_team **twitch_v5_get_channel_teams(const char *client_id, const char *channel_id, int* size);
+
+/**
+ * Downloads the list of channel's communities.
+ *
+ * @param client_id Twitch API client ID.
+ * @param channel_id Channel ID.
+ *
+ * @return An array of pointers to twitch_community structs describing which communities the channel is part of. You will have to manually free the memory and the array itself.
+ */
+twitch_community **twitch_v5_get_channel_communities(const char *client_id, const char *channel_id, int* size);
+
 #endif
 

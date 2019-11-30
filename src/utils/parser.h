@@ -103,5 +103,23 @@ void *parse_top_game(json_value *value);
  */
 void *parse_follower(json_value *value);
 
+/**
+ * Creates a new twitch_team struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value holding data fields.
+ *
+ * @return Pointer to filled in twitch_team struct.
+ */
+void *parse_team(json_value *value);
+
+/**
+ * Creates a new twitch_community struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value holding data fields.
+ *
+ * @return Pointer to filled in twitch_community struct.
+ */
+void *parse_community(json_value *value);
+
 #endif
 

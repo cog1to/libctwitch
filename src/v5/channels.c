@@ -41,6 +41,21 @@ string_t *channel_followers_url_builder(void *params, int limit, int offset, con
   return url;
 }
 
+typedef struct {
+  const char *channel_id;
+} channel_teams_params;
+
+string_t *channel_teams_url_builder(void *params, int limit, int offset, const char *cursor) {
+  channel_teams_params *ctparams = (channel_teams_params *)params;
+
+  // Construct the link.
+  string_t *url = string_init_with_value("https://api.twitch.tv/kraken/channels/");
+  string_append((void *)ctparams->channel_id, strlen(ctparams->channel_id), url);
+  string_append((void *)"/teams", strlen("/teams"), url);
+
+  return url;
+}
+
 /** API **/
 
 twitch_follower **twitch_v5_get_channel_followers(const char *client_id, const char *channel_id, int limit, const char *cursor, const char *direction, int *size, int *total, char **next_cursor) {
@@ -61,5 +76,23 @@ twitch_follower **twitch_v5_get_all_channel_followers(const char *client_id, con
 
   twitch_follower **followers = (twitch_follower **)get_all_pages(client_id, &channel_followers_url_builder, (void *)&params, "follows", &parse_follower, false, size);
   return followers;
+}
+
+twitch_team **twitch_v5_get_channel_teams(const char *client_id, const char *channel_id, int* size) {
+  channel_teams_params params = {
+    .channel_id = channel_id,
+  };
+
+  twitch_team **teams = (twitch_team **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, NULL, "teams", &parse_team, size, NULL, NULL);
+  return teams;
+}
+
+twitch_community **twitch_v5_get_channel_communities(const char *client_id, const char *channel_id, int* size) {
+  channel_teams_params params = {
+    .channel_id = channel_id,
+  };
+
+  twitch_community **communities = (twitch_community **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, NULL, "communities", &parse_community, size, NULL, NULL);
+  return communities;
 }
 
