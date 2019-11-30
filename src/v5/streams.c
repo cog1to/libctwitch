@@ -20,7 +20,7 @@ typedef struct {
   const char *language;
 } streams_params;
 
-string_t *streams_url_builder(void *params, int limit, int offset, const char *cursor) {
+string_t *streams_url_builder(void *params, int limit, int offset) {
   streams_params *sparams = (streams_params *)params;
   bool is_first_param = true;
   char buffer[512];
@@ -63,7 +63,7 @@ string_t *streams_url_builder(void *params, int limit, int offset, const char *c
   return url;
 }
 
-string_t *featured_streams_url_builder(void *params, int limit, int offset, const char *cursor) {
+string_t *featured_streams_url_builder(void *params, int limit, int offset) {
   // Featured streams endpoint doesn't have any additional parameters.
   string_t *url = string_init_with_value("https://api.twitch.tv/kraken/streams/featured");
   append_paging_params(url, limit, offset, true);
@@ -82,7 +82,7 @@ twitch_stream **twitch_v5_get_streams(const char *client_id, int channel_ids_cou
     .language = language
   };
 
-  twitch_stream **streams = (twitch_stream **)get_page(client_id, &streams_url_builder, (void *)&params, limit, offset, NULL, "streams", &parse_stream, size, total, NULL);
+  twitch_stream **streams = (twitch_stream **)get_page(client_id, &streams_url_builder, (void *)&params, limit, offset, "streams", &parse_stream, size, total);
   return streams;
 }
 
@@ -159,7 +159,7 @@ twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game) {
 
 twitch_featured_stream **twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *size) {
   int total = 0;
-  twitch_featured_stream **streams = (twitch_featured_stream **)get_page(client_id, &featured_streams_url_builder, NULL, limit, offset, NULL, "featured", &parse_featured_stream, size, &total, NULL);
+  twitch_featured_stream **streams = (twitch_featured_stream **)get_page(client_id, &featured_streams_url_builder, NULL, limit, offset, "featured", &parse_featured_stream, size, &total);
   return streams;
 }
 

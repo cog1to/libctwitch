@@ -108,8 +108,8 @@ void append_cursor(string_t *url, const char *cursor, bool is_first_param) {
   string_append((void *)buffer, strlen(buffer), url);
 }
 
-void **get_page(const char *client_id, page_url_builder builder, void *params, int limit, int offset, const char* cursor, const char *values_key, parser_func parser, int *size, int *total, char **next_cursor) {
-  string_t *url = builder(params, limit, offset, cursor);
+void **get_page(const char *client_id, page_url_builder builder, void *params, int limit, int offset, const char *values_key, parser_func parser, int *size, int *total) {
+  string_t *url = builder(params, limit, offset);
   json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
 
@@ -129,6 +129,32 @@ void **get_page(const char *client_id, page_url_builder builder, void *params, i
       elements = parse_json_array(elements_value, size, parser);
     } else if (strcmp(value->u.object.values[x].name, "_total") == 0) {
       *total = value->u.object.values[x].value->u.integer;
+    }
+  }
+
+  json_value_free(value);
+  return elements;
+}
+
+void **get_cursored_page(const char *client_id, cursor_page_url_builder builder, void *params, int limit, const char *cursor, const char *values_key, parser_func parser, int *size, char **next_cursor) {
+  string_t *url = builder(params, limit, cursor);
+  json_value *value = twitch_v5_get_json(client_id, url->ptr);
+  string_free(url);
+
+  // Extract the relevant fields.
+  void **elements = NULL;
+
+  int length = value->u.object.length;
+  for (int x = 0; x < length; x++) {
+    if (strcmp(value->u.object.values[x].name, values_key) == 0) {
+      json_value *elements_value = value->u.object.values[x].value;
+      int elements_length = elements_value->u.array.length;
+      if (elements_length == 0) {
+        *size = 0;
+        break;
+      }
+
+      elements = parse_json_array(elements_value, size, parser);
     } else if (strcmp(value->u.object.values[x].name, "_cursor") == 0) {
       (*next_cursor) = immutable_string_copy(value->u.object.values[x].value->u.string.ptr);
     }
@@ -144,35 +170,24 @@ void **get_all_pages(const char *client_id, page_url_builder builder, void *para
   int count = 0;
   int total = 0;
   int offset = 0;
-  int real_offset = 0;
   void **elements = NULL;
-  char *cursor = NULL;
-  char *next_cursor = NULL;
 
-  // NOTE: channels/<>/followers endpoint has a strange behavior with cursors.
-  //   1. It returns improper number of total items at the beginning.
-  //   2. It relies on cursors for paging instead of offset value.
-  //   3. At the end of the list, it returns 0 total number of items.
-  // So to accomodate for all of this, we have to introduce special logic with additional real_offset parameter and "fake" offset
-  // which is always kept at 0.
-  //
-  // I assume every endpoint that has 'cursor' parameter will behave the same way...
   do {
-    void **page = get_page(client_id, builder, params, PAGE_SIZE, offset, cursor, values_key, parser, &count, &total, &next_cursor);
+    void **page = get_page(client_id, builder, params, PAGE_SIZE, offset, values_key, parser, &count, &total);
 
     // Don't do anything if there are 0 items returned. It should mean we're at the end of the list.
-    if (count == 0 && next_cursor == NULL) {
-      if (real_offset + count < total || total == 0) {
-        total = (real_offset + count);
+    if (count == 0) {
+      if (offset + count < total || total == 0) {
+        total = (offset + count);
       }
       break;
     }
 
     // (Re)allocate memory to store next page.
-    if (real_offset == 0) {
+    if (offset == 0) {
       elements = malloc(sizeof(void *) * count);
     } else {
-      elements = realloc(elements, sizeof(void *) * (real_offset + count));
+      elements = realloc(elements, sizeof(void *) * (offset + count));
     }
 
     if (elements == NULL) {
@@ -181,13 +196,54 @@ void **get_all_pages(const char *client_id, page_url_builder builder, void *para
     }
 
     // Copy page's content to the overall storage.
-    memcpy(&elements[real_offset], page, sizeof(void *) * count);
+    memcpy(&elements[offset], page, sizeof(void *) * count);
 
     // Offset to the next page.
-    real_offset += count;
-    if (next_cursor == NULL) {
-      offset += count;
+    offset += count;
+
+    // Free current page data.
+    free(page);
+  } while ((ignore_totals && (count == PAGE_SIZE)) || (offset < total));
+
+  // Return the whole list.
+  *size = total;
+  return elements;
+}
+
+void **get_all_cursored_pages(const char *client_id, cursor_page_url_builder builder, void *params, const char *values_key, parser_func parser, int *size) {
+  const int PAGE_SIZE = 20;
+
+  int count = 0;
+  int total = 0;
+  void **elements = NULL;
+  char *cursor = NULL;
+  char *next_cursor = NULL;
+
+  do {
+    void **page = get_cursored_page(client_id, builder, params, PAGE_SIZE, cursor, values_key, parser, &count, &next_cursor);
+
+    // Don't do anything if there are 0 items returned. It should mean we're at the end of the list.
+    if (count == 0 && next_cursor == NULL) {
+      break;
     }
+
+    // (Re)allocate memory to store next page.
+    if (total == 0) {
+      elements = malloc(sizeof(void *) * count);
+    } else {
+      elements = realloc(elements, sizeof(void *) * (total + count));
+    }
+
+    if (elements == NULL) {
+      fprintf(stderr, "Failed to allocate memory for next page.");
+      exit(EXIT_FAILURE);
+    }
+
+    // Copy page's content to the overall storage.
+    memcpy(&elements[total], page, sizeof(void *) * count);
+
+    // Update total count.
+    total += count;
 
     // Free current page data.
     free(page);
@@ -201,7 +257,7 @@ void **get_all_pages(const char *client_id, page_url_builder builder, void *para
       free(next_cursor);
       next_cursor = NULL;
     }
-  } while ((ignore_totals && (count == PAGE_SIZE)) || (real_offset < total));
+  } while (count > 0);
 
   // Free the cursor memory.
   if (cursor != NULL) {
@@ -209,7 +265,7 @@ void **get_all_pages(const char *client_id, page_url_builder builder, void *para
   }
 
   // Return the whole list.
-  *size = ignore_totals ? offset : total;
+  *size = total;
   return elements;
 }
 

@@ -17,7 +17,7 @@ typedef struct {
   const char *direction;
 } channel_followers_params;
 
-string_t *channel_followers_url_builder(void *params, int limit, int offset, const char *cursor) {
+string_t *channel_followers_url_builder(void *params, int limit, const char *cursor) {
   char buffer[128];
   bool is_first_param = true;
 
@@ -35,7 +35,6 @@ string_t *channel_followers_url_builder(void *params, int limit, int offset, con
     is_first_param = false;
   }
 
-  append_paging_params(url, limit, offset, is_first_param);
   append_cursor(url, cursor, is_first_param);
 
   return url;
@@ -45,7 +44,7 @@ typedef struct {
   const char *channel_id;
 } channel_teams_params;
 
-string_t *channel_teams_url_builder(void *params, int limit, int offset, const char *cursor) {
+string_t *channel_teams_url_builder(void *params, int limit, int offset) {
   channel_teams_params *ctparams = (channel_teams_params *)params;
 
   // Construct the link.
@@ -64,7 +63,7 @@ twitch_follower **twitch_v5_get_channel_followers(const char *client_id, const c
     .direction = direction,
   };
 
-  twitch_follower **followers = (twitch_follower **)get_page(client_id, &channel_followers_url_builder, (void *)&params, limit, 0, cursor, "follows", &parse_follower, size, total, next_cursor);
+  twitch_follower **followers = (twitch_follower **)get_cursored_page(client_id, &channel_followers_url_builder, (void *)&params, limit, cursor, "follows", &parse_follower, size, next_cursor);
   return followers;
 }
 
@@ -74,7 +73,7 @@ twitch_follower **twitch_v5_get_all_channel_followers(const char *client_id, con
     .direction = direction,
   };
 
-  twitch_follower **followers = (twitch_follower **)get_all_pages(client_id, &channel_followers_url_builder, (void *)&params, "follows", &parse_follower, false, size);
+  twitch_follower **followers = (twitch_follower **)get_all_cursored_pages(client_id, &channel_followers_url_builder, (void *)&params, "follows", &parse_follower, size);
   return followers;
 }
 
@@ -83,7 +82,7 @@ twitch_team **twitch_v5_get_channel_teams(const char *client_id, const char *cha
     .channel_id = channel_id,
   };
 
-  twitch_team **teams = (twitch_team **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, NULL, "teams", &parse_team, size, NULL, NULL);
+  twitch_team **teams = (twitch_team **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, "teams", &parse_team, size, NULL);
   return teams;
 }
 
@@ -92,7 +91,7 @@ twitch_community **twitch_v5_get_channel_communities(const char *client_id, cons
     .channel_id = channel_id,
   };
 
-  twitch_community **communities = (twitch_community **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, NULL, "communities", &parse_community, size, NULL, NULL);
+  twitch_community **communities = (twitch_community **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, "communities", &parse_community, size, NULL);
   return communities;
 }
 
