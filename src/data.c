@@ -281,7 +281,7 @@ void twitch_team_list_free(int count, twitch_team **list) {
 /** Communities data **/
 
 twitch_community *twitch_community_alloc() {
-  GENERIC_ALLOC(twitch_community);
+  GENERIC_ALLOC(twitch_community)
 }
 
 void twitch_community_free(twitch_community *community) {
@@ -301,5 +301,98 @@ void twitch_community_free(twitch_community *community) {
 
 void twitch_community_list_free(int count, twitch_community **list) {
   pointer_array_free(count, (void **)list, (void(*))&twitch_community_free);
+}
+
+/** Video data **/
+
+twitch_resolutions *twitch_resolutions_alloc() {
+  GENERIC_ALLOC(twitch_resolutions)
+}
+
+void twitch_resolutions_free(twitch_resolutions *resolutions) {
+  FREE(resolutions->chunked)
+  FREE(resolutions->high)
+  FREE(resolutions->medium)
+  FREE(resolutions->low)
+  FREE(resolutions->mobile)
+  free(resolutions);
+}
+
+twitch_fps *twitch_fps_alloc() {
+  GENERIC_ALLOC(twitch_fps)
+}
+
+void twitch_fps_free(twitch_fps *fps) {
+  free(fps);
+}
+
+twitch_channel_ref *twitch_channel_ref_alloc() {
+  GENERIC_ALLOC(twitch_channel_ref)
+}
+
+void twitch_channel_ref_free(twitch_channel_ref *ref) {
+  FREE(ref->name)
+  FREE(ref->display_name)
+  free(ref);
+}
+
+twitch_thumbnail *twitch_thumbnail_alloc() {
+  GENERIC_ALLOC(twitch_thumbnail)
+}
+
+void twitch_thumbnail_free(twitch_thumbnail *thumbnail) {
+  FREE(thumbnail->url)
+  FREE(thumbnail->type)
+  free(thumbnail);
+}
+
+twitch_thumbnail_list *twitch_thumbnail_list_alloc() {
+  GENERIC_ALLOC(twitch_thumbnail_list)
+}
+
+void twitch_thumbnail_list_free(twitch_thumbnail_list *list) {
+  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_thumbnail_free);
+  free(list);
+}
+
+twitch_video_thumbnails *twitch_video_thumbnails_alloc() {
+  GENERIC_ALLOC(twitch_video_thumbnails)
+}
+
+void twitch_video_thumbnails_free(twitch_video_thumbnails *thumbnails) {
+  FREE_CUSTOM(thumbnails->large, twitch_thumbnail_list_free)
+  FREE_CUSTOM(thumbnails->medium, twitch_thumbnail_list_free)
+  FREE_CUSTOM(thumbnails->small, twitch_thumbnail_list_free)
+  FREE_CUSTOM(thumbnails->template, twitch_thumbnail_list_free)
+}
+
+twitch_video *twitch_video_alloc() {
+  GENERIC_ALLOC(twitch_video)
+}
+
+void twitch_video_free(twitch_video *video) {
+  FREE(video->id)
+  FREE(video->broadcast_type)
+  FREE_CUSTOM(video->channel, twitch_channel_ref_free)
+  FREE(video->created_at)
+  FREE(video->description)
+  FREE(video->description_html)
+  FREE_CUSTOM(video->fps, twitch_fps_free)
+  FREE(video->game)
+  FREE(video->language)
+  FREE_CUSTOM(video->preview, twitch_art_free)
+  FREE(video->published_at)
+  FREE_CUSTOM(video->resolutions, twitch_resolutions_free)
+  FREE(video->status)
+  FREE(video->tag_list)
+  FREE(video->title)
+  FREE(video->url)
+  FREE_CUSTOM(video->thumbnails, twitch_video_thumbnails_free)
+  FREE(video->viewable)
+  FREE(video->viewable_at)
+}
+
+void twitch_video_list_free(int count, twitch_video **list) {
+  pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_video_free);
 }
 

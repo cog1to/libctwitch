@@ -584,7 +584,7 @@ twitch_video_thumbnails *twitch_video_thumbnails_alloc();
 void twitch_video_thumbnails_free(twitch_video_thumbnails *thumbnails);
 
 typedef struct {
-  long long int id;
+  char *id;
   int broadcast_id;
   char *broadcast_type;
   twitch_channel_ref *channel;

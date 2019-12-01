@@ -39,7 +39,8 @@ typedef enum {
   top_games,
   channel_follows,
   channel_teams,
-  channel_communities
+  channel_communities,
+  channel_videos
 } command_type;
 
 // Command handler function  type.
@@ -110,6 +111,59 @@ char *get_param(const char *param_name, int options_count, const char **options)
   return NULL;
 }
 
+/** Gets client_id parameter from provided options array.
+ *
+ * @param options_count Number of options in the options array.
+ * @param options Options array.
+ *
+ * @return Client ID string or NULL if it's not provided.
+ */
+char *get_client_id(int options_count, const char **options) {
+  char *client_id = get_param("client-id", options_count, options);
+  if (client_id == NULL) {
+    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  return client_id;
+}
+
+/**
+ * Searches for channel with given name and returns it's stringified ID.
+ *
+ * @param client_id Twitch API client ID.
+ * @param query Search string.
+ *
+ * @return String containing channel's ID value, or null if it's not found.
+ */
+char *find_channel_id(char *client_id, const char *query) {
+  int channels_count = 0, channels_total = 0;
+  twitch_channel *target = NULL;
+  twitch_channel **channels = twitch_v5_search_channels(client_id, query, 20, 0, &channels_count, &channels_total);
+  if (channels_count > 0) {
+    for (int index = 0; index < channels_count; index++) {
+      twitch_channel *channel = channels[index];
+      if (strcmp(channel->name, query) == 0) {
+        target = channel;
+        break;
+      }
+    }
+  }
+
+  if (target == NULL) {
+    twitch_channel_list_free(channels_count, channels);
+    return NULL;
+  }
+
+  // Convert channel ID.
+  char* channel_id = malloc(64 * sizeof(char));
+  sprintf(channel_id, "%lld", target->id);
+
+  twitch_channel_list_free(channels_count, channels);
+  return channel_id;
+}
+
+
 /**
  * Gets and prints the featured streams.
  *
@@ -118,12 +172,7 @@ char *get_param(const char *param_name, int options_count, const char **options)
  * @param options List of option strings.
  */
 void get_featured(const char *param, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
-
+  char *CLIENT_ID = get_client_id(options_count, options);
   int featured_count = 0;
   twitch_featured_stream **featured = twitch_v5_get_all_featured_streams(CLIENT_ID, &featured_count);
   if (featured != NULL && featured_count > 0) {
@@ -153,12 +202,7 @@ void get_featured(const char *param, int options_count, const char **options) {
  * @param options List of arguments.
  */
 void get_user(const char *username, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
-
+  char *CLIENT_ID = get_client_id(options_count, options);
   twitch_user *user = twitch_v5_get_user_by_username(CLIENT_ID, username);
   if (user != NULL) {
     printf(
@@ -186,11 +230,7 @@ void get_user(const char *username, int options_count, const char **options) {
  * @param options List of command line arguments.
  */
 void get_games(const char *name, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
+  char *CLIENT_ID = get_client_id(options_count, options);
 
   int size = 0;
   twitch_game **games = twitch_v5_search_games(CLIENT_ID, name, false, &size);
@@ -218,11 +258,7 @@ void get_games(const char *name, int options_count, const char **options) {
  * @param options List of command line arguments.
  */
 void get_streams(const char *query, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
+  char *CLIENT_ID = get_client_id(options_count, options);
 
   int size = 0;
   twitch_stream **streams = twitch_v5_search_all_streams(CLIENT_ID, query, none, &size);
@@ -253,11 +289,7 @@ void get_streams(const char *query, int options_count, const char **options) {
  * @param options List of command line arguments.
  */
 void get_live_follows(const char *username, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
+  char *CLIENT_ID = get_client_id(options_count, options);
 
   // Find user by login name to get their user ID.
   twitch_user *user = twitch_v5_get_user_by_username(CLIENT_ID, username);
@@ -320,11 +352,7 @@ void get_live_follows(const char *username, int options_count, const char **opti
  * @param options List of command line arguments.
  */
 void get_top_games(const char *query, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
+  char *CLIENT_ID = get_client_id(options_count, options);
 
   int limit = atoi(query);
   if (limit <= 0) {
@@ -352,34 +380,13 @@ void get_top_games(const char *query, int options_count, const char **options) {
 }
 
 void get_channel_followers(const char *query, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *channel_id = find_channel_id(CLIENT_ID, query);
 
-  int channels_count = 0, channels_total = 0;
-  twitch_channel *target = NULL;
-  twitch_channel **channels = twitch_v5_search_channels(CLIENT_ID, query, 20, 0, &channels_count, &channels_total);
-  if (channels_count > 0) {
-    for (int index = 0; index < channels_count; index++) {
-      twitch_channel *channel = channels[index];
-      if (strcmp(channel->name, query) == 0) {
-        target = channel;
-        break;
-      }
-    }
-  }
-
-  if (target == NULL) {
+  if (channel_id == NULL) {
     printf("Channel '%s' not found\n", query);
-    twitch_channel_list_free(channels_count, channels);
     return;
   }
-
-  // Convert channel ID.
-  char channel_id[64];
-  sprintf(channel_id, "%lld", target->id);
 
   int size = 0;
   twitch_follower **followers = twitch_v5_get_all_channel_followers(CLIENT_ID, channel_id, "asc", &size);
@@ -395,37 +402,17 @@ void get_channel_followers(const char *query, int options_count, const char **op
   }
 
   free(CLIENT_ID);
+  free(channel_id);
 }
 
 void get_channel_teams(const char *query, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *channel_id = find_channel_id(CLIENT_ID, query);
 
-  int channels_count = 0, channels_total = 0;
-  twitch_channel *target = NULL;
-  twitch_channel **channels = twitch_v5_search_channels(CLIENT_ID, query, 20, 0, &channels_count, &channels_total);
-  if (channels_count > 0) {
-    for (int index = 0; index < channels_count; index++) {
-      twitch_channel *channel = channels[index];
-      if (strcmp(channel->name, query) == 0) {
-        target = channel;
-        break;
-      }
-    }
-  }
-
-  if (target == NULL) {
+  if (channel_id == NULL) {
     printf("Channel '%s' not found\n", query);
-    twitch_channel_list_free(channels_count, channels);
     return;
   }
-
-  // Convert channel ID.
-  char channel_id[64];
-  sprintf(channel_id, "%lld", target->id);
 
   int size = 0;
   twitch_team **teams = twitch_v5_get_channel_teams(CLIENT_ID, channel_id, &size);
@@ -438,37 +425,17 @@ void get_channel_teams(const char *query, int options_count, const char **option
   }
 
   free(CLIENT_ID);
+  free(channel_id);
 }
 
 void get_channel_communities(const char *query, int options_count, const char **options) {
-  char *CLIENT_ID = get_param("client-id", options_count, options);
-  if (CLIENT_ID == NULL) {
-    fprintf(stderr, "Error: client ID should be provided with '--client-id=' option.\n");
-    exit(EXIT_FAILURE);
-  }
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *channel_id = find_channel_id(CLIENT_ID, query);
 
-  int channels_count = 0, channels_total = 0;
-  twitch_channel *target = NULL;
-  twitch_channel **channels = twitch_v5_search_channels(CLIENT_ID, query, 20, 0, &channels_count, &channels_total);
-  if (channels_count > 0) {
-    for (int index = 0; index < channels_count; index++) {
-      twitch_channel *channel = channels[index];
-      if (strcmp(channel->name, query) == 0) {
-        target = channel;
-        break;
-      }
-    }
-  }
-
-  if (target == NULL) {
+  if (channel_id == NULL) {
     printf("Channel '%s' not found\n", query);
-    twitch_channel_list_free(channels_count, channels);
     return;
   }
-
-  // Convert channel ID.
-  char channel_id[64];
-  sprintf(channel_id, "%lld", target->id);
 
   int size = 0;
   twitch_community **communities = twitch_v5_get_channel_communities(CLIENT_ID, channel_id, &size);
@@ -481,8 +448,31 @@ void get_channel_communities(const char *query, int options_count, const char **
   }
 
   free(CLIENT_ID);
+  free(channel_id);
 }
 
+void get_channel_videos(const char *query, int options_count, const char **options) {
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *channel_id = find_channel_id(CLIENT_ID, query);
+
+  if (channel_id == NULL) {
+    printf("Channel '%s' not found\n", query);
+    return;
+  }
+
+  int size = 0;
+  twitch_video **videos = twitch_v5_get_all_channel_videos(CLIENT_ID, channel_id, NULL, NULL, NULL, &size);
+  if (size > 0) {
+    for (int index = 0; index < size; index++) {
+      twitch_video *video = videos[index];
+      printf("%s\n  Title: %s\n  Game: %s\n  Description: %s\n", video->id, video->title, video->game, video->description);
+    }
+    twitch_video_list_free(size, videos);
+  }
+
+  free(CLIENT_ID);
+  free(channel_id);
+}
 /** Main **/
 
 int main(int argc, char **argv) {
@@ -549,6 +539,13 @@ int main(int argc, char **argv) {
       .description = "Gets all communities of specific channel.",
       .has_parameter = true,
       .handler = &get_channel_communities
+    },
+    {
+      .command = channel_videos,
+      .name = "videos",
+      .description = "Gets all videos of specific channel.",
+      .has_parameter = true,
+      .handler = &get_channel_videos
     }
   };
 

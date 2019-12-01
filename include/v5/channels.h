@@ -52,5 +52,36 @@ twitch_team **twitch_v5_get_channel_teams(const char *client_id, const char *cha
  */
 twitch_community **twitch_v5_get_channel_communities(const char *client_id, const char *channel_id, int* size);
 
+/**
+ * Downloads one page of channels' videos list.
+ *
+ * @param client_id Twitch API client ID.
+ * @param channel_id Channel ID.
+ * @param limit Page size.
+ * @param offset Page offset.
+ * @param broadcast_type Comma-separated list of broadcast types. Possible values: 'archive', 'highlight', 'upload'. Default: all of them.
+ * @param language Comma-separated list of language/locale abbreviations, e.g. 'en,es'. Default: all languages.
+ * @param sort Sort field. Valid values: 'views', 'time'. Default: 'time'.
+ * @param size Will return a number of downloaded and parsed items.
+ * @param total Will return a total count of videos of the specific channel.
+ *
+ * @return Array of pointers to twitch_video structs with video data. You have to deallocate it later manually.
+ */
+twitch_video **twitch_v5_get_channel_videos(const char *client_id, const char *channel_id, int limit, int offset, const char *broadcast_type, const char *language, char *sort, int *size, int* total);
+
+/**
+ * Downloads all of channels' videos list.
+ *
+ * @param client_id Twitch API client ID.
+ * @param channel_id Channel ID.
+ * @param broadcast_type Comma-separated list of broadcast types. Possible values: 'archive', 'highlight', 'upload'. Default: all of them.
+ * @param language Comma-separated list of language/locale abbreviations, e.g. 'en,es'. Default: all languages.
+ * @param sort Sort field. Valid values: 'views', 'time'. Default: 'time'.
+ * @param size Will return a number of downloaded and parsed items.
+ *
+ * @return Array of pointers to twitch_video structs with video data. You have to deallocate it later manually.
+ */
+twitch_video **twitch_v5_get_all_channel_videos(const char *client_id, const char *channel_id, const char *broadcast_type, const char *language, char *sort, int *size);
+
 #endif
 

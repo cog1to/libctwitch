@@ -121,5 +121,68 @@ void *parse_team(json_value *value);
  */
 void *parse_community(json_value *value);
 
+/**
+ * Creates a new twitch_resolutions struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value to parse.
+ *
+ * @return pointer to twitch_resolutions struct with data from JSON.
+ */
+void *parse_resolutions(json_value *value);
+
+/**
+ * Creates a new twitch_fps struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value to parse.
+ *
+ * @return pointer to twitch_fps struct with data from JSON.
+ */
+void *parse_fps(json_value *value);
+
+/**
+ * Creates a new twitch_channel_ref struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value to parse.
+ *
+ * @return pointer to twitch_channel_ref struct with data from JSON.
+ */
+void *parse_channel_ref(json_value *value);
+
+/**
+ * Creates a new twitch_thumbnail struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value to parse.
+ *
+ * @return pointer to twitch_thumbnail struct with data from JSON.
+ */
+void *parse_thumbnail(json_value *value);
+
+/**
+ * Creates a new twitch_thumbnail_list struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value to parse.
+ *
+ * @return pointer to twitch_thumbnail_list struct with data from JSON.
+ */
+void *parse_thumbnail_list(json_value *value);
+
+/**
+ * Creates a new twitch_video_thumbnails struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value to parse.
+ *
+ * @return pointer to twitch_video_thumbnails struct with data from JSON.
+ */
+void *parse_video_thumbnails(json_value *value);
+
+/**
+ * Creates a new twitch_video struct and fills it with properties from JSON value.
+ *
+ * @param value JSON value to parse.
+ *
+ * @return pointer to twitch_video struct with data from JSON.
+ */
+void *parse_video(json_value *value);
+
 #endif
 
