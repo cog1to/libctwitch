@@ -458,5 +458,177 @@ void twitch_community_free(twitch_community *community);
  */
 void twitch_community_list_free(int count, twitch_community **list);
 
+/** Videos **/
+
+typedef struct {
+  char *chunked;
+  char *high;
+  char *low;
+  char *medium;
+  char *mobile;
+} twitch_resolutions;
+
+/**
+ * Allocates and initializes new twitch_resolutions struct.
+ *
+ * @return Pointer to newly allocated twitch_resolutions struct.
+ */
+twitch_resolutions *twitch_resolutions_alloc();
+
+/**
+ * Frees memory allocated for twitch_resolutions struct.
+ *
+ * @param team Struct to deallocate.
+ */
+void twitch_resolutions_free(twitch_resolutions *resolutions);
+
+typedef struct {
+  float chunked;
+  float high;
+  float low;
+  float medium;
+  float mobile;
+} twitch_fps;
+
+/**
+ * Allocates and initializes new twitch_fps struct.
+ *
+ * @return Pointer to newly allocated twitch_fps struct.
+ */
+twitch_fps *twitch_fps_alloc();
+
+/**
+ * Frees memory allocated for twitch_fps struct.
+ *
+ * @param team Struct to deallocate.
+ */
+void twitch_fps_free(twitch_fps *fps);
+
+typedef struct {
+  long long int id;
+  char *display_name;
+  char *name;
+} twitch_channel_ref;
+
+/**
+ * Allocates and initializes new twitch_channel_ref struct.
+ *
+ * @return Pointer to newly allocated twitch_channel_ref struct.
+ */
+twitch_channel_ref *twitch_channel_ref_alloc();
+
+/**
+ * Frees memory allocated for twitch_channel_ref struct.
+ *
+ * @param team Struct to deallocate.
+ */
+void twitch_channel_ref_free(twitch_channel_ref *ref);
+
+typedef struct {
+  char *type;
+  char *url;
+} twitch_thumbnail;
+
+/**
+ * Allocates memory for new instance of twitch_thumbnail struct;
+ *
+ * @return Pointer to newly allocated struct.
+ */
+twitch_thumbnail *twitch_thumbnail_alloc();
+
+/**
+ * Frees the memory occupied by twitch_thumbnail struct and it's properties.
+ *
+ * @param thumbnail Pointer to thumbnail struct to deallocate.
+ */
+void twitch_thumbnail_free(twitch_thumbnail *thumbnail);
+
+typedef struct {
+  size_t count;
+  twitch_thumbnail **items;
+} twitch_thumbnail_list;
+
+/**
+ * Allocates new twitch_thumbnail_list struct.
+ *
+ * @return Pointer to allocated memory.
+ */
+twitch_thumbnail_list *twitch_thumbnail_list_alloc();
+
+/**
+ * Frees the memory allocated for twitch_thumbnail_list struct and it's content.
+ *
+ * @param list List to deallocate.
+ */
+void twitch_thumbnail_list_free(twitch_thumbnail_list *list);
+
+typedef struct {
+  twitch_thumbnail_list* large;
+  twitch_thumbnail_list* medium;
+  twitch_thumbnail_list* small;
+  twitch_thumbnail_list* template;
+} twitch_video_thumbnails;
+
+/**
+ * Allocates new twitch_video_thumbnails struct.
+ *
+ * @return Pointer to allocated struct.
+ */
+twitch_video_thumbnails *twitch_video_thumbnails_alloc();
+
+/**
+ * Frees the memory allocated for twitch_video_thumbnails struct and it's content.
+ *
+ * @param list List to deallocate.
+ */
+void twitch_video_thumbnails_free(twitch_video_thumbnails *thumbnails);
+
+typedef struct {
+  long long int id;
+  int broadcast_id;
+  char *broadcast_type;
+  twitch_channel_ref *channel;
+  char *created_at;
+  char *description;
+  char *description_html;
+  twitch_fps *fps;
+  char *game;
+  char *language;
+  int length;
+  twitch_art *preview;
+  char *published_at;
+  twitch_resolutions *resolutions;
+  char *status;
+  char *tag_list;
+  twitch_video_thumbnails *thumbnails;
+  char *title;
+  char *url;
+  char *viewable;
+  char *viewable_at;
+  int views;
+} twitch_video;
+
+/**
+ * Allocates new twitch_video struct.
+ *
+ * @return Pointer to allocated struct.
+ */
+twitch_video *twitch_video_alloc();
+
+/**
+ * Frees the memory allocated for twitch_video struct and it's content.
+ *
+ * @param Struct to deallocate.
+ */
+void twitch_video_free(twitch_video *video);
+
+/**
+ * Frees memory occupied by array of twitch_video structs.
+ *
+ * @param count Number of items in the list.
+ * @param list List to free.
+ */
+void twitch_video_list_free(int count, twitch_video **list);
+
 #endif
 
