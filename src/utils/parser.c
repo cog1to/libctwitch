@@ -7,7 +7,7 @@
 #include "parser.h"
 #include "string_utils.h"
 
-/** JSON parsers **/
+/** JSON array parser **/
 
 void **parse_json_array(json_value *value, int *count, void *(*parser)(json_value *)) {
   if (value->type != json_array) {
@@ -32,7 +32,7 @@ void **parse_json_array(json_value *value, int *count, void *(*parser)(json_valu
   return array;
 }
 
-/** Parsing entities **/
+/** Generic entity parsing **/
 
 void parse_id(void *dest, json_value *source) {
   if (source->type == json_integer) {
@@ -81,35 +81,21 @@ void parse_entity(json_value *src, int count, field_spec *specs) {
 twitch_art *parse_art(json_value *value) {
   twitch_art *art = twitch_art_alloc();
 
-  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
-    if (strcmp(value->u.object.values[prop_ind].name, "large") == 0) {
-      // Large art.
-      if (value->u.object.values[prop_ind].value->type == json_string) {
-        art->large = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "medium") == 0) {
-      // Medium art.
-      if (value->u.object.values[prop_ind].value->type == json_string) {
-        art->medium = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "small") == 0) {
-      // Small art.
-      if (value->u.object.values[prop_ind].value->type != json_null) {
-        art->small = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "template") == 0) {
-      // Template.
-      if (value->u.object.values[prop_ind].value->type != json_null) {
-        art->template = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    }
-  }
+  field_spec schema[] = {
+    { .name = "large", .dest = &art->large, .parser = &parse_string },
+    { .name = "medium", .dest = &art->medium, .parser = &parse_string },
+    { .name = "small", .dest = &art->small, .parser = &parse_string },
+    { .name = "template", .dest = &art->template, .parser = &parse_string },
+  }; 
+  parse_entity(value, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)art;
 }
 
 void _parse_art(void *dest, json_value *value) {
-  *((void **)dest) = parse_art(value);
+  if (value->type == json_object) {
+    *((void **)dest) = parse_art(value);
+  }
 }
 
 /** User **/
@@ -311,6 +297,7 @@ void *parse_team(json_value *value) {
     { .name = "info", .dest = &team->info, .parser = &parse_string },
     { .name = "display_name", .dest = &team->display_name, .parser = &parse_string },
     { .name = "name", .dest = &team->name, .parser = &parse_string },
+    // TODO: Users
   };
   parse_entity(value, sizeof(schema)/sizeof(schema[0]), schema);
 
@@ -320,42 +307,20 @@ void *parse_team(json_value *value) {
 void *parse_community(json_value *value) {
   twitch_community *community = twitch_community_alloc();
 
-  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
-    if (strcmp(value->u.object.values[prop_ind].name, "owner_id") == 0) {
-      // Owner ID.
-      community->owner_id = value->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(value->u.object.values[prop_ind].name, "_id") == 0) {
-      // ID.
-      community->id = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "avatar_image_url") == 0) {
-      // Avatar image URL.
-      community->avatar_image_url = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "cover_image_url") == 0) {
-      // Cover image URL.
-      community->cover_image_url = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "description") == 0) {
-      // Description.
-      community->description = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "description_html") == 0) {
-      // Description HTML.
-      community->description_html = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "rules_html") == 0) {
-      // Rules HTML.
-      community->rules_html = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "rules") == 0) {
-      // Rules.
-      community->rules = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "name") == 0) {
-      // Name.
-      community->name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "display_name") == 0) {
-      // Display name.
-      community->display_name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "summary") == 0) {
-      // Summary.
-      community->summary = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    }
-  }
+  field_spec schema[] = {
+    { .name = "_id", .dest = &community->id, .parser = &parse_string },
+    { .name = "owner_id", .dest = &community->owner_id, .parser = &parse_id },
+    { .name = "avatar_image_url", .dest = &community->avatar_image_url, .parser = &parse_string },
+    { .name = "cover_image_url", .dest = &community->cover_image_url, .parser = &parse_string },
+    { .name = "description", .dest = &community->description, .parser = &parse_string },
+    { .name = "description_html", .dest = &community->description_html, .parser = &parse_string },
+    { .name = "rules", .dest = &community->rules, .parser = &parse_string },
+    { .name = "rules_html", .dest = &community->rules_html, .parser = &parse_string },
+    { .name = "name", .dest = &community->name, .parser = &parse_string },
+    { .name = "display_name", .dest = &community->display_name, .parser = &parse_string },
+    { .name = "summary", .dest = &community->summary, .parser = &parse_string },
+  };
+  parse_entity(value, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)community;
 }
