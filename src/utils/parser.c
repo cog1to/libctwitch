@@ -76,6 +76,44 @@ void parse_entity(json_value *src, int count, field_spec *specs) {
   }
 }
 
+/** Art **/
+
+twitch_art *parse_art(json_value *value) {
+  twitch_art *art = twitch_art_alloc();
+
+  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
+    if (strcmp(value->u.object.values[prop_ind].name, "large") == 0) {
+      // Large art.
+      if (value->u.object.values[prop_ind].value->type == json_string) {
+        art->large = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "medium") == 0) {
+      // Medium art.
+      if (value->u.object.values[prop_ind].value->type == json_string) {
+        art->medium = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "small") == 0) {
+      // Small art.
+      if (value->u.object.values[prop_ind].value->type != json_null) {
+        art->small = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    } else if (strcmp(value->u.object.values[prop_ind].name, "template") == 0) {
+      // Template.
+      if (value->u.object.values[prop_ind].value->type != json_null) {
+        art->template = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
+      }
+    }
+  }
+
+  return (void *)art;
+}
+
+void _parse_art(void *dest, json_value *value) {
+  *((void **)dest) = parse_art(value);
+}
+
+/** User **/
+
 void *parse_user(json_value *user_object) {
   twitch_user *user = twitch_user_alloc();
 
@@ -89,10 +127,18 @@ void *parse_user(json_value *user_object) {
     { .name = "created_at", .dest = &user->created_at, .parser = &parse_string },
     { .name = "updated_at", .dest = &user->updated_at, .parser = &parse_string }
   }; 
-  parse_entity(user_object, 8, schema);
+  parse_entity(user_object, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)user;
 }
+
+void _parse_user(void *dest, json_value *value) {
+  if (value->type == json_object) {
+    *((void **)dest) = parse_user(value);
+  }
+}
+
+/** Channel **/
 
 void *parse_channel(json_value *channel_object) {
   twitch_channel *channel = twitch_channel_alloc();
@@ -127,73 +173,62 @@ void *parse_channel(json_value *channel_object) {
 }
 
 void _parse_channel(void *dest, json_value *value) {
-  *((void **)dest) = parse_channel(value);
+  if (value->type == json_object) {
+    *((void **)dest) = parse_channel(value);
+  }
 }
 
+/** Follow **/
+
 void *parse_follow(json_value *follow_object) {
-  twitch_follow *follow = calloc(1, sizeof(twitch_follow)); //twitch_follow_alloc();
+  twitch_follow *follow = twitch_follow_alloc();
 
   field_spec schema[] = {
-    { .name = "creted_at", .dest = &follow->created_at, .parser = &parse_string },
+    { .name = "created_at", .dest = &follow->created_at, .parser = &parse_string },
     { .name = "notifications", .dest = &follow->notifications, .parser = &parse_bool },
     { .name = "channel", .dest = &follow->channel, .parser = &_parse_channel }
   };
-  parse_entity(follow_object, 3, schema);
+  parse_entity(follow_object, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)follow;
 }
 
+/** Streams **/
+
 void *parse_stream(json_value *stream_object) {
   twitch_stream *stream = twitch_stream_alloc();
 
-  for (int prop_ind = 0; prop_ind < stream_object->u.object.length; prop_ind++) {
-    if (strcmp(stream_object->u.object.values[prop_ind].name, "_id") == 0) {
-      // ID.
-      stream->id = stream_object->u.object.values[prop_ind].value->u.integer;
-    } if (strcmp(stream_object->u.object.values[prop_ind].name, "created_at") == 0) {
-      // Created At date.
-      stream->created_at = immutable_string_copy(stream_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(stream_object->u.object.values[prop_ind].name, "average_fps") == 0) {
-      // Average FPS.
-      stream->average_fps = stream_object->u.object.values[prop_ind].value->u.dbl;
-    } else if (strcmp(stream_object->u.object.values[prop_ind].name, "channel") == 0) {
-      // Channel.
-      stream->channel = parse_channel(stream_object->u.object.values[prop_ind].value);
-    } else if (strcmp(stream_object->u.object.values[prop_ind].name, "delay") == 0) {
-      // Delay.
-      stream->delay = stream_object->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(stream_object->u.object.values[prop_ind].name, "video_height") == 0) {
-      // Video height.
-      stream->video_height = stream_object->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(stream_object->u.object.values[prop_ind].name, "viewers") == 0) {
-      // Viewers.
-      stream->viewers = stream_object->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(stream_object->u.object.values[prop_ind].name, "is_playlist") == 0) {
-      // Is playlist flag.
-      stream->is_playlist = stream_object->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(stream_object->u.object.values[prop_ind].name, "game") == 0) {
-      // Game.
-      stream->game = immutable_string_copy(stream_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(stream_object->u.object.values[prop_ind].name, "preview") == 0) {
-      // TODO: Preview parsing.
-    }
-  }
+  field_spec schema[] = {
+    { .name = "_id", .dest = &stream->id, .parser = &parse_id },
+    { .name = "created_at", .dest = &stream->created_at, .parser = &parse_string },
+    { .name = "average_fps", .dest = &stream->average_fps, .parser = &parse_double },
+    { .name = "channel", .dest = &stream->channel, .parser = &_parse_channel },
+    { .name = "delay", .dest = &stream->delay, .parser = &parse_int },
+    { .name = "video_height", .dest = &stream->video_height, .parser = &parse_int },
+    { .name = "viewers", .dest = &stream->viewers, .parser = &parse_int },
+    { .name = "is_playlist", .dest = &stream->is_playlist, .parser = &parse_bool },
+    { .name = "game", .dest = &stream->game, .parser = &parse_string },
+    { .name = "preview", .dest = &stream->preview, .parser = &_parse_art },
+  };
+  parse_entity(stream_object, sizeof(schema)/sizeof(schema[0]), schema);
 
-  return stream;
+  return (void *)stream;
+}
+
+void _parse_stream(void *dest, json_value *value) {
+  if (value->type == json_object) {
+    *((void **)dest) = parse_stream(value);
+  }
 }
 
 void *parse_summary(json_value *summary_object) {
   twitch_summary *summary = twitch_summary_alloc();
 
-  for (int prop_ind = 0; prop_ind < summary_object->u.object.length; prop_ind++) {
-    if (strcmp(summary_object->u.object.values[prop_ind].name, "channels") == 0) {
-      // Channels.
-      summary->channels = summary_object->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(summary_object->u.object.values[prop_ind].name, "viewers") == 0) {
-      // Viewers.
-      summary->viewers = summary_object->u.object.values[prop_ind].value->u.integer;
-    }
-  }
+  field_spec schema[] = {
+    { .name = "channels", .dest = &summary->channels, .parser = &parse_int },
+    { .name = "viewers", .dest = &summary->viewers, .parser = &parse_int },
+  };
+  parse_entity(summary_object, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)summary;
 }
@@ -201,121 +236,51 @@ void *parse_summary(json_value *summary_object) {
 void *parse_featured_stream(json_value *featured_object) {
   twitch_featured_stream *stream = twitch_featured_stream_alloc();
 
-  for (int prop_ind = 0; prop_ind < featured_object->u.object.length; prop_ind++) {
-    if (strcmp(featured_object->u.object.values[prop_ind].name, "image") == 0) {
-      // Image.
-      if (featured_object->u.object.values[prop_ind].value->type == json_string) {
-        stream->image = immutable_string_copy(featured_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } if (strcmp(featured_object->u.object.values[prop_ind].name, "priority") == 0) {
-      // Priority.
-      stream->priority = featured_object->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "scheduled") == 0) {
-      // Scheduled flag.
-      stream->scheduled = featured_object->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "sponsored") == 0) {
-      // Sponsored flag.
-      stream->sponsored = featured_object->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "text") == 0) {
-      // Text.
-      if (featured_object->u.object.values[prop_ind].value->type == json_string) {
-        stream->text = immutable_string_copy(featured_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "title") == 0) {
-      // Title.
-      if (featured_object->u.object.values[prop_ind].value->type == json_string) {
-        stream->title = immutable_string_copy(featured_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(featured_object->u.object.values[prop_ind].name, "stream") == 0) {
-      // Stream.
-      if (featured_object->u.object.values[prop_ind].value->type == json_object) {
-        stream->stream = parse_stream(featured_object->u.object.values[prop_ind].value);
-      }
-    }
-  }
+  field_spec schema[] = {
+    { .name = "image", .dest = &stream->image, .parser = &parse_string },
+    { .name = "priority", .dest = &stream->priority, .parser = &parse_int },
+    { .name = "scheduled", .dest = &stream->scheduled, .parser = &parse_bool },
+    { .name = "sponsored", .dest = &stream->sponsored, .parser = &parse_bool },
+    { .name = "text", .dest = &stream->text, .parser = &parse_string },
+    { .name = "title", .dest = &stream->title, .parser = &parse_string },
+    { .name = "stream", .dest = &stream->stream, .parser = &_parse_stream },
+  };
+  parse_entity(featured_object, sizeof(schema)/sizeof(schema[0]), schema);
 
   return stream;
-}
-
-twitch_art *parse_art(json_value *value) {
-  twitch_art *art = twitch_art_alloc();
-
-  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
-    if (strcmp(value->u.object.values[prop_ind].name, "large") == 0) {
-      // Large art.
-      if (value->u.object.values[prop_ind].value->type == json_string) {
-        art->large = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "medium") == 0) {
-      // Medium art.
-      if (value->u.object.values[prop_ind].value->type == json_string) {
-        art->medium = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "small") == 0) {
-      // Small art.
-      if (value->u.object.values[prop_ind].value->type != json_null) {
-        art->small = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "template") == 0) {
-      // Template.
-      if (value->u.object.values[prop_ind].value->type != json_null) {
-        art->template = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    }
-  }
-
-  return (void *)art;
 }
 
 void *parse_game(json_value *value) {
   twitch_game *game = twitch_game_alloc();
 
-  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
-    if (strcmp(value->u.object.values[prop_ind].name, "_id") == 0) {
-      // ID.
-      game->id = value->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(value->u.object.values[prop_ind].name, "box") == 0) {
-      // Box art.
-      if (value->u.object.values[prop_ind].value->type == json_object) {
-        game->box = parse_art(value->u.object.values[prop_ind].value);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "giantbomb_id") == 0) {
-      // GiantBomb ID.
-      game->giantbomb_id = value->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(value->u.object.values[prop_ind].name, "logo") == 0) {
-      // Logo.
-      if (value->u.object.values[prop_ind].value->type == json_object) {
-        game->logo = parse_art(value->u.object.values[prop_ind].value);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "name") == 0) {
-      // Name.
-      game->name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "popularity") == 0) {
-      // Popularity.
-      game->popularity = value->u.object.values[prop_ind].value->u.integer;
-    }
-  }
+  field_spec schema[] = {
+    { .name = "_id", .dest = &game->id, .parser = &parse_id },
+    { .name = "box", .dest = &game->box, .parser = &_parse_art },
+    { .name = "giantbomb_id", .dest = &game->giantbomb_id, .parser = &parse_int },
+    { .name = "logo", .dest = &game->logo, .parser = &_parse_art },
+    { .name = "name", .dest = &game->name, .parser = &parse_string },
+    { .name = "popularity", .dest = &game->popularity, .parser = &parse_int },
+  };
+  parse_entity(value, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)game;
+}
+
+void _parse_game(void *dest, json_value *value) {
+  if (value->type == json_object) {
+    *((void **)dest) = parse_game(value);
+  }
 }
 
 void *parse_top_game(json_value *value) {
   twitch_top_game *game = twitch_top_game_alloc();
 
-  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
-    if (strcmp(value->u.object.values[prop_ind].name, "game") == 0) {
-      // Game.
-      if (value->u.object.values[prop_ind].value->type == json_object) {
-        game->game = parse_game(value->u.object.values[prop_ind].value);
-      }
-    } else if (strcmp(value->u.object.values[prop_ind].name, "channels") == 0) {
-      // Channels.
-      game->channels = value->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(value->u.object.values[prop_ind].name, "viewers") == 0) {
-      // Viewers.
-      game->viewers = value->u.object.values[prop_ind].value->u.integer;
-    }
-  }
+  field_spec schema[] = {
+    { .name = "game", .dest = &game->game, .parser = &_parse_game },
+    { .name = "channels", .dest = &game->channels, .parser = &parse_int },
+    { .name = "viewers", .dest = &game->viewers, .parser = &parse_int },
+  };
+  parse_entity(value, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)game;
 }
@@ -323,18 +288,12 @@ void *parse_top_game(json_value *value) {
 void *parse_follower(json_value *value) {
   twitch_follower *follower = twitch_follower_alloc();
 
-  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
-    if (strcmp(value->u.object.values[prop_ind].name, "created_at") == 0) {
-      // Created At date.
-      follower->created_at = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "notifications") == 0) {
-      // Notifications.
-      follower->notifications = value->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(value->u.object.values[prop_ind].name, "user") == 0) {
-      // User.
-      follower->user = parse_user(value->u.object.values[prop_ind].value);
-    }
-  }
+  field_spec schema[] = {
+    { .name = "created_at", .dest = &follower->created_at, .parser = &parse_string },
+    { .name = "notifications", .dest = &follower->notifications, .parser = &parse_int },
+    { .name = "user", .dest = &follower->user, .parser = &_parse_user },
+  };
+  parse_entity(value, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)follower;
 }
@@ -342,36 +301,18 @@ void *parse_follower(json_value *value) {
 void *parse_team(json_value *value) {
   twitch_team *team = twitch_team_alloc();
 
-  for (int prop_ind = 0; prop_ind < value->u.object.length; prop_ind++) {
-    if (strcmp(value->u.object.values[prop_ind].name, "_id") == 0) {
-      // ID.
-      team->id = value->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(value->u.object.values[prop_ind].name, "created_at") == 0) {
-      // Created At date.
-      team->created_at = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "updated_at") == 0) {
-      // Updated At date.
-      team->updated_at = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "background") == 0) {
-      // Background.
-      team->background = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "logo") == 0) {
-      // Logo.
-      team->logo = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "banner") == 0) {
-      // Banner.
-      team->banner = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "name") == 0) {
-      // Name.
-      team->name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "display_name") == 0) {
-      // Display name.
-      team->display_name = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(value->u.object.values[prop_ind].name, "info") == 0) {
-      // Info.
-      team->info = immutable_string_copy(value->u.object.values[prop_ind].value->u.string.ptr);
-    }
-  }
+  field_spec schema[] = {
+    { .name = "_id", .dest = &team->id, .parser = &parse_id },
+    { .name = "created_at", .dest = &team->created_at, .parser = &parse_string },
+    { .name = "updated_at", .dest = &team->updated_at, .parser = &parse_string },
+    { .name = "background", .dest = &team->background, .parser = &parse_string },
+    { .name = "logo", .dest = &team->logo, .parser = &parse_string },
+    { .name = "banner", .dest = &team->banner, .parser = &parse_string },
+    { .name = "info", .dest = &team->info, .parser = &parse_string },
+    { .name = "display_name", .dest = &team->display_name, .parser = &parse_string },
+    { .name = "name", .dest = &team->name, .parser = &parse_string },
+  };
+  parse_entity(value, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)team;
 }

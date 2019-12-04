@@ -6,6 +6,29 @@
 #include <string.h>
 #include <stdbool.h>
 
+/** Art data **/
+
+typedef struct {
+  char *large;
+  char *medium;
+  char *small;
+  char *template;
+} twitch_art;
+
+/**
+ * Allocates and clears memory for new twitch_art struct.
+ *
+ * @return Pointer to allocated twitch_art struct.
+ */
+twitch_art *twitch_art_alloc();
+
+/**
+ * Frees the memory for given twitch_art struct and all it's properties.
+ *
+ * @param art Struct to deallocate.
+ */
+void twitch_art_free(twitch_art *art);
+
 /** User data **/
 
 /**
@@ -109,23 +132,18 @@ typedef struct {
 } twitch_follow;
 
 /**
+ * Allocates new instance of twitch_follow struct.
+ *
+ * @return Pointer to newly allocated twitch_follow struct.
+ */
+twitch_follow *twitch_follow_alloc();
+
+/**
  * Frees all the properties of twitch_follow struct, and the struct itself.
  *
  * @param follow. Data structure to deallocate.
  */
 void twitch_follow_free(twitch_follow *follow);
-
-/**
- * Allocates a new twitch_follow struct and initializes it with given data.
- *
- * @param created_at Created At date string.
- * @param notifications Flag indicating whether user has notifications enabled for the given channel.
- * @param channel Channel that was followed. When specified, the follow struct will assume ownership of this object
- *      and will try to free it when freeing itself.
- *
- * @return Initialized twitch_follow data struct.
- */
-twitch_follow *twitch_follow_init(char *created_at, int notifications, twitch_channel *channel);
 
 /**
  * Helper function to release a dynamically allocated list of pointers to twitch_follow elements.
@@ -157,7 +175,7 @@ typedef struct {
   int is_playlist;
   int video_height;
   int viewers;
-  // TODO: Add preview data.
+  twitch_art *preview;
 } twitch_stream;
 
 /**
@@ -252,28 +270,6 @@ void twitch_featured_stream_free(twitch_featured_stream *stream);
  */
 void twitch_featured_stream_list_free(int count, twitch_featured_stream **streams);
 
-/** Art data **/
-
-typedef struct {
-  char *large;
-  char *medium;
-  char *small;
-  char *template;
-} twitch_art;
-
-/**
- * Allocates and clears memory for new twitch_art struct.
- *
- * @return Pointer to allocated twitch_art struct.
- */
-twitch_art *twitch_art_alloc();
-
-/**
- * Frees the memory for given twitch_art struct and all it's properties.
- *
- * @param art Struct to deallocate.
- */
-void twitch_art_free(twitch_art *art);
 
 /** Game data **/
 

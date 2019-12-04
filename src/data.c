@@ -85,6 +85,10 @@ void twitch_channel_list_free(int count, twitch_channel **list) {
 
 /** Follow data **/
 
+twitch_follow *twitch_follow_alloc() {
+  GENERIC_ALLOC(twitch_follow)
+}
+
 void twitch_follow_free(twitch_follow *follow) {
   FREE(follow->created_at)
   FREE_CUSTOM(follow->channel, twitch_channel_free);
@@ -95,51 +99,15 @@ void twitch_follows_list_free(twitch_follow **list, int count) {
   pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_follow_free);
 }
 
-twitch_follow *twitch_follow_init(char *created_at, int notifications, twitch_channel *channel) {
-  twitch_follow *follow = malloc(sizeof(twitch_follow));
-
-  follow->created_at = malloc(strlen(created_at) + 1);
-  strcpy(follow->created_at, created_at);
-
-  follow->notifications = notifications;
-
-  follow->channel = channel;
-
-  return follow;
-}
-
 twitch_stream *twitch_stream_alloc() {
   GENERIC_ALLOC(twitch_stream)
-}
-
-twitch_stream *twitch_stream_init(long long int id, int average_fps, twitch_channel *channel, char *created_at, int delay, char *game, int is_playlist, int video_height, int viewers) {
-  twitch_stream *stream = twitch_stream_alloc();
-
-  stream->id = id;
-
-  stream->average_fps = average_fps;
-  stream->channel = channel;
-
-  stream->created_at = malloc(strlen(created_at) + 1);
-  strcpy(stream->created_at, created_at);
-
-  stream->delay = delay;
-  stream->is_playlist = is_playlist;
-  stream->video_height = video_height;
-  stream->viewers = viewers;
-
-  if (game != NULL) {
-    stream->game = malloc(strlen(game) + 1);
-    strcpy(stream->game, game);
-  }
-
-  return stream;
 }
 
 void twitch_stream_free(twitch_stream *stream) {
   FREE(stream->created_at)
   FREE(stream->game)
   FREE_CUSTOM(stream->channel, twitch_channel_free);
+  FREE_CUSTOM(stream->preview, twitch_art_free);
   free(stream);
 }
 
