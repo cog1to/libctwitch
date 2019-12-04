@@ -40,7 +40,6 @@ twitch_user *twitch_user_alloc() {
 }
 
 void twitch_user_free(twitch_user *user) {
-  FREE(user->id)
   FREE(user->display_name)
   FREE(user->name)
   FREE(user->created_at)
@@ -59,26 +58,6 @@ void twitch_users_list_free(twitch_user **list, int count) {
 
 twitch_channel *twitch_channel_alloc() {
   GENERIC_ALLOC(twitch_channel)
-}
-
-twitch_channel *twitch_channel_init(long long int id, char *game, char *name, char *status, char *display_name) {
-  twitch_channel *channel = twitch_channel_alloc();
-
-  channel->id = id;
-
-  channel->game = malloc(strlen(game) + 1);
-  strcpy(channel->game, game);
-
-  channel->name = malloc(strlen(name) + 1);
-  strcpy(channel->name, name);
-
-  channel->status = malloc(strlen(status) + 1);
-  strcpy(channel->status, status);
-
-  channel->display_name = malloc(strlen(display_name) + 1);
-  strcpy(channel->display_name, display_name);
-
-  return channel;
 }
 
 void twitch_channel_free(twitch_channel *channel) {

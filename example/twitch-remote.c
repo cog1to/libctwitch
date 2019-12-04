@@ -298,9 +298,13 @@ void get_live_follows(const char *username, int options_count, const char **opti
     return;
   }
 
+  // Convert ID to string.
+  char* user_id = malloc(64 * sizeof(char));
+  sprintf(user_id, "%lld", user->id);
+
   // Get all user's follows.
   int follows_total = 0;
-  twitch_follow **follows = twitch_v5_get_all_user_follows(CLIENT_ID, user->id, NULL, NULL, &follows_total);
+  twitch_follow **follows = twitch_v5_get_all_user_follows(CLIENT_ID, user_id, NULL, NULL, &follows_total);
   if (follows == NULL) {
     twitch_user_free(user);
     fprintf(stderr, "Error: failed to get user's follows.\n");

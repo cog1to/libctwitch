@@ -12,7 +12,7 @@
  * Twitch User info. All properties are dynamically allocated.
  */
 typedef struct {
-  char *id;
+  long long id;
   char *display_name;
   char *name;
   char *type;
@@ -60,8 +60,8 @@ typedef struct {
   int followers;
   char *language;
   char *logo;
-  int mature;
-  int partner;
+  bool mature;
+  bool partner;
   char *profile_banner;
   char *profile_banner_background_color;
   char *updated_at;
@@ -70,8 +70,8 @@ typedef struct {
   int views;
   char *broadcaster_type;
   char *broadcaster_software;
-  int private_video;
-  int privacy_options_enabled;
+  bool private_video;
+  bool privacy_options_enabled;
 } twitch_channel;
 
 /**
@@ -81,19 +81,6 @@ typedef struct {
  * @return Pointer to new twitch_channel struct. You'll have to manually free it later using twitch_channel_free().
  */
 twitch_channel *twitch_channel_alloc();
-
-/**
- * Dynamically allocates and initialized twitch_channel struct with given data values.
- *
- * @param id Channel ID.
- * @param game Game played on the channel.
- * @param name Twitch's name of the channel, i.e. "dyingcamel".
- * @param status Channel's status message.
- * @param display_name Channel's display name, i.e. "DyingCamel".
- *
- * @return Pointer to new twitch_channel struct. You'll have to manually free it later using twitch_channel_free().
- */
-twitch_channel *twitch_channel_init(long long id, char *game, char *name, char *status, char *display_name);
 
 /**
  * Frees all propertes of twitch_channel struct, and the struct itself.

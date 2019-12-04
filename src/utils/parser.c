@@ -32,40 +32,64 @@ void **parse_json_array(json_value *value, int *count, void *(*parser)(json_valu
   return array;
 }
 
+/** Parsing entities **/
+
+void parse_id(void *dest, json_value *source) {
+  if (source->type == json_integer) {
+    *((int *)dest) = source->u.integer;
+  } else if (source->type == json_string) {
+    *((int *)dest) = strtoimax(source->u.string.ptr, NULL, 10);
+  }
+}
+
+void parse_string(void *dest, json_value *source) {
+  if (source->type == json_string) {
+    *((char **)dest) = immutable_string_copy(source->u.string.ptr);
+  }
+}
+
+void parse_bool(void *dest, json_value *source) {
+  *((bool *)dest) = source->u.boolean;
+}
+
+void parse_double(void *dest, json_value *source) {
+  *((float *)dest) = source->u.dbl;
+}
+
+void parse_int(void *dest, json_value *source) {
+  *((int *)dest) = source->u.integer;
+}
+
+typedef struct {
+  char *name;
+  void *dest;
+  void(*parser)(void*, json_value*);
+} field_spec;
+
+void parse_entity(json_value *src, int count, field_spec *specs) {
+  for (int prop_ind = 0; prop_ind < src->u.object.length; prop_ind++) {
+    for (int spec_ind = 0; spec_ind < count; spec_ind++) {
+      if (strcmp(src->u.object.values[prop_ind].name, specs[spec_ind].name) == 0) {
+        (*specs[spec_ind].parser)(specs[spec_ind].dest, src->u.object.values[prop_ind].value);
+      }
+    }
+  }
+}
+
 void *parse_user(json_value *user_object) {
   twitch_user *user = twitch_user_alloc();
 
-  for (int prop_ind = 0; prop_ind < user_object->u.object.length; prop_ind++) {
-    if (strcmp(user_object->u.object.values[prop_ind].name, "_id") == 0) {
-      // ID.
-      user->id = immutable_string_copy(user_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(user_object->u.object.values[prop_ind].name, "display_name") == 0) {
-      // Display name.
-      user->display_name = immutable_string_copy(user_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(user_object->u.object.values[prop_ind].name, "name") == 0) {
-      // Name.
-      user->name = immutable_string_copy(user_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(user_object->u.object.values[prop_ind].name, "logo") == 0) {
-      // Logo.
-      if (user_object->u.object.values[prop_ind].value->type == json_string) {
-        user->logo = immutable_string_copy(user_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(user_object->u.object.values[prop_ind].name, "bio") == 0) {
-      // Logo.
-      if (user_object->u.object.values[prop_ind].value->type == json_string) {
-        user->bio = immutable_string_copy(user_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(user_object->u.object.values[prop_ind].name, "type") == 0) {
-      // Type.
-      user->type = immutable_string_copy(user_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(user_object->u.object.values[prop_ind].name, "created_at") == 0) {
-      // Created At date string.
-      user->created_at = immutable_string_copy(user_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(user_object->u.object.values[prop_ind].name, "updated_at") == 0) {
-      // Updated At date string.
-      user->updated_at = immutable_string_copy(user_object->u.object.values[prop_ind].value->u.string.ptr);
-    }
-  }
+  field_spec schema[] = {
+    { .name = "_id", .dest = &user->id, .parser = &parse_id },
+    { .name = "display_name", .dest = &user->display_name, .parser = &parse_string },
+    { .name = "name", .dest = &user->name, .parser = &parse_string },
+    { .name = "logo", .dest = &user->logo, .parser = &parse_string },
+    { .name = "bio", .dest = &user->bio, .parser = &parse_string },
+    { .name = "type", .dest = &user->type, .parser = &parse_string },
+    { .name = "created_at", .dest = &user->created_at, .parser = &parse_string },
+    { .name = "updated_at", .dest = &user->updated_at, .parser = &parse_string }
+  }; 
+  parse_entity(user_object, 8, schema);
 
   return (void *)user;
 }
@@ -73,125 +97,48 @@ void *parse_user(json_value *user_object) {
 void *parse_channel(json_value *channel_object) {
   twitch_channel *channel = twitch_channel_alloc();
 
-  for (int prop_ind = 0; prop_ind < channel_object->u.object.length; prop_ind++) {
-    if (strcmp(channel_object->u.object.values[prop_ind].name, "_id") == 0) {
-      // ID.
-      if (channel_object->u.object.values[prop_ind].value->type == json_integer) {
-        channel->id = channel_object->u.object.values[prop_ind].value->u.integer;
-      } else if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->id = strtoimax(channel_object->u.object.values[prop_ind].value->u.string.ptr, NULL, 10);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "display_name") == 0) {
-      // Display name.
-      channel->display_name = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "name") == 0) {
-      // Name.
-      channel->name = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "game") == 0) {
-      // Game.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->game = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "status") == 0) {
-      // Status.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->status = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "logo") == 0) {
-      // Logo.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->logo = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "profile_banner") == 0) {
-      // Profile banner.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->profile_banner = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "created_at") == 0) {
-      // Created At date string.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->created_at = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "updated_at") == 0) {
-      // Updated At date string.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->updated_at = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "language") == 0) {
-      // Language.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->language = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "broadcaster_language") == 0) {
-      // Broadcaster language.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->broadcaster_language = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "url") == 0) {
-      // URL.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->url = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "video_banner") == 0) {
-      // Video banner.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->video_banner = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "followers") == 0) {
-      // Followers.
-      channel->followers = channel_object->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "views") == 0) {
-      // Views.
-      channel->views = channel_object->u.object.values[prop_ind].value->u.integer;
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "mature") == 0) {
-      // Mature flag.
-      channel->mature = channel_object->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "partner") == 0) {
-      // Partner flag.
-      channel->partner = channel_object->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "profile_banner_background_color") == 0) {
-      // Profile banner background color.
-      if (channel_object->u.object.values[prop_ind].value->type == json_string) {
-        channel->profile_banner_background_color = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "private_video") == 0) {
-      // Private video flag.
-      channel->private_video = channel_object->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "privacy_options_enabled") == 0) {
-      // Privacy options enabled flag.
-      channel->privacy_options_enabled = channel_object->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "broadcaster_type") == 0) {
-      // Broadcaster type.
-      if (channel_object->u.object.values[prop_ind].value->type != json_null) {
-        channel->broadcaster_type = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    } else if (strcmp(channel_object->u.object.values[prop_ind].name, "broadcaster_software") == 0) {
-      // Broadcaster sowftware.
-      if (channel_object->u.object.values[prop_ind].value->type != json_null) {
-        channel->broadcaster_software = immutable_string_copy(channel_object->u.object.values[prop_ind].value->u.string.ptr);
-      }
-    }
-
-  }
+  field_spec schema[] = {
+    { .name = "_id", .dest = &channel->id, .parser = &parse_id },
+    { .name = "display_name", .dest = &channel->display_name, .parser = &parse_string },
+    { .name = "name", .dest = &channel->name, .parser = &parse_string },
+    { .name = "game", .dest = &channel->game, .parser = &parse_string },
+    { .name = "status", .dest = &channel->status, .parser = &parse_string },
+    { .name = "logo", .dest = &channel->logo, .parser = &parse_string },
+    { .name = "profile_banner", .dest = &channel->logo, .parser = &parse_string },
+    { .name = "created_at", .dest = &channel->created_at, .parser = &parse_string },
+    { .name = "updated_at", .dest = &channel->updated_at, .parser = &parse_string },
+    { .name = "language", .dest = &channel->language, .parser = &parse_string },
+    { .name = "broadcaster_language", .dest = &channel->broadcaster_language, .parser = &parse_string },
+    { .name = "url", .dest = &channel->url, .parser = &parse_string },
+    { .name = "video_banner", .dest = &channel->video_banner, .parser = &parse_string },
+    { .name = "followers", .dest = &channel->followers, .parser = &parse_int },
+    { .name = "views", .dest = &channel->views, .parser = &parse_int },
+    { .name = "mature", .dest = &channel->mature, .parser = &parse_bool },
+    { .name = "partner", .dest = &channel->partner, .parser = &parse_bool },
+    { .name = "profile_banner_background_color", .dest = &channel->profile_banner_background_color, .parser = &parse_string },
+    { .name = "private_video", .dest = &channel->private_video, .parser = &parse_bool },
+    { .name = "privacy_options_enabled", .dest = &channel->privacy_options_enabled, .parser = &parse_bool },
+    { .name = "broadcaster_type", .dest = &channel->broadcaster_type, .parser = &parse_string },
+    { .name = "broadcaster_software", .dest = &channel->broadcaster_software, .parser = &parse_string },
+  };
+  parse_entity(channel_object, sizeof(schema)/sizeof(schema[0]), schema);
 
   return (void *)channel;
 }
 
-void *parse_follow(json_value *follow_object) {
-  twitch_follow *follow = malloc(sizeof(twitch_follow));
+void _parse_channel(void *dest, json_value *value) {
+  *((void **)dest) = parse_channel(value);
+}
 
-  for (int prop_ind = 0; prop_ind < follow_object->u.object.length; prop_ind++) {
-    if (strcmp(follow_object->u.object.values[prop_ind].name, "created_at") == 0) {
-      // Created At date.
-      follow->created_at = immutable_string_copy(follow_object->u.object.values[prop_ind].value->u.string.ptr);
-    } else if (strcmp(follow_object->u.object.values[prop_ind].name, "notifications") == 0) {
-      // Notifications.
-      follow->notifications = follow_object->u.object.values[prop_ind].value->u.boolean;
-    } else if (strcmp(follow_object->u.object.values[prop_ind].name, "channel") == 0) {
-      // Channel.
-      follow->channel = parse_channel(follow_object->u.object.values[prop_ind].value);
-    }
-  }
+void *parse_follow(json_value *follow_object) {
+  twitch_follow *follow = calloc(1, sizeof(twitch_follow)); //twitch_follow_alloc();
+
+  field_spec schema[] = {
+    { .name = "creted_at", .dest = &follow->created_at, .parser = &parse_string },
+    { .name = "notifications", .dest = &follow->notifications, .parser = &parse_bool },
+    { .name = "channel", .dest = &follow->channel, .parser = &_parse_channel }
+  };
+  parse_entity(follow_object, 3, schema);
 
   return (void *)follow;
 }
