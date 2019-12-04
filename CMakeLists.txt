@@ -29,6 +29,7 @@ add_library(ctwitch SHARED
   src/v5/streams.c
   src/v5/games.c
   src/v5/channels.c
+  src/v5/teams.c
   src/init.c
 )
 
@@ -65,6 +66,7 @@ add_executable(twitch-remote
   src/v5/streams.c
   src/v5/games.c
   src/v5/channels.c
+  src/v5/teams.c
   src/init.c
 )
 

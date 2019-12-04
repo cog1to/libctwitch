@@ -256,28 +256,6 @@ void twitch_follower_list_free(int count, twitch_follower **list) {
   pointer_array_free(count, (void **)list, (void(*))&twitch_follower_free);
 }
 
-/** Teams data **/
-
-twitch_team *twitch_team_alloc() {
-  GENERIC_ALLOC(twitch_team)
-}
-
-void twitch_team_free(twitch_team *team) {
-  FREE(team->background)
-  FREE(team->banner)
-  FREE(team->created_at)
-  FREE(team->display_name)
-  FREE(team->info)
-  FREE(team->logo)
-  FREE(team->name)
-  FREE(team->updated_at)
-  free(team);
-}
-
-void twitch_team_list_free(int count, twitch_team **list) {
-  pointer_array_free(count, (void **)list, (void(*))&twitch_team_free);
-}
-
 /** Communities data **/
 
 twitch_community *twitch_community_alloc() {
@@ -393,6 +371,59 @@ void twitch_video_free(twitch_video *video) {
 }
 
 void twitch_video_list_free(int count, twitch_video **list) {
+  pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_video_free);
+}
+
+/** Teams data **/
+
+twitch_team_user *twitch_team_user_alloc() {
+  GENERIC_ALLOC(twitch_team_user)
+}
+
+void twitch_team_user_free(twitch_team_user *user) {
+  FREE(user->broadcaster_language)
+  FREE(user->created_at)
+  FREE(user->display_name)
+  FREE(user->game)
+  FREE(user->language)
+  FREE(user->logo)
+  FREE(user->name)
+  FREE(user->profile_banner)
+  FREE(user->profile_banner_background_color)
+  FREE(user->status)
+  FREE(user->updated_at)
+  FREE(user->url)
+  FREE(user->video_banner)
+  free(user);
+}
+
+twitch_team_user_list *twitch_team_user_list_alloc() {
+  GENERIC_ALLOC(twitch_team_user_list)
+}
+
+void twitch_team_user_list_free(twitch_team_user_list *list) {
+  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_team_user_free);
+  free(list);
+}
+
+twitch_team *twitch_team_alloc() {
+  GENERIC_ALLOC(twitch_team)
+}
+
+void twitch_team_free(twitch_team *team) {
+  FREE(team->background)
+  FREE(team->banner)
+  FREE(team->created_at)
+  FREE(team->display_name)
+  FREE(team->info)
+  FREE(team->logo)
+  FREE(team->name)
+  FREE(team->updated_at)
+  FREE_CUSTOM(team->users, twitch_team_user_list_free)
+  free(team);
+}
+
+void twitch_team_list_free(int count, twitch_team **list) {
   pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_video_free);
 }
 

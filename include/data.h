@@ -383,42 +383,6 @@ void twitch_follower_free(twitch_follower *follower);
  */
 void twitch_follower_list_free(int count, twitch_follower **list);
 
-/** Teams data **/
-
-typedef struct {
-  long long int id;
-  char *background;
-  char *banner;
-  char *created_at;
-  char *display_name;
-  char *info;
-  char *logo;
-  char *name;
-  char *updated_at;
-} twitch_team;
-
-/**
- * Allocates and initializes new twitch_team struct.
- *
- * @return Pointer to newly allocated tiwtch_team struct.
- */
-twitch_team *twitch_team_alloc();
-
-/**
- * Frees memory allocated for twitch_team struct.
- *
- * @param team Struct to deallocate.
- */
-void twitch_team_free(twitch_team *team);
-
-/**
- * Deallocates an array of dynamically allocated twitch_team structs.
- *
- * @param count Number of items in the array.
- * @param list List to deallocate.
- */
-void twitch_team_list_free(int count, twitch_team **list);
-
 /** Communities **/
 
 typedef struct {
@@ -629,6 +593,97 @@ void twitch_video_free(twitch_video *video);
  * @param list List to free.
  */
 void twitch_video_list_free(int count, twitch_video **list);
+
+/** Teams **/
+
+typedef struct {
+  long long int id;
+  char *broadcaster_language;
+  char *created_at;
+  char *display_name;
+  int followers;
+  char *game;
+  char *language;
+  char *logo;
+  bool mature;
+  char *name;
+  bool partner;
+  char *profile_banner;
+  char *profile_banner_background_color;
+  char *status;
+  char *updated_at;
+  char *url;
+  char *video_banner;
+  int views;
+} twitch_team_user;
+
+/**
+ * Allocates and clears memory for a new twitch_team_user struct.
+ *
+ * @return Pointer to newly allocated twitch_team_user struct.
+ */
+twitch_team_user *twitch_team_user_alloc();
+
+/**
+ * Frees memory allocated for given twitch_team_user struct.
+ *
+ * @param user Struct to deallocate.
+ */
+void twitch_team_user_free(twitch_team_user *user);
+
+typedef struct {
+  size_t count;
+  twitch_team_user **items;
+} twitch_team_user_list;
+
+/**
+ * Allocates new twitch_team_user_list struct.
+ *
+ * @return Pointer to allocated struct.
+ */
+twitch_team_user_list *twitch_team_user_list_alloc();
+
+/**
+ * Frees the memory allocated for twitch_team_user_list struct and it's content.
+ *
+ * @param list List to deallocate.
+ */
+void twitch_team_user_list_free(twitch_team_user_list *list);
+
+typedef struct {
+  long long int id;
+  char *background;
+  char *banner;
+  char *created_at;
+  char *display_name;
+  char *info;
+  char *logo;
+  char *name;
+  char *updated_at;
+  twitch_team_user_list *users;
+} twitch_team;
+
+/**
+ * Allocates and clears memory for new twitch_team struct.
+ *
+ * @return Pointer to newly allocated twitch_team struct.
+ */
+twitch_team *twitch_team_alloc();
+
+/**
+ * Frees memory allocated for given twitch_team struct.
+ *
+ * @param team Struct to deallocate.
+ */
+void twitch_team_free(twitch_team *team);
+
+/**
+ * Frees memory allocated for each twitch_team struct in given array, and the array itself
+ *
+ * @param count Number of items is the array.
+ * @param list Array to deallocate.
+ */
+void twitch_team_list_free(int count, twitch_team **list);
 
 #endif
 
