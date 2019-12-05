@@ -40,7 +40,8 @@ typedef enum {
   channel_follows,
   channel_teams,
   channel_communities,
-  channel_videos
+  channel_videos,
+  team
 } command_type;
 
 // Command handler function  type.
@@ -137,12 +138,12 @@ char *get_client_id(int options_count, const char **options) {
  * @return String containing channel's ID value, or null if it's not found.
  */
 char *find_channel_id(char *client_id, const char *query) {
-  int channels_count = 0, channels_total = 0;
+  int channels_total = 0;
   twitch_channel *target = NULL;
-  twitch_channel **channels = twitch_v5_search_channels(client_id, query, 20, 0, &channels_count, &channels_total);
-  if (channels_count > 0) {
-    for (int index = 0; index < channels_count; index++) {
-      twitch_channel *channel = channels[index];
+  twitch_channel_list *channels = twitch_v5_search_channels(client_id, query, 20, 0, &channels_total);
+  if (channels->count > 0) {
+    for (int index = 0; index < channels->count; index++) {
+      twitch_channel *channel = channels->items[index];
       if (strcmp(channel->name, query) == 0) {
         target = channel;
         break;
@@ -151,7 +152,7 @@ char *find_channel_id(char *client_id, const char *query) {
   }
 
   if (target == NULL) {
-    twitch_channel_list_free(channels_count, channels);
+    twitch_channel_list_free(channels);
     return NULL;
   }
 
@@ -159,7 +160,7 @@ char *find_channel_id(char *client_id, const char *query) {
   char* channel_id = malloc(64 * sizeof(char));
   sprintf(channel_id, "%lld", target->id);
 
-  twitch_channel_list_free(channels_count, channels);
+  twitch_channel_list_free(channels);
   return channel_id;
 }
 
@@ -477,6 +478,27 @@ void get_channel_videos(const char *query, int options_count, const char **optio
   free(CLIENT_ID);
   free(channel_id);
 }
+
+void get_team(const char *query, int options_count, const char **options) {
+  char *CLIENT_ID = get_client_id(options_count, options);
+
+  twitch_team *team = twitch_v5_get_team(CLIENT_ID, query);
+  if (team != NULL) {
+    printf("Team: %s\n", team->display_name);
+    if (team->users != NULL) {
+      for (int index = 0; index < team->users->count; index++) {
+        printf("%d: %s\n  Display name: %s\n", index, team->users->items[index]->name, team->users->items[index]->display_name);
+        printf("  Game: %s\n", team->users->items[index]->game);
+        printf("  Status: %s\n", team->users->items[index]->status);
+        printf("  URL: %s\n", team->users->items[index]->url);
+      }
+    }
+    twitch_team_free(team);
+  }
+
+  free(CLIENT_ID);
+}
+
 /** Main **/
 
 int main(int argc, char **argv) {
@@ -550,6 +572,13 @@ int main(int argc, char **argv) {
       .description = "Gets all videos of specific channel.",
       .has_parameter = true,
       .handler = &get_channel_videos
+    },
+    {
+      .command = team,
+      .name = "team",
+      .description = "Gets team description.",
+      .has_parameter = true,
+      .handler = &get_team
     }
   };
 

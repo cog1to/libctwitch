@@ -22,6 +22,7 @@ string_t *teams_url_builder(void *params, int limit, int offset) {
 
 string_t *team_url_builder(void *params) {
   string_t *url = string_init_with_value("https://api.twitch.tv/kraken/teams/");
+  string_append((const char *)params, strlen(params), url);
   return url;
 }
 

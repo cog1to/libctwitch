@@ -20,13 +20,11 @@
  * @param query Query string. Don't URL-escape this beforehabd, because the method performs its own URL-escaping.
  * @param limit Page size.
  * @param offset Search results list offset.
- * @param size Will hold the total number of downloaded channel objects.
  * @param total Will hold the total number of found channels.
  *
- * @return Array of twitch_channel structs matching given search string. Don't forget to free the memory allocated for each item and
- *     array itself.
+ * @return Instance of twitch_channel_list containing channels matching given search string. Don't forget to free the memory allocated for the list.
  */
-twitch_channel **twitch_v5_search_channels(const char *client_id, const char *query, int limit, int offset, int *size, int *total);
+twitch_channel_list *twitch_v5_search_channels(const char *client_id, const char *query, int limit, int offset, int *total);
 
 /**
  * Performs channel search for given query string and downloads all pages of results.
@@ -35,10 +33,9 @@ twitch_channel **twitch_v5_search_channels(const char *client_id, const char *qu
  * @param query Query string. Don't URL-escape this beforehabd, because the method performs its own URL-escaping.
  * @param size Will hold the number of downloaded channel objects.
  *
- * @return Array of twitch_channel structs matching given search string. Don't forget to free the memory allocated for each item and
- *     array itself.
+ * @return Instance of twitch_channel_list containing channels matching given search string. Don't forget to free the memory allocated for the list.
  */
-twitch_channel **twitch_v5_search_all_channels(const char *client_id, const char *query, int *size); 
+twitch_channel_list *twitch_v5_search_all_channels(const char *client_id, const char *query); 
 
 /**
  * Performs stream search with given query string and stream type filter and return one page of the results.

@@ -79,8 +79,13 @@ void twitch_channel_free(twitch_channel *channel) {
   free(channel);
 }
 
-void twitch_channel_list_free(int count, twitch_channel **list) {
-  pointer_array_free(count, (void **)list, (void(*)(void*))&twitch_channel_free);
+twitch_channel_list *twitch_channel_list_alloc() {
+  GENERIC_ALLOC(twitch_channel_list)
+}
+
+void twitch_channel_list_free(twitch_channel_list *list) {
+  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_channel_free);
+  free(list);
 }
 
 /** Follow data **/
@@ -289,6 +294,7 @@ void twitch_video_thumbnails_free(twitch_video_thumbnails *thumbnails) {
   FREE_CUSTOM(thumbnails->medium, twitch_thumbnail_list_free)
   FREE_CUSTOM(thumbnails->small, twitch_thumbnail_list_free)
   FREE_CUSTOM(thumbnails->template, twitch_thumbnail_list_free)
+  free(thumbnails);
 }
 
 twitch_video *twitch_video_alloc() {
@@ -315,6 +321,7 @@ void twitch_video_free(twitch_video *video) {
   FREE_CUSTOM(video->thumbnails, twitch_video_thumbnails_free)
   FREE(video->viewable)
   FREE(video->viewable_at)
+  free(video);
 }
 
 void twitch_video_list_free(int count, twitch_video **list) {
@@ -322,36 +329,6 @@ void twitch_video_list_free(int count, twitch_video **list) {
 }
 
 /** Teams data **/
-
-twitch_team_user *twitch_team_user_alloc() {
-  GENERIC_ALLOC(twitch_team_user)
-}
-
-void twitch_team_user_free(twitch_team_user *user) {
-  FREE(user->broadcaster_language)
-  FREE(user->created_at)
-  FREE(user->display_name)
-  FREE(user->game)
-  FREE(user->language)
-  FREE(user->logo)
-  FREE(user->name)
-  FREE(user->profile_banner)
-  FREE(user->profile_banner_background_color)
-  FREE(user->status)
-  FREE(user->updated_at)
-  FREE(user->url)
-  FREE(user->video_banner)
-  free(user);
-}
-
-twitch_team_user_list *twitch_team_user_list_alloc() {
-  GENERIC_ALLOC(twitch_team_user_list)
-}
-
-void twitch_team_user_list_free(twitch_team_user_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_team_user_free);
-  free(list);
-}
 
 twitch_team *twitch_team_alloc() {
   GENERIC_ALLOC(twitch_team)
@@ -366,7 +343,7 @@ void twitch_team_free(twitch_team *team) {
   FREE(team->logo)
   FREE(team->name)
   FREE(team->updated_at)
-  FREE_CUSTOM(team->users, twitch_team_user_list_free)
+  FREE_CUSTOM(team->users, twitch_channel_list_free)
   free(team);
 }
 

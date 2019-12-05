@@ -112,13 +112,24 @@ twitch_channel *twitch_channel_alloc();
  */
 void twitch_channel_free(twitch_channel *channel);
 
+typedef struct {
+  int count;
+  twitch_channel **items;
+} twitch_channel_list;
+
 /**
- * Frees memory allocated for each twitch_channel struct inside the given array, and the array itself.
+ * Allocates new twitch_channel_list struct.
  *
- * @param count Number of items in the list.
- * @param list The list to deallocate.
+ * @return Pointer to newly allocated channel list struct.
  */
-void twitch_channel_list_free(int count, twitch_channel **list);
+twitch_channel_list *twitch_channel_list_alloc();
+
+/**
+ * Frees memory occupied by given twitch_channel_list struct and it's items.
+ *
+ * @param list List to deallocate.
+ */
+void twitch_channel_list_free(twitch_channel_list *list);
 
 /** Follow data **/
 
@@ -581,60 +592,6 @@ void twitch_video_list_free(int count, twitch_video **list);
 
 typedef struct {
   long long int id;
-  char *broadcaster_language;
-  char *created_at;
-  char *display_name;
-  int followers;
-  char *game;
-  char *language;
-  char *logo;
-  bool mature;
-  char *name;
-  bool partner;
-  char *profile_banner;
-  char *profile_banner_background_color;
-  char *status;
-  char *updated_at;
-  char *url;
-  char *video_banner;
-  int views;
-} twitch_team_user;
-
-/**
- * Allocates and clears memory for a new twitch_team_user struct.
- *
- * @return Pointer to newly allocated twitch_team_user struct.
- */
-twitch_team_user *twitch_team_user_alloc();
-
-/**
- * Frees memory allocated for given twitch_team_user struct.
- *
- * @param user Struct to deallocate.
- */
-void twitch_team_user_free(twitch_team_user *user);
-
-typedef struct {
-  size_t count;
-  twitch_team_user **items;
-} twitch_team_user_list;
-
-/**
- * Allocates new twitch_team_user_list struct.
- *
- * @return Pointer to allocated struct.
- */
-twitch_team_user_list *twitch_team_user_list_alloc();
-
-/**
- * Frees the memory allocated for twitch_team_user_list struct and it's content.
- *
- * @param list List to deallocate.
- */
-void twitch_team_user_list_free(twitch_team_user_list *list);
-
-typedef struct {
-  long long int id;
   char *background;
   char *banner;
   char *created_at;
@@ -643,7 +600,7 @@ typedef struct {
   char *logo;
   char *name;
   char *updated_at;
-  twitch_team_user_list *users;
+  twitch_channel_list *users;
 } twitch_team;
 
 /**

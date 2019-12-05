@@ -14,6 +14,7 @@
 #include "v5/streams.h"
 #include "v5/games.h"
 #include "v5/channels.h"
+#include "v5/teams.h"
 
 #endif
 
