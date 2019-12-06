@@ -174,11 +174,13 @@ char *find_channel_id(char *client_id, const char *query) {
  */
 void get_featured(const char *param, int options_count, const char **options) {
   char *CLIENT_ID = get_client_id(options_count, options);
-  int featured_count = 0;
-  twitch_featured_stream **featured = twitch_v5_get_all_featured_streams(CLIENT_ID, &featured_count);
-  if (featured != NULL && featured_count > 0) {
-    for (int idx = 0; idx < featured_count; idx++) {
-      twitch_featured_stream *stream = featured[idx];
+
+  twitch_featured_stream_list *featured = twitch_v5_get_all_featured_streams(CLIENT_ID);
+  printf("0!\n");
+  if (featured != NULL && featured->count > 0) {
+    printf("1!\n");
+    for (int idx = 0; idx < featured->count; idx++) {
+      twitch_featured_stream *stream = featured->items[idx];
       printf(
         "Channel Name: %s\n  Title: %s\n  Game: %s\n  Viewers: %d\n  URL: %s\n  Text: %s\n",
         stream->stream->channel->name,
@@ -189,7 +191,7 @@ void get_featured(const char *param, int options_count, const char **options) {
         stream->text
       );
     }
-    twitch_featured_stream_list_free(featured_count, featured);
+    twitch_featured_stream_list_free(featured);
   }
 
   free(CLIENT_ID);
@@ -233,11 +235,10 @@ void get_user(const char *username, int options_count, const char **options) {
 void get_games(const char *name, int options_count, const char **options) {
   char *CLIENT_ID = get_client_id(options_count, options);
 
-  int size = 0;
-  twitch_game **games = twitch_v5_search_games(CLIENT_ID, name, false, &size);
-  if (games != NULL && size > 0) {
-    for (int index = 0; index < size; index++) {
-      twitch_game *game = games[index];
+  twitch_game_list *games = twitch_v5_search_games(CLIENT_ID, name, false);
+  if (games != NULL && games->count > 0) {
+    for (int index = 0; index < games->count; index++) {
+      twitch_game *game = games->items[index];
       printf(
         "ID: %lld\n  Name: %s\n  Popularity: %d\n  Giantbomb ID: %lld\n",
         game->id,
@@ -245,7 +246,7 @@ void get_games(const char *name, int options_count, const char **options) {
         game->popularity,
         game->giantbomb_id);
     }
-    twitch_game_list_free(size, games);
+    twitch_game_list_free(games);
   }
 
   free(CLIENT_ID);
@@ -261,12 +262,11 @@ void get_games(const char *name, int options_count, const char **options) {
 void get_streams(const char *query, int options_count, const char **options) {
   char *CLIENT_ID = get_client_id(options_count, options);
 
-  int size = 0;
-  twitch_stream **streams = twitch_v5_search_all_streams(CLIENT_ID, query, none, &size);
-  if (streams != NULL && size > 0) {
-    printf("Streams found: %d\n", size);
-    for (int index = 0; index < size; index++) {
-      twitch_stream *stream = streams[index];
+  twitch_stream_list *streams = twitch_v5_search_all_streams(CLIENT_ID, query, none);
+  if (streams != NULL && streams->count > 0) {
+    printf("Streams found: %d\n", streams->count);
+    for (int index = 0; index < streams->count; index++) {
+      twitch_stream *stream = streams->items[index];
       printf(
         "ID: %lld\n  Game: %s\n  Channel: %s\n  Status: %s\n  URL: %s\n",
         stream->id,
@@ -276,7 +276,7 @@ void get_streams(const char *query, int options_count, const char **options) {
         stream->channel->url
       );
     }
-    twitch_stream_list_free(size, streams);
+    twitch_stream_list_free(streams);
   }
 
   free(CLIENT_ID);
@@ -304,8 +304,7 @@ void get_live_follows(const char *username, int options_count, const char **opti
   sprintf(user_id, "%lld", user->id);
 
   // Get all user's follows.
-  int follows_total = 0;
-  twitch_follow **follows = twitch_v5_get_all_user_follows(CLIENT_ID, user_id, NULL, NULL, &follows_total);
+  twitch_follow_list *follows = twitch_v5_get_all_user_follows(CLIENT_ID, user_id, NULL, NULL);
   if (follows == NULL) {
     twitch_user_free(user);
     fprintf(stderr, "Error: failed to get user's follows.\n");
@@ -313,22 +312,21 @@ void get_live_follows(const char *username, int options_count, const char **opti
   }
 
   // Get all streams from user's follows.
-  char **channel_ids = (char **)pointer_array_map((void **)follows, follows_total, &channel_id_from_follow);
+  char **channel_ids = (char **)pointer_array_map((void **)follows->items, follows->count, &channel_id_from_follow);
   int streams_count = 0;
-  twitch_stream **streams = twitch_v5_get_all_streams(
+  twitch_stream_list *streams = twitch_v5_get_all_streams(
     CLIENT_ID,
-    follows_total,
+    follows->count,
     (const char **)channel_ids,
     NULL,
     NULL,
-    NULL,
-    &streams_count
+    NULL
   );
 
   // Print stream data.
-  if (streams_count > 0 && streams != NULL) {
-    for (int idx = 0; idx < streams_count; idx++) {
-      twitch_stream *stream = streams[idx];
+  if (streams != NULL && streams->count > 0) {
+    for (int idx = 0; idx < streams->count; idx++) {
+      twitch_stream *stream = streams->items[idx];
       printf(
         "ID: %lld\n  Game: %s\n  Channel: %s\n  Channel ID: %lld\n  Status: %s\n  URL: %s\n",
         stream->id,
@@ -339,13 +337,13 @@ void get_live_follows(const char *username, int options_count, const char **opti
         stream->channel->url
       );
     }
-    twitch_stream_list_free(streams_count, streams);
+    twitch_stream_list_free(streams);
   }
 
   // Cleanup.
   twitch_user_free(user);
-  twitch_follows_list_free(follows, follows_total);
-  pointer_array_free(follows_total, (void **)channel_ids, (void(*)(void*))&free);
+  twitch_follows_list_free(follows);
+  pointer_array_free(follows->count, (void **)channel_ids, (void(*)(void*))&free);
   free(CLIENT_ID);
 }
 
@@ -366,11 +364,11 @@ void get_top_games(const char *query, int options_count, const char **options) {
   }
 
   int size = 0, total = 0;
-  twitch_top_game **games = twitch_v5_get_top_games(CLIENT_ID, limit, 0, &size, &total);
-  if (games != NULL && size > 0) {
+  twitch_top_game_list *games = twitch_v5_get_top_games(CLIENT_ID, limit, 0, &total);
+  if (games != NULL && games->count > 0) {
     printf("Total: %d\n", total);
-    for (int index = 0; index < size; index++) {
-      twitch_top_game *game = games[index];
+    for (int index = 0; index < games->count; index++) {
+      twitch_top_game *game = games->items[index];
       printf(
         "Game: %s\n  Viewers: %d\n  Channels: %d\n",
         game->game->name,
@@ -378,7 +376,7 @@ void get_top_games(const char *query, int options_count, const char **options) {
         game->channels
       );
     }
-    twitch_top_game_list_free(size, games);
+    twitch_top_game_list_free(games);
   }
 
   free(CLIENT_ID);
@@ -393,17 +391,18 @@ void get_channel_followers(const char *query, int options_count, const char **op
     return;
   }
 
-  int size = 0;
-  twitch_follower **followers = twitch_v5_get_all_channel_followers(CLIENT_ID, channel_id, "asc", &size);
-  printf("Total followers: %d\n", size);
-  if (size > 0) {
-    for (int index = 0; index < size; index++) {
-      twitch_follower *follower = followers[index];
+  twitch_follower_list *followers = twitch_v5_get_all_channel_followers(CLIENT_ID, channel_id, "asc");
+  printf("Total followers: %d\n", followers->count);
+  if (followers->count > 0) {
+    for (int index = 0; index < followers->count; index++) {
+      twitch_follower *follower = followers->items[index];
       if (follower->user != NULL) {
-        printf("%s%s", followers[index]->user->display_name, (index < size - 1) ? ", " : "\n");
+        printf("%s%s",
+          follower->user->display_name,
+          (index < (followers->count - 1)) ? ", " : "\n");
       }
     }
-    twitch_follower_list_free(size, followers);
+    twitch_follower_list_free(followers);
   }
 
   free(CLIENT_ID);
@@ -419,14 +418,13 @@ void get_channel_teams(const char *query, int options_count, const char **option
     return;
   }
 
-  int size = 0;
-  twitch_team **teams = twitch_v5_get_channel_teams(CLIENT_ID, channel_id, &size);
-  if (size > 0) {
-    for (int index = 0; index < size; index++) {
-      twitch_team *team = teams[index];
+  twitch_team_list *teams = twitch_v5_get_channel_teams(CLIENT_ID, channel_id);
+  if (teams->count > 0) {
+    for (int index = 0; index < teams->count; index++) {
+      twitch_team *team = teams->items[index];
       printf("%s\n  Info: %s\n", team->display_name, team->info);
     }
-    twitch_team_list_free(size, teams);
+    twitch_team_list_free(teams);
   }
 
   free(CLIENT_ID);
@@ -442,14 +440,18 @@ void get_channel_communities(const char *query, int options_count, const char **
     return;
   }
 
-  int size = 0;
-  twitch_community **communities = twitch_v5_get_channel_communities(CLIENT_ID, channel_id, &size);
-  if (size > 0) {
-    for (int index = 0; index < size; index++) {
-      twitch_community *community = communities[index];
-      printf("%s\n  Name: %s\n  ID: %s\n  Summary: %s\n", community->display_name, community->name, community->id, community->summary);
+  twitch_community_list *communities = twitch_v5_get_channel_communities(CLIENT_ID, channel_id);
+  if (communities->count > 0) {
+    for (int index = 0; index < communities->count; index++) {
+      twitch_community *community = communities->items[index];
+      printf("%s\n  Name: %s\n  ID: %s\n  Summary: %s\n",
+        community->display_name,
+        community->name,
+        community->id,
+        community->summary
+      );
     }
-    twitch_community_list_free(size, communities);
+    twitch_community_list_free(communities);
   }
 
   free(CLIENT_ID);
@@ -465,14 +467,13 @@ void get_channel_videos(const char *query, int options_count, const char **optio
     return;
   }
 
-  int size = 0;
-  twitch_video **videos = twitch_v5_get_all_channel_videos(CLIENT_ID, channel_id, NULL, NULL, NULL, &size);
-  if (size > 0) {
-    for (int index = 0; index < size; index++) {
-      twitch_video *video = videos[index];
+  twitch_video_list *videos = twitch_v5_get_all_channel_videos(CLIENT_ID, channel_id, NULL, NULL, NULL);
+  if (videos->count > 0) {
+    for (int index = 0; index < videos->count; index++) {
+      twitch_video *video = videos->items[index];
       printf("%s\n  Title: %s\n  Game: %s\n  Description: %s\n", video->id, video->title, video->game, video->description);
     }
-    twitch_video_list_free(size, videos);
+    twitch_video_list_free(videos);
   }
 
   free(CLIENT_ID);
@@ -576,7 +577,7 @@ int main(int argc, char **argv) {
     {
       .command = team,
       .name = "team",
-      .description = "Gets team description.",
+      .description = "Gets team description and users.",
       .has_parameter = true,
       .handler = &get_team
     }
@@ -597,7 +598,7 @@ int main(int argc, char **argv) {
         // Don't forget to initialize the library!
         twitch_init();
 
-        // Handle the command.
+        // Handle the command. We currently only support one additional argument/param.
         if (command.has_parameter) {
           command.handler(argv[2], argc - 3, (const char **)(&argv[3]));
         } else {

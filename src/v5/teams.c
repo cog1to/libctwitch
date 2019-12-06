@@ -28,14 +28,16 @@ string_t *team_url_builder(void *params) {
 
 /** API **/
 
-twitch_team **twitch_v5_get_teams(const char *client_id, int limit, int offset, int* size) {
-  twitch_team **teams = (twitch_team **)get_page(client_id, &teams_url_builder, NULL, limit, offset, "teams", &parse_team, size, NULL);
-  return teams;
+twitch_team_list *twitch_v5_get_teams(const char *client_id, int limit, int offset) {
+  twitch_team_list *list = twitch_team_list_alloc();
+  list->items = (twitch_team **)get_page(client_id, &teams_url_builder, NULL, limit, offset, "teams", &parse_team, &list->count, NULL);
+  return list;
 }
 
-twitch_team **twitch_v5_get_all_teams(const char *client_id, int *size) {
-  twitch_team **teams = (twitch_team **)get_all_pages(client_id, &teams_url_builder, NULL, "teams", &parse_team, false, size);
-  return teams;
+twitch_team_list *twitch_v5_get_all_teams(const char *client_id) {
+  twitch_team_list *list = twitch_team_list_alloc();
+  list->items = (twitch_team **)get_all_pages(client_id, &teams_url_builder, NULL, "teams", &parse_team, false, &list->count);
+  return list;
 }
 
 twitch_team *twitch_v5_get_team(const char *client_id, const char *name) {

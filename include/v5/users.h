@@ -39,11 +39,9 @@ twitch_user *twitch_v5_get_user_by_username(const char *client_id, const char *u
  * @param client_id Twitch API client ID.
  * @param usernames_count Size of the list of usernames. Should not exceed 100, accodring to API docs.
  * @param usernames List of usernames/logins to check.
- * @param total Used to return total number of users parsed from the response.
  *
- * @return Array of pointers to twitch_user objects. Don't forget to free them with twitch_user_free() function.
- */
-twitch_user **twitch_v5_get_users(const char *client_id, int usernames_count, const char **usernames, int *total);
+ * @return List of users. */
+twitch_user_list *twitch_v5_get_users(const char *client_id, int usernames_count, const char **usernames);
 
 /**
  * Checks if specific user follows specific channel.
@@ -66,12 +64,10 @@ twitch_follow *twitch_v5_check_user_follow(const char *client_id, const char *us
  * @param sortby Sort property. Can be either "created_at", "last_broadcast", or "login".
  * @param limit Page size.
  * @param offset List offset.
- * @param size Used to return the number of downloaded items. Can be less than page size if there aren't enough items.
  * @param total Used to return the total number of items in the list reported by Twitch API.
- * @return Array of pointers to twitch_follow structs describing each user's follow. You have to manually free
- *      each item in the array, as well as array itself.
- */
-twitch_follow **twitch_v5_get_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby, int limit, int offset, int *size, int *total);
+ *
+ * @return List of follows. Deallocate with twitch_follow_list_free(). */
+twitch_follow_list *twitch_v5_get_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby, int limit, int offset, int *total);
 
 /**
  * Returns list of all follows for a given user downloaded by internally calling paged version
@@ -80,14 +76,11 @@ twitch_follow **twitch_v5_get_user_follows(const char *client_id, const char *us
  * @param client_id Twitch API client ID.
  * @param user_id Twitch User ID: a string representation of user's ID number.
  * @param direction List sort direction. Can be either "asc" or "desc". If not specified, "desc" will be assumed by the API.
- * @param sortby Sort property. Can be either "created_at", "last_broadcast", or "login". If not specified, "created_at" will
- *      be used by the API as default.
- * @param size Used to return the number of downloaded items. Can be less than page size if there aren't enough items.
+ * @param sortby Sort property. Can be either "created_at", "last_broadcast", or "login". If not specified, "created_at" will be used by the API as default.
  *
- * @return Array of pointers to twitch_follow structs describing each user's follow. You have to manually free
- *      each item in the array, as well as array itself.
+ * @return List of follows.
  */
-twitch_follow **twitch_v5_get_all_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby, int *size);
+twitch_follow_list *twitch_v5_get_all_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby);
 
 #endif
 
