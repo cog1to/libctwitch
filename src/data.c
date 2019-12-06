@@ -25,6 +25,15 @@
     deinit(prop); \
   }
 
+#define GENERIC_LIST(entity) \
+  twitch_##entity##_list *twitch_##entity##_list_alloc() { \
+    GENERIC_ALLOC(twitch_##entity##_list) \
+  } \
+  void twitch_##entity##_list_free(twitch_##entity##_list *list) { \
+    pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_##user##_free); \
+    free(list); \
+  }
+
 /** Helper functions **/
 
 void free_if_not_empty(void *ptr, void(*deallocator)(void *)) {
@@ -50,14 +59,7 @@ void twitch_user_free(twitch_user *user) {
   free(user);
 }
 
-twitch_user_list *twitch_user_list_alloc() {
-  GENERIC_ALLOC(twitch_user_list)
-}
-
-void twitch_user_list_free(twitch_user_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_user_free);
-  free(list);
-}
+GENERIC_LIST(user)
 
 /** Channel data **/
 
@@ -84,14 +86,7 @@ void twitch_channel_free(twitch_channel *channel) {
   free(channel);
 }
 
-twitch_channel_list *twitch_channel_list_alloc() {
-  GENERIC_ALLOC(twitch_channel_list)
-}
-
-void twitch_channel_list_free(twitch_channel_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_channel_free);
-  free(list);
-}
+GENERIC_LIST(channel)
 
 /** Follow data **/
 
@@ -105,14 +100,9 @@ void twitch_follow_free(twitch_follow *follow) {
   free(follow);
 }
 
-twitch_follow_list *twitch_follow_list_alloc() {
-  GENERIC_ALLOC(twitch_follow_list)
-}
+GENERIC_LIST(follow)
 
-void twitch_follows_list_free(twitch_follow_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_follow_free);
-  free(list);
-}
+/** Streams **/
 
 twitch_stream *twitch_stream_alloc() {
   GENERIC_ALLOC(twitch_stream)
@@ -126,14 +116,7 @@ void twitch_stream_free(twitch_stream *stream) {
   free(stream);
 }
 
-twitch_stream_list *twitch_stream_list_alloc() {
-  GENERIC_ALLOC(twitch_stream_list)
-}
-
-void twitch_stream_list_free(twitch_stream_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*))&twitch_stream_free);
-  free(list);
-}
+GENERIC_LIST(stream)
 
 twitch_summary *twitch_summary_alloc() {
   GENERIC_ALLOC(twitch_summary)
@@ -155,14 +138,7 @@ void twitch_featured_stream_free(twitch_featured_stream *stream) {
   free(stream);
 }
 
-twitch_featured_stream_list *twitch_featured_stream_list_alloc() {
-  GENERIC_ALLOC(twitch_featured_stream_list)
-}
-
-void twitch_featured_stream_list_free(twitch_featured_stream_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*))&twitch_featured_stream_free);
-  free(list);
-}
+GENERIC_LIST(featured_stream)
 
 /** Art data **/
 
@@ -193,14 +169,7 @@ void twitch_game_free(twitch_game *game) {
   free(game);
 }
 
-twitch_game_list *twitch_game_list_alloc() {
-  GENERIC_ALLOC(twitch_game_list)
-}
-
-void twitch_game_list_free(twitch_game_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_game_free);
-  free(list);
-}
+GENERIC_LIST(game)
 
 /** Top games data **/
 
@@ -213,14 +182,7 @@ void twitch_top_game_free(twitch_top_game *game) {
   free(game);
 }
 
-twitch_top_game_list *twitch_top_game_list_alloc() {
-  GENERIC_ALLOC(twitch_top_game_list)
-}
-
-void twitch_top_game_list_free(twitch_top_game_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*))&twitch_top_game_free);
-  free(list);
-}
+GENERIC_LIST(top_game)
 
 /** Channel followers data **/
 
@@ -234,14 +196,7 @@ void twitch_follower_free(twitch_follower *follower) {
   free(follower);
 }
 
-twitch_follower_list *twitch_follower_list_alloc() {
-  GENERIC_ALLOC(twitch_follower_list)
-}
-
-void twitch_follower_list_free(twitch_follower_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*))&twitch_follower_free);
-  free(list);
-}
+GENERIC_LIST(follower)
 
 /** Communities data **/
 
@@ -264,14 +219,7 @@ void twitch_community_free(twitch_community *community) {
   free(community);
 }
 
-twitch_community_list *twitch_community_list_alloc() {
-  GENERIC_ALLOC(twitch_community_list)
-}
-
-void twitch_community_list_free(twitch_community_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*))&twitch_community_free);
-  free(list);
-}
+GENERIC_LIST(community)
 
 /** Video data **/
 
@@ -316,14 +264,7 @@ void twitch_thumbnail_free(twitch_thumbnail *thumbnail) {
   free(thumbnail);
 }
 
-twitch_thumbnail_list *twitch_thumbnail_list_alloc() {
-  GENERIC_ALLOC(twitch_thumbnail_list)
-}
-
-void twitch_thumbnail_list_free(twitch_thumbnail_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_thumbnail_free);
-  free(list);
-}
+GENERIC_LIST(thumbnail)
 
 twitch_video_thumbnails *twitch_video_thumbnails_alloc() {
   GENERIC_ALLOC(twitch_video_thumbnails)
@@ -364,14 +305,7 @@ void twitch_video_free(twitch_video *video) {
   free(video);
 }
 
-twitch_video_list *twitch_video_list_alloc() {
-  GENERIC_ALLOC(twitch_video_list)
-}
-
-void twitch_video_list_free(twitch_video_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_video_free);
-  free(list);
-}
+GENERIC_LIST(video)
 
 /** Teams data **/
 
@@ -392,12 +326,5 @@ void twitch_team_free(twitch_team *team) {
   free(team);
 }
 
-twitch_team_list *twitch_team_list_alloc() {
-  GENERIC_ALLOC(twitch_team_list)
-}
-
-void twitch_team_list_free(twitch_team_list *list) {
-  pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_team_free);
-  free(list);
-}
+GENERIC_LIST(team)
 

@@ -342,7 +342,7 @@ void get_live_follows(const char *username, int options_count, const char **opti
 
   // Cleanup.
   twitch_user_free(user);
-  twitch_follows_list_free(follows);
+  twitch_follow_list_free(follows);
   pointer_array_free(follows->count, (void **)channel_ids, (void(*)(void*))&free);
   free(CLIENT_ID);
 }

@@ -185,7 +185,7 @@ twitch_follow_list *twitch_follow_list_alloc();
  *
  * @param list List to free.
  */
-void twitch_follows_list_free(twitch_follow_list *list);
+void twitch_follow_list_free(twitch_follow_list *list);
 
 /** Stream data **/
 
