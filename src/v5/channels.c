@@ -94,48 +94,51 @@ string_t *channel_videos_url_builder(void *params, int limit, int offset) {
   return url;
 }
 
-
 /** API **/
 
-twitch_follower **twitch_v5_get_channel_followers(const char *client_id, const char *channel_id, int limit, const char *cursor, const char *direction, int *size, int *total, char **next_cursor) {
+twitch_follower_list *twitch_v5_get_channel_followers(const char *client_id, const char *channel_id, int limit, const char *cursor, const char *direction, int *total, char **next_cursor) {
   channel_followers_params params = {
     .channel_id = channel_id,
     .direction = direction,
   };
 
-  twitch_follower **followers = (twitch_follower **)get_cursored_page(client_id, &channel_followers_url_builder, (void *)&params, limit, cursor, "follows", &parse_follower, size, next_cursor);
+  twitch_follower_list *followers = twitch_follower_list_alloc();
+  followers->items = (twitch_follower **)get_cursored_page(client_id, &channel_followers_url_builder, (void *)&params, limit, cursor, "follows", &parse_follower, &followers->count, next_cursor);
   return followers;
 }
 
-twitch_follower **twitch_v5_get_all_channel_followers(const char *client_id, const char *channel_id, const char *direction, int *size) {
+twitch_follower_list *twitch_v5_get_all_channel_followers(const char *client_id, const char *channel_id, const char *direction) {
   channel_followers_params params = {
     .channel_id = channel_id,
     .direction = direction,
   };
 
-  twitch_follower **followers = (twitch_follower **)get_all_cursored_pages(client_id, &channel_followers_url_builder, (void *)&params, "follows", &parse_follower, size);
+  twitch_follower_list *followers = twitch_follower_list_alloc();
+  followers->items = (twitch_follower **)get_all_cursored_pages(client_id, &channel_followers_url_builder, (void *)&params, "follows", &parse_follower, &followers->count);
   return followers;
 }
 
-twitch_team **twitch_v5_get_channel_teams(const char *client_id, const char *channel_id, int* size) {
+twitch_team_list *twitch_v5_get_channel_teams(const char *client_id, const char *channel_id) {
   channel_teams_params params = {
     .channel_id = channel_id,
   };
 
-  twitch_team **teams = (twitch_team **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, "teams", &parse_team, size, NULL);
+  twitch_team_list *teams = twitch_team_list_alloc();
+  teams->items = (twitch_team **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, "teams", &parse_team, &teams->count, NULL);
   return teams;
 }
 
-twitch_community **twitch_v5_get_channel_communities(const char *client_id, const char *channel_id, int* size) {
+twitch_community_list *twitch_v5_get_channel_communities(const char *client_id, const char *channel_id) {
   channel_teams_params params = {
     .channel_id = channel_id,
   };
 
-  twitch_community **communities = (twitch_community **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, "communities", &parse_community, size, NULL);
+  twitch_community_list *communities = twitch_community_list_alloc();
+  communities->items = (twitch_community **)get_page(client_id, &channel_teams_url_builder, (void *)&params, 0, 0, "communities", &parse_community, &communities->count, NULL);
   return communities;
 }
 
-twitch_video **twitch_v5_get_channel_videos(const char *client_id, const char *channel_id, int limit, int offset, const char *broadcast_type, const char *language, char *sort, int *size, int* total) {
+twitch_video_list *twitch_v5_get_channel_videos(const char *client_id, const char *channel_id, int limit, int offset, const char *broadcast_type, const char *language, char *sort, int* total) {
   channel_videos_params params = {
     .channel_id = channel_id,
     .broadcast_type = broadcast_type,
@@ -143,11 +146,12 @@ twitch_video **twitch_v5_get_channel_videos(const char *client_id, const char *c
     .sort = sort,
   };
 
-  twitch_video **videos = (twitch_video **)get_page(client_id, &channel_videos_url_builder, (void *)&params, limit, offset, "videos", &parse_video, size, total);
+  twitch_video_list *videos = twitch_video_list_alloc();
+  videos->items = (twitch_video **)get_page(client_id, &channel_videos_url_builder, (void *)&params, limit, offset, "videos", &parse_video, &videos->count, total);
   return videos;
 }
 
-twitch_video **twitch_v5_get_all_channel_videos(const char *client_id, const char *channel_id, const char *broadcast_type, const char *language, char *sort, int *size) {
+twitch_video_list *twitch_v5_get_all_channel_videos(const char *client_id, const char *channel_id, const char *broadcast_type, const char *language, char *sort) {
   channel_videos_params params = {
     .channel_id = channel_id,
     .broadcast_type = broadcast_type,
@@ -155,7 +159,8 @@ twitch_video **twitch_v5_get_all_channel_videos(const char *client_id, const cha
     .sort = sort,
   };
 
-  twitch_video **videos = (twitch_video **)get_all_pages(client_id, &channel_videos_url_builder, (void *)&params, "videos", &parse_video, false, size);
+  twitch_video_list *videos = twitch_video_list_alloc();
+  videos->items = (twitch_video **)get_all_pages(client_id, &channel_videos_url_builder, (void *)&params, "videos", &parse_video, false, &videos->count);
   return videos;
 }
 

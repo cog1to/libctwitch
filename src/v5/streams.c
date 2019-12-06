@@ -73,7 +73,7 @@ string_t *featured_streams_url_builder(void *params, int limit, int offset) {
 
 /** API **/
 
-twitch_stream **twitch_v5_get_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int limit, int offset, int *size, int *total) {
+twitch_stream_list *twitch_v5_get_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int limit, int offset, int *total) {
   streams_params params = {
     .channel_ids_count = channel_ids_count,
     .channel_ids = channel_ids,
@@ -82,11 +82,13 @@ twitch_stream **twitch_v5_get_streams(const char *client_id, int channel_ids_cou
     .language = language
   };
 
-  twitch_stream **streams = (twitch_stream **)get_page(client_id, &streams_url_builder, (void *)&params, limit, offset, "streams", &parse_stream, size, total);
+  twitch_stream_list *streams = twitch_stream_list_alloc();
+  streams->items = (twitch_stream **)get_page(client_id, &streams_url_builder, (void *)&params, limit, offset, "streams", &parse_stream, &streams->count, total);
+
   return streams;
 }
 
-twitch_stream** twitch_v5_get_all_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int *size) {
+twitch_stream_list *twitch_v5_get_all_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language) {
   streams_params params = {
     .channel_ids_count = channel_ids_count,
     .channel_ids = channel_ids,
@@ -95,7 +97,9 @@ twitch_stream** twitch_v5_get_all_streams(const char *client_id, int channel_ids
     .language = language
   };
 
-  twitch_stream **streams = (twitch_stream **)get_all_pages(client_id, &streams_url_builder, (void *)&params, "streams", &parse_stream, false, size);
+  twitch_stream_list *streams = twitch_stream_list_alloc();
+  streams->items = (twitch_stream **)get_all_pages(client_id, &streams_url_builder, (void *)&params, "streams", &parse_stream, false, &streams->count);
+
   return streams;
 }
 
@@ -157,14 +161,17 @@ twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game) {
   return summary;
 }
 
-twitch_featured_stream **twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *size) {
-  int total = 0;
-  twitch_featured_stream **streams = (twitch_featured_stream **)get_page(client_id, &featured_streams_url_builder, NULL, limit, offset, "featured", &parse_featured_stream, size, &total);
+twitch_featured_stream_list *twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *total) {
+  twitch_featured_stream_list *streams = twitch_featured_stream_list_alloc();
+  streams->items = (twitch_featured_stream **)get_page(client_id, &featured_streams_url_builder, NULL, limit, offset, "featured", &parse_featured_stream, &streams->count, total);
+
   return streams;
 }
 
-twitch_featured_stream **twitch_v5_get_all_featured_streams(const char *client_id, int *size) {
-  twitch_featured_stream **streams = (twitch_featured_stream **)get_all_pages(client_id, &featured_streams_url_builder, NULL, "featured", &parse_featured_stream, true, size);
+twitch_featured_stream_list *twitch_v5_get_all_featured_streams(const char *client_id) {
+  twitch_featured_stream_list *streams = twitch_featured_stream_list_alloc();
+  streams->items = (twitch_featured_stream **)get_all_pages(client_id, &featured_streams_url_builder, NULL, "featured", &parse_featured_stream, true, &streams->count);
+
   return streams;
 }
 

@@ -25,13 +25,11 @@
  *      Twitch API will not use any language filters.
  * @param limit Page size.
  * @param offset List offset.
- * @param size Used to return a number of downloaded items.
  * @param total Used to return a total number of items as reported by Twitch API.
  *
- * @return Array of pointers to twitch_stream structs describing each live stream. You have to manually free
- *      each item in the array, as well as array itself.
- */
-twitch_stream **twitch_v5_get_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int limit, int offset, int *size, int *total);
+ * @return An instance of twitch_stream_list struct containing stream data. Free it later with twitch_stream_list_free().
+ * */
+twitch_stream_list *twitch_v5_get_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int limit, int offset, int *total);
 
 /**
  * Returns full list of items describing live streams queried by channel list, game, language; internally downloaded
@@ -42,14 +40,11 @@ twitch_stream **twitch_v5_get_streams(const char *client_id, int channel_ids_cou
  * @param channel_ids Array of strings with channel IDs.
  * @param game Game name filter. Has to be an exact match with one of the games registered on Twitch.
  * @param stream_type Stream type. Can be "all", "live", or "playlist". If not specified, "all" will be assumed by the API.
- * @param language. Locale ID string specifying the language filter. Example: "en", "fi", "fr". If not specified,
- *      Twitch API will not use any language filters.
- * @param size Used to return a number of downloaded items.
+ * @param language. Locale ID string specifying the language filter. Example: "en", "fi", "fr". If not specified, Twitch API will not use any language filters.
  *
- * @return Array of pointers to twitch_stream structs describing each live stream. You have to manually free
- *      each item in the array, as well as array itself.
+ * @return An instance of twitch_stream_list struct containing stream data. Free it later with twitch_stream_list_free().
  */
-twitch_stream **twitch_v5_get_all_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language, int *size);
+twitch_stream_list *twitch_v5_get_all_streams(const char *client_id, int channel_ids_count, const char **channel_ids, const char *game, const char *stream_type, const char* language);
 
 /**
  * Returns a stream object for given channel, if it's online. Otherwise returns NULL.
@@ -79,22 +74,21 @@ twitch_summary *twitch_v5_get_summary(const char *client_id, const char *game);
  * @param client_id Twitch API client ID.
  * @param limit Page limit. Maximum allowed by the API: 100.
  * @param offset Page offset.
- * @param size Number of downloaded items.
+ * @param Will contain total number of items in the list.
  *
- * @return Array of twitch_featured_stream pointers containing data for given page of featured streams.
+ * @return Instance of twitch_featured_stream_list struct containing featured streams data.
  */
-twitch_featured_stream **twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *size);
+twitch_featured_stream_list *twitch_v5_get_featured_streams(const char *client_id, int limit, int offset, int *total);
 
 /**
  * Returns all featured streams. Each element in an array is a pointer to dynamically allocated twitch_featured_stream struct.
  * Don't forget to release the allocated memory later by calling twitch_feature_stream_list_free() function;
  *
  * @param client_id Twitch API client ID.
- * @param size Number of downloaded items.
  *
- * @return Array of twitch_featured_stream pointers containing data for given page of featured streams.
+ * @return Instance of twitch_featured_stream_list struct containing featured streams data.
  */
-twitch_featured_stream **twitch_v5_get_all_featured_streams(const char *client_id, int *size);
+twitch_featured_stream_list *twitch_v5_get_all_featured_streams(const char *client_id);
 
 #endif
 

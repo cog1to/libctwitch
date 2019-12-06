@@ -104,7 +104,7 @@ twitch_user *twitch_v5_get_user_by_username(const char *client_id, const char *u
   return user;
 }
 
-twitch_user **twitch_v5_get_users(const char *client_id, int usernames_count, const char **usernames, int *total) {
+twitch_user_list *twitch_v5_get_users(const char *client_id, int usernames_count, const char **usernames) {
   char buffer[2048];
 
   // Construct the link.
@@ -125,7 +125,7 @@ twitch_user **twitch_v5_get_users(const char *client_id, int usernames_count, co
   // Extract the relevant fields.
   twitch_user **users = NULL;
 
-  int length = value->u.object.length;
+  int length = value->u.object.length, total = 0;
   for (int x = 0; x < length; x++) {
     if (strcmp(value->u.object.values[x].name, "users") == 0) {
       json_value *users_value = value->u.object.values[x].value;
@@ -134,12 +134,17 @@ twitch_user **twitch_v5_get_users(const char *client_id, int usernames_count, co
         break;
       }
 
-      users = (twitch_user **)parse_json_array(users_value, total, &parse_user);
+      users = (twitch_user **)parse_json_array(users_value, &total, &parse_user);
     }
   }
 
   json_value_free(value);
-  return users;
+
+  twitch_user_list *list = twitch_user_list_alloc();
+  list->items = users;
+  list->count = total;
+
+  return list;
 }
 
 twitch_follow *twitch_v5_check_user_follow(const char *client_id, const char *user_id, const char *channel_id) {
@@ -166,25 +171,27 @@ twitch_follow *twitch_v5_check_user_follow(const char *client_id, const char *us
   return follow;
 }
 
-twitch_follow **twitch_v5_get_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby, int limit, int offset, int *size, int *total) {
+twitch_follow_list *twitch_v5_get_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby, int limit, int offset, int *total) {
   follows_params params = {
     .user_id = user_id,
     .direction = direction,
     .sortby = sortby
   };
 
-  twitch_follow **follows = (twitch_follow **)get_page(client_id, &user_follows_url_builder, (void *)&params, limit, offset, "follows", &parse_follow, size, total);
-  return follows;
+  twitch_follow_list *list = twitch_follow_list_alloc();
+  list->items = (twitch_follow **)get_page(client_id, &user_follows_url_builder, (void *)&params, limit, offset, "follows", &parse_follow, &list->count, total);
+  return list;
 }
 
-twitch_follow** twitch_v5_get_all_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby, int *size) {
+twitch_follow_list *twitch_v5_get_all_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby) {
   follows_params params = {
     .user_id = user_id,
     .direction = direction,
     .sortby = sortby
   };
 
-  twitch_follow **follows = (twitch_follow **)get_all_pages(client_id, &user_follows_url_builder, (void *)&params, "follows", &parse_follow, false, size);
-  return follows;
+  twitch_follow_list *list = twitch_follow_list_alloc();
+  list->items = (twitch_follow **)get_all_pages(client_id, &user_follows_url_builder, (void *)&params, "follows", &parse_follow, false, &list->count);
+  return list;
 }
 

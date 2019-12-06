@@ -203,7 +203,7 @@ void **get_all_pages(const char *client_id, page_url_builder builder, void *para
 
     // Free current page data.
     free(page);
-  } while ((ignore_totals && (count == PAGE_SIZE)) || (offset < total));
+  } while ((ignore_totals && count > 0) || (offset < total));
 
   // Return the whole list.
   *size = total;
