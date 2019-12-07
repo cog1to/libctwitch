@@ -1,5 +1,6 @@
 # Build files
 build/
+dist/
 
 # VIM swap files
 *.swp
