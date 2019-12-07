@@ -1,0 +1,11 @@
+prefix=@DEST_DIR@
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libctwitch
+Description: Twitch API for C. 
+Version: 0.1
+
+Libs: -L${libdir} @PRIVATE_LIBS@
+Cflags: -I${includedir}

@@ -52,6 +52,14 @@ install(TARGETS ctwitch
 # Install library headers
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 
+# Generate pkg-config
+set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
+set(PRIVATE_LIBS "-l${ctwitch}")
+configure_file(libctwitch.pc.in libctwitch.pc @ONLY)
+
+# Install pkg-config
+install(FILES ${CMAKE_BINARY_DIR}/libctwitch.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
 # Example target
 add_executable(twitch-remote
   example/twitch-remote.c
