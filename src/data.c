@@ -30,7 +30,7 @@
     GENERIC_ALLOC(twitch_##entity##_list) \
   } \
   void twitch_##entity##_list_free(twitch_##entity##_list *list) { \
-    pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_##user##_free); \
+    pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_##entity##_free); \
     free(list); \
   }
 

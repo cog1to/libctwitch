@@ -136,7 +136,7 @@ void *parse_channel(json_value *channel_object) {
     { .name = "game", .dest = &channel->game, .parser = &parse_string },
     { .name = "status", .dest = &channel->status, .parser = &parse_string },
     { .name = "logo", .dest = &channel->logo, .parser = &parse_string },
-    { .name = "profile_banner", .dest = &channel->logo, .parser = &parse_string },
+    { .name = "profile_banner", .dest = &channel->profile_banner, .parser = &parse_string },
     { .name = "created_at", .dest = &channel->created_at, .parser = &parse_string },
     { .name = "updated_at", .dest = &channel->updated_at, .parser = &parse_string },
     { .name = "language", .dest = &channel->language, .parser = &parse_string },
