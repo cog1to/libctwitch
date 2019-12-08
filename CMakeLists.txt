@@ -54,7 +54,7 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAM
 
 # Generate pkg-config
 set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
-set(PRIVATE_LIBS "-l${ctwitch}")
+set(PRIVATE_LIBS "-lctwitch")
 configure_file(libctwitch.pc.in libctwitch.pc @ONLY)
 
 # Install pkg-config

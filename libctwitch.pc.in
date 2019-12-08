@@ -1,7 +1,7 @@
 prefix=@DEST_DIR@
 exec_prefix=${prefix}
 libdir=${prefix}/lib
-includedir=${prefix}/include
+includedir=${prefix}/include/ctwitch
 
 Name: libctwitch
 Description: Twitch API for C. 
