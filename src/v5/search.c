@@ -7,7 +7,7 @@
 #include "utils/network_utils.h"
 #include "utils/parser.h"
 #include "json/json.h"
-#include "data.h"
+#include "v5/data.h"
 
 /** URL builders  **/
 
@@ -93,78 +93,78 @@ string_t *game_search_url_builder(void *params, int limit, int offset) {
 
 /** API **/
 
-twitch_channel_list *twitch_v5_search_channels(const char *client_id, const char *query, int limit, int offset, int *total) {
+twitch_v5_channel_list *twitch_v5_search_channels(const char *client_id, const char *query, int limit, int offset, int *total) {
   channel_search_params params = {
     .query = query
   };
 
   int size = 0;
-  twitch_channel **items = (twitch_channel **)get_page(client_id, &channel_search_url_builder, &params, limit, offset, "channels", &parse_channel, &size, total);
+  twitch_v5_channel **items = (twitch_v5_channel **)get_page(client_id, &channel_search_url_builder, &params, limit, offset, "channels", &parse_channel, &size, total);
 
-  twitch_channel_list *list = twitch_channel_list_alloc();
+  twitch_v5_channel_list *list = twitch_v5_channel_list_alloc();
   list->items = items;
   list->count = size;
 
   return list;
 }
 
-twitch_channel_list *twitch_v5_search_all_channels(const char *client_id, const char *query) {
+twitch_v5_channel_list *twitch_v5_search_all_channels(const char *client_id, const char *query) {
   channel_search_params params = {
     .query = query
   };
 
   int size = 0;
-  twitch_channel **items = (twitch_channel **)get_all_pages(client_id, &channel_search_url_builder, &params, "channels", &parse_channel, false, &size);
+  twitch_v5_channel **items = (twitch_v5_channel **)get_all_pages(client_id, &channel_search_url_builder, &params, "channels", &parse_channel, false, &size);
 
-  twitch_channel_list *list = twitch_channel_list_alloc();
+  twitch_v5_channel_list *list = twitch_v5_channel_list_alloc();
   list->items = items;
   list->count = size;
 
   return list;
 }
 
-twitch_stream_list *twitch_v5_search_streams(const char *client_id, const char *query, stream_filter filter, int limit, int offset, int *total) {
+twitch_v5_stream_list *twitch_v5_search_streams(const char *client_id, const char *query, stream_filter filter, int limit, int offset, int *total) {
   stream_search_params params = {
     .query = query,
     .filter = filter
   };
 
   int size = 0;
-  twitch_stream **streams = (twitch_stream **)get_page(client_id, &stream_search_url_builder, &params, limit, offset, "streams", &parse_stream, &size, total);
+  twitch_v5_stream **streams = (twitch_v5_stream **)get_page(client_id, &stream_search_url_builder, &params, limit, offset, "streams", &parse_stream, &size, total);
 
-  twitch_stream_list *list = twitch_stream_list_alloc();
+  twitch_v5_stream_list *list = twitch_v5_stream_list_alloc();
   list->count = size;
   list->items = streams;
 
   return list;
 }
 
-twitch_stream_list *twitch_v5_search_all_streams(const char *client_id, const char *query, stream_filter filter) {
+twitch_v5_stream_list *twitch_v5_search_all_streams(const char *client_id, const char *query, stream_filter filter) {
   stream_search_params params = {
     .query = query,
     .filter = filter
   };
 
   int size = 0;
-  twitch_stream **streams = (twitch_stream **)get_all_pages(client_id, &stream_search_url_builder, &params, "streams", &parse_stream, false, &size);
+  twitch_v5_stream **streams = (twitch_v5_stream **)get_all_pages(client_id, &stream_search_url_builder, &params, "streams", &parse_stream, false, &size);
 
-  twitch_stream_list *list = twitch_stream_list_alloc();
+  twitch_v5_stream_list *list = twitch_v5_stream_list_alloc();
   list->count = size;
   list->items = streams;
 
   return list;
 }
 
-twitch_game_list *twitch_v5_search_games(const char *client_id, const char *query, bool live) {
+twitch_v5_game_list *twitch_v5_search_games(const char *client_id, const char *query, bool live) {
   game_search_params params = {
     .query = query,
     .live = live
   };
 
   int total = 0, size = 0;
-  twitch_game **games = (twitch_game **)get_page(client_id, &game_search_url_builder, &params, 0, 0, "games", &parse_game, &size, &total);
+  twitch_v5_game **games = (twitch_v5_game **)get_page(client_id, &game_search_url_builder, &params, 0, 0, "games", &parse_game, &size, &total);
 
-  twitch_game_list *list = twitch_game_list_alloc();
+  twitch_v5_game_list *list = twitch_v5_game_list_alloc();
   list->items = games;
   list->count = size;
 

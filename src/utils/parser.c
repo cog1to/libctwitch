@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "data.h"
+#include "v5/data.h"
 #include "parser.h"
 #include "string_utils.h"
 
@@ -78,8 +78,8 @@ void parse_entity(json_value *src, int count, field_spec *specs) {
 
 /** Art **/
 
-twitch_art *parse_art(json_value *value) {
-  twitch_art *art = twitch_art_alloc();
+twitch_v5_art *parse_art(json_value *value) {
+  twitch_v5_art *art = twitch_v5_art_alloc();
 
   field_spec schema[] = {
     { .name = "large", .dest = &art->large, .parser = &parse_string },
@@ -101,7 +101,7 @@ void _parse_art(void *dest, json_value *value) {
 /** User **/
 
 void *parse_user(json_value *user_object) {
-  twitch_user *user = twitch_user_alloc();
+  twitch_v5_user *user = twitch_v5_user_alloc();
 
   field_spec schema[] = {
     { .name = "_id", .dest = &user->id, .parser = &parse_id },
@@ -127,7 +127,7 @@ void _parse_user(void *dest, json_value *value) {
 /** Channel **/
 
 void *parse_channel(json_value *channel_object) {
-  twitch_channel *channel = twitch_channel_alloc();
+  twitch_v5_channel *channel = twitch_v5_channel_alloc();
 
   field_spec schema[] = {
     { .name = "_id", .dest = &channel->id, .parser = &parse_id },
@@ -167,9 +167,9 @@ void _parse_channel(void *dest, json_value *value) {
 void _parse_channel_list(void *dest, json_value *value) {
   if (value->type == json_array) {
     int size = 0;
-    twitch_channel_list *list = twitch_channel_list_alloc();
+    twitch_v5_channel_list *list = twitch_v5_channel_list_alloc();
 
-    twitch_channel **channels = (twitch_channel **)parse_json_array(value, &size, &parse_channel);
+    twitch_v5_channel **channels = (twitch_v5_channel **)parse_json_array(value, &size, &parse_channel);
     list->count = size;
     list->items = channels;
 
@@ -180,7 +180,7 @@ void _parse_channel_list(void *dest, json_value *value) {
 /** Follow **/
 
 void *parse_follow(json_value *follow_object) {
-  twitch_follow *follow = twitch_follow_alloc();
+  twitch_v5_follow *follow = twitch_v5_follow_alloc();
 
   field_spec schema[] = {
     { .name = "created_at", .dest = &follow->created_at, .parser = &parse_string },
@@ -195,7 +195,7 @@ void *parse_follow(json_value *follow_object) {
 /** Streams **/
 
 void *parse_stream(json_value *stream_object) {
-  twitch_stream *stream = twitch_stream_alloc();
+  twitch_v5_stream *stream = twitch_v5_stream_alloc();
 
   field_spec schema[] = {
     { .name = "_id", .dest = &stream->id, .parser = &parse_id },
@@ -221,7 +221,7 @@ void _parse_stream(void *dest, json_value *value) {
 }
 
 void *parse_summary(json_value *summary_object) {
-  twitch_summary *summary = twitch_summary_alloc();
+  twitch_v5_summary *summary = twitch_v5_summary_alloc();
 
   field_spec schema[] = {
     { .name = "channels", .dest = &summary->channels, .parser = &parse_int },
@@ -233,7 +233,7 @@ void *parse_summary(json_value *summary_object) {
 }
 
 void *parse_featured_stream(json_value *featured_object) {
-  twitch_featured_stream *stream = twitch_featured_stream_alloc();
+  twitch_v5_featured_stream *stream = twitch_v5_featured_stream_alloc();
 
   field_spec schema[] = {
     { .name = "image", .dest = &stream->image, .parser = &parse_string },
@@ -250,7 +250,7 @@ void *parse_featured_stream(json_value *featured_object) {
 }
 
 void *parse_game(json_value *value) {
-  twitch_game *game = twitch_game_alloc();
+  twitch_v5_game *game = twitch_v5_game_alloc();
 
   field_spec schema[] = {
     { .name = "_id", .dest = &game->id, .parser = &parse_id },
@@ -272,7 +272,7 @@ void _parse_game(void *dest, json_value *value) {
 }
 
 void *parse_top_game(json_value *value) {
-  twitch_top_game *game = twitch_top_game_alloc();
+  twitch_v5_top_game *game = twitch_v5_top_game_alloc();
 
   field_spec schema[] = {
     { .name = "game", .dest = &game->game, .parser = &_parse_game },
@@ -285,7 +285,7 @@ void *parse_top_game(json_value *value) {
 }
 
 void *parse_follower(json_value *value) {
-  twitch_follower *follower = twitch_follower_alloc();
+  twitch_v5_follower *follower = twitch_v5_follower_alloc();
 
   field_spec schema[] = {
     { .name = "created_at", .dest = &follower->created_at, .parser = &parse_string },
@@ -298,7 +298,7 @@ void *parse_follower(json_value *value) {
 }
 
 void *parse_team(json_value *value) {
-  twitch_team *team = twitch_team_alloc();
+  twitch_v5_team *team = twitch_v5_team_alloc();
 
   field_spec schema[] = {
     { .name = "_id", .dest = &team->id, .parser = &parse_id },
@@ -318,7 +318,7 @@ void *parse_team(json_value *value) {
 }
 
 void *parse_community(json_value *value) {
-  twitch_community *community = twitch_community_alloc();
+  twitch_v5_community *community = twitch_v5_community_alloc();
 
   field_spec schema[] = {
     { .name = "_id", .dest = &community->id, .parser = &parse_string },
@@ -339,7 +339,7 @@ void *parse_community(json_value *value) {
 }
 
 void *parse_resolutions(json_value *value) {
-  twitch_resolutions *resolutions = twitch_resolutions_alloc();
+  twitch_v5_resolutions *resolutions = twitch_v5_resolutions_alloc();
   
   field_spec schema[] = {
     { .name = "chunked", .dest = &resolutions->chunked, .parser = &parse_string },
@@ -360,7 +360,7 @@ void _parse_resolutions(void *dest, json_value *value) {
 }
 
 void *parse_fps(json_value *value) {
-  twitch_fps *fps = twitch_fps_alloc();
+  twitch_v5_fps *fps = twitch_v5_fps_alloc();
 
   field_spec schema[] = {
     { .name = "chunked", .dest = &fps->chunked, .parser = &parse_double },
@@ -381,7 +381,7 @@ void _parse_fps(void *dest, json_value *value) {
 }
 
 void *parse_channel_ref(json_value *value) {
-  twitch_channel_ref *ref = twitch_channel_ref_alloc();
+  twitch_v5_channel_ref *ref = twitch_v5_channel_ref_alloc();
   
   field_spec schema[] = {
     { .name = "_id", .dest = &ref->id, .parser = &parse_id },
@@ -400,7 +400,7 @@ void _parse_channel_ref(void *dest, json_value *value) {
 }
 
 void *parse_thumbnail(json_value *value) {
-  twitch_thumbnail *thumb = twitch_thumbnail_alloc();
+  twitch_v5_thumbnail *thumb = twitch_v5_thumbnail_alloc();
   
   field_spec schema[] = {
     { .name = "type", .dest = &thumb->type, .parser = &parse_string },
@@ -420,9 +420,9 @@ void _parse_thumbnail(void *dest, json_value *value) {
 void _parse_thumbnail_list(void *dest, json_value *value) {
   if (value->type == json_array) {
     int size = 0;
-    twitch_thumbnail **thumbs = (twitch_thumbnail **)parse_json_array(value, &size, &parse_thumbnail);
+    twitch_v5_thumbnail **thumbs = (twitch_v5_thumbnail **)parse_json_array(value, &size, &parse_thumbnail);
 
-    twitch_thumbnail_list *list = twitch_thumbnail_list_alloc();
+    twitch_v5_thumbnail_list *list = twitch_v5_thumbnail_list_alloc();
     list->count = size;
     list->items = thumbs;
 
@@ -432,7 +432,7 @@ void _parse_thumbnail_list(void *dest, json_value *value) {
 
 void _parse_video_thumbnails(void *dest, json_value *value) {
   if (value->type == json_object) {
-    twitch_video_thumbnails *thumbs = twitch_video_thumbnails_alloc();
+    twitch_v5_video_thumbnails *thumbs = twitch_v5_video_thumbnails_alloc();
 
     field_spec schema[] = {
       { .name = "large", .dest = &thumbs->large, .parser = &_parse_thumbnail_list },
@@ -447,7 +447,7 @@ void _parse_video_thumbnails(void *dest, json_value *value) {
 }
 
 void *parse_video(json_value *value) {
-  twitch_video *video = twitch_video_alloc();
+  twitch_v5_video *video = twitch_v5_video_alloc();
 
   field_spec schema[] = {
     { .name = "_id", .dest = &video->id, .parser = &parse_string },

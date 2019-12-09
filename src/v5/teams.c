@@ -8,7 +8,7 @@
 #include "utils/network_utils.h"
 #include "utils/parser.h"
 #include "json/json.h"
-#include "data.h"
+#include "v5/data.h"
 
 /** URL builders  **/
 
@@ -28,25 +28,25 @@ string_t *team_url_builder(void *params) {
 
 /** API **/
 
-twitch_team_list *twitch_v5_get_teams(const char *client_id, int limit, int offset) {
-  twitch_team_list *list = twitch_team_list_alloc();
-  list->items = (twitch_team **)get_page(client_id, &teams_url_builder, NULL, limit, offset, "teams", &parse_team, &list->count, NULL);
+twitch_v5_team_list *twitch_v5_get_teams(const char *client_id, int limit, int offset) {
+  twitch_v5_team_list *list = twitch_v5_team_list_alloc();
+  list->items = (twitch_v5_team **)get_page(client_id, &teams_url_builder, NULL, limit, offset, "teams", &parse_team, &list->count, NULL);
   return list;
 }
 
-twitch_team_list *twitch_v5_get_all_teams(const char *client_id) {
-  twitch_team_list *list = twitch_team_list_alloc();
-  list->items = (twitch_team **)get_all_pages(client_id, &teams_url_builder, NULL, "teams", &parse_team, false, &list->count);
+twitch_v5_team_list *twitch_v5_get_all_teams(const char *client_id) {
+  twitch_v5_team_list *list = twitch_v5_team_list_alloc();
+  list->items = (twitch_v5_team **)get_all_pages(client_id, &teams_url_builder, NULL, "teams", &parse_team, false, &list->count);
   return list;
 }
 
-twitch_team *twitch_v5_get_team(const char *client_id, const char *name) {
+twitch_v5_team *twitch_v5_get_team(const char *client_id, const char *name) {
   string_t *url = team_url_builder((void *)name);
   json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
 
   void *team = parse_team(value);
   json_value_free(value);
-  return (twitch_team *)team;
+  return (twitch_v5_team *)team;
 }
 
