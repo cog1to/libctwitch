@@ -28,10 +28,10 @@ void **pointer_array_map(void **src, size_t src_count, void *(*getter)(void *));
  * Frees given array of pointers using specified deinit function.
  *
  * This is a convenience function to recursively deallocate complex and dynamically allocated
- * data structures. For example, for an array of twitch_follow structs, we can use this function
+ * data structures. For example, for an array of twitch_v5_follow structs, we can use this function
  * to recursively deallocate all the memory allocated for it by invoking something like this:
  *
- * pointer_array_free(count, (void **)follows, (void(*)(void*))&twitch_follow_free)
+ * pointer_array_free(count, (void **)follows, (void(*)(void*))&twitch_v5_follow_free)
  *
  * @param count Number of items in the array.
  * @param src Array of pointers to the items.

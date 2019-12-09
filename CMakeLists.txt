@@ -23,7 +23,7 @@ add_library(ctwitch SHARED
   src/utils/array_utils.c
   src/utils/network_utils.c
   src/utils/parser.c
-  src/data.c
+  src/v5/data.c
   src/v5/users.c
   src/v5/search.c
   src/v5/streams.c
@@ -68,7 +68,7 @@ add_executable(twitch-remote
   src/utils/array_utils.c
   src/utils/network_utils.c
   src/utils/parser.c
-  src/data.c
+  src/v5/data.c
   src/v5/users.c
   src/v5/search.c
   src/v5/streams.c

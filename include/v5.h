@@ -8,7 +8,7 @@
 #ifndef _H_TWITCH
 #define _H_TWITCH
 
-#include "data.h"
+#include "v5/data.h"
 #include "v5/search.h"
 #include "v5/users.h"
 #include "v5/streams.h"

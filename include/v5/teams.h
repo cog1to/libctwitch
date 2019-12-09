@@ -22,7 +22,7 @@
  *
  * @return Pointer to twitch_team_list struct containing downloaded teams data.
  * */
-twitch_team_list *twitch_v5_get_teams(const char *client_id, int limit, int offset);
+twitch_v5_team_list *twitch_v5_get_teams(const char *client_id, int limit, int offset);
 
 /**
  * Returns a full list of all registered teams.
@@ -31,7 +31,7 @@ twitch_team_list *twitch_v5_get_teams(const char *client_id, int limit, int offs
  *
  * @return Team list.
  * */
-twitch_team_list *twitch_v5_get_all_teams(const char *client_id);
+twitch_v5_team_list *twitch_v5_get_all_teams(const char *client_id);
 
 /**
  * Gets details for one team identified by it's name.
@@ -41,6 +41,6 @@ twitch_team_list *twitch_v5_get_all_teams(const char *client_id);
  *
  * @return Team details inside twitch_team struct.
  */
-twitch_team *twitch_v5_get_team(const char *client_id, const char *name);
+twitch_v5_team *twitch_v5_get_team(const char *client_id, const char *name);
 
 #endif

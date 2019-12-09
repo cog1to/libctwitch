@@ -21,9 +21,9 @@
  * @param total Will return total number of items in the remote top games list.
  *
  * @return An array of pointers to dynamically allocated twitch_top_game structs. You will
- *   have to deallocate it, either manually or using twitch_top_game_list_free() function.
+ *   have to deallocate it, either manually or using twitch_v5_top_game_list_free() function.
  */
-twitch_top_game_list *twitch_v5_get_top_games(const char *client_id, int limit, int offset, int *total);
+twitch_v5_top_game_list *twitch_v5_get_top_games(const char *client_id, int limit, int offset, int *total);
 
 /**
  * Returns the full list of games on Twitch, sorted by number of current viewers, most popular
@@ -32,9 +32,9 @@ twitch_top_game_list *twitch_v5_get_top_games(const char *client_id, int limit, 
  * @param client_id Twitch API client ID.
  *
  * @return An array of pointers to dynamically allocated twitch_top_game structs. You will
- *   have to deallocate it, either manually or using twitch_top_game_list_free() function.
+ *   have to deallocate it, either manually or using twitch_v5_top_game_list_free() function.
  */
-twitch_top_game_list *twitch_v5_get_all_top_games(const char *client_id);
+twitch_v5_top_game_list *twitch_v5_get_all_top_games(const char *client_id);
 
 #endif
 

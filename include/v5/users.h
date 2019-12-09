@@ -14,24 +14,24 @@
 #include "data.h"
 
 /**
- * Returns a pointer to twitch_user structure describing user found by given user ID.
+ * Returns a pointer to twitch_v5_user structure describing user found by given user ID.
  *
  * @param id User ID.
  * @param client_id Twitch API client ID.
- * @return Dynamically allocated twitch_user struct describing user. You have to manually free
- *      the memory using twitch_user_free() function.
+ * @return Dynamically allocated twitch_v5_user struct describing user. You have to manually free
+ *      the memory using twitch_v5_user_free() function.
  */
-twitch_user *twitch_v5_get_user(const char *client_id, const char *id);
+twitch_v5_user *twitch_v5_get_user(const char *client_id, const char *id);
 
 /**
- * Returns a pointer to twitch_user structure describing user found by given username.
+ * Returns a pointer to twitch_v5_user structure describing user found by given username.
  *
  * @param username Username to lookup.
  * @param client_id Twitch API client ID.
- * @return Dynamically allocated twitch_user struct describing user. You have to manually free
- *      the memory using twitch_user_free() function.
+ * @return Dynamically allocated twitch_v5_user struct describing user. You have to manually free
+ *      the memory using twitch_v5_user_free() function.
  */
-twitch_user *twitch_v5_get_user_by_username(const char *client_id, const char *username);
+twitch_v5_user *twitch_v5_get_user_by_username(const char *client_id, const char *username);
 
 /**
  * Returns a list of users matching given list of logins.
@@ -41,7 +41,7 @@ twitch_user *twitch_v5_get_user_by_username(const char *client_id, const char *u
  * @param usernames List of usernames/logins to check.
  *
  * @return List of users. */
-twitch_user_list *twitch_v5_get_users(const char *client_id, int usernames_count, const char **usernames);
+twitch_v5_user_list *twitch_v5_get_users(const char *client_id, int usernames_count, const char **usernames);
 
 /**
  * Checks if specific user follows specific channel.
@@ -50,10 +50,10 @@ twitch_user_list *twitch_v5_get_users(const char *client_id, int usernames_count
  * @param user_id User ID to check.
  * @param channel_id Channel ID to check for user's follow.
  *
- * @return Follow data if user does follow the channel, or NULL otherwise. Don't forget to free the twitch_follow struct
- *      with twitch_follow_free() function.
+ * @return Follow data if user does follow the channel, or NULL otherwise. Don't forget to free the twitch_v5_follow struct
+ *      with twitch_v5_follow_free() function.
  */
-twitch_follow *twitch_v5_check_user_follow(const char *client_id, const char *user_id, const char *channel_id);
+twitch_v5_follow *twitch_v5_check_user_follow(const char *client_id, const char *user_id, const char *channel_id);
 
 /**
  * Returns one page of list of follows for a given user.
@@ -66,8 +66,8 @@ twitch_follow *twitch_v5_check_user_follow(const char *client_id, const char *us
  * @param offset List offset.
  * @param total Used to return the total number of items in the list reported by Twitch API.
  *
- * @return List of follows. Deallocate with twitch_follow_list_free(). */
-twitch_follow_list *twitch_v5_get_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby, int limit, int offset, int *total);
+ * @return List of follows. Deallocate with twitch_v5_follow_list_free(). */
+twitch_v5_follow_list *twitch_v5_get_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby, int limit, int offset, int *total);
 
 /**
  * Returns list of all follows for a given user downloaded by internally calling paged version
@@ -80,7 +80,7 @@ twitch_follow_list *twitch_v5_get_user_follows(const char *client_id, const char
  *
  * @return List of follows.
  */
-twitch_follow_list *twitch_v5_get_all_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby);
+twitch_v5_follow_list *twitch_v5_get_all_user_follows(const char *client_id, const char *user_id, const char *direction, const char *sortby);
 
 #endif
 
