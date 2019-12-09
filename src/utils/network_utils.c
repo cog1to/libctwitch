@@ -83,8 +83,7 @@ json_value *twitch_v5_get_json(const char *client_id, const char *url) {
   string_free(output);
 
   if (value == NULL) {
-    fprintf(stderr, "Failed to parse JSON.");
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "Failed to parse JSON.\n");
   }
 
   return value;
@@ -112,6 +111,11 @@ void **get_page(const char *client_id, page_url_builder builder, void *params, i
   string_t *url = builder(params, limit, offset);
   json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
+
+  if (value == NULL) {
+    *size = 0;
+    return NULL;
+  }
 
   // Extract the relevant fields.
   void **elements = NULL;
@@ -191,7 +195,7 @@ void **get_all_pages(const char *client_id, page_url_builder builder, void *para
     }
 
     if (elements == NULL) {
-      fprintf(stderr, "Failed to allocate memory for next page.");
+      fprintf(stderr, "Failed to allocate memory for next page.\n");
       exit(EXIT_FAILURE);
     }
 
@@ -235,7 +239,7 @@ void **get_all_cursored_pages(const char *client_id, cursor_page_url_builder bui
     }
 
     if (elements == NULL) {
-      fprintf(stderr, "Failed to allocate memory for next page.");
+      fprintf(stderr, "Failed to allocate memory for next page.\n");
       exit(EXIT_FAILURE);
     }
 
