@@ -98,7 +98,7 @@ twitch_v5_stream_list *twitch_v5_get_all_streams(const char *client_id, int chan
   };
 
   twitch_v5_stream_list *streams = twitch_v5_stream_list_alloc();
-  streams->items = (twitch_v5_stream **)get_all_pages(client_id, &streams_url_builder, (void *)&params, "streams", &parse_stream, false, &streams->count);
+  streams->items = (twitch_v5_stream **)get_all_pages(client_id, &streams_url_builder, (void *)&params, "streams", &parse_stream, true, &streams->count);
 
   return streams;
 }
