@@ -190,8 +190,17 @@ twitch_v5_follow_list *twitch_v5_get_all_user_follows(const char *client_id, con
     .sortby = sortby
   };
 
-  twitch_v5_follow_list *list = twitch_v5_follow_list_alloc();
-  list->items = (twitch_v5_follow **)get_all_pages(client_id, &user_follows_url_builder, (void *)&params, "follows", &parse_follow, false, &list->count);
-  return list;
+  // 2020-10-15: Twitch V5 API is broken again.
+  // Offset parameter is not working for follows endpoint so we have to hack it.
+  // We get first page and get "total" value from it, then we get one page with limit == total.
+
+  int total = 0;
+  twitch_v5_follow_list *first_page = twitch_v5_follow_list_alloc();
+  first_page->items = (twitch_v5_follow **)get_page(client_id, &user_follows_url_builder, (void *)&params, 20, 0, "follows", &parse_follow, &first_page->count, &total);
+  twitch_v5_follow_list_free(first_page);
+
+  twitch_v5_follow_list *all_follows = twitch_v5_follow_list_alloc();
+  all_follows->items = (twitch_v5_follow **)get_page(client_id, &user_follows_url_builder, (void *)&params, total, 0, "follows", &parse_follow, &all_follows->count, &total);
+  return all_follows;
 }
 

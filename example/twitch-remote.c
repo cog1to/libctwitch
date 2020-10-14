@@ -209,7 +209,7 @@ void get_user(const char *username, int options_count, const char **options) {
   twitch_v5_user *user = twitch_v5_get_user_by_username(CLIENT_ID, username);
   if (user != NULL) {
     printf(
-      "Username: %s\n  ID: %s\n  Display Name: %s\n  Created At: %s\n  Updated At: %s\n  Type: %s\n",
+      "Username: %s\n  ID: %lld\n  Display Name: %s\n  Created At: %s\n  Updated At: %s\n  Type: %s\n",
       user->name,
       user->id,
       user->display_name,
@@ -342,8 +342,11 @@ void get_live_follows(const char *username, int options_count, const char **opti
 
   // Cleanup.
   twitch_v5_user_free(user);
+
+  int channels_count = follows->count;
   twitch_v5_follow_list_free(follows);
-  pointer_array_free(follows->count, (void **)channel_ids, (void(*)(void*))&free);
+
+  pointer_array_free(channels_count, (void **)channel_ids, (void(*)(void*))&free);
   free(CLIENT_ID);
 }
 
