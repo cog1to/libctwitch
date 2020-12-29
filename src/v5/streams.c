@@ -23,7 +23,7 @@ typedef struct {
 string_t *streams_url_builder(void *params, int limit, int offset) {
   streams_params *sparams = (streams_params *)params;
   bool is_first_param = true;
-  char buffer[512];
+  char buffer[1024];
 
   // Construct the link.
   string_t *url = string_init_with_value("https://api.twitch.tv/kraken/streams/");
