@@ -61,6 +61,10 @@ twitch_v5_user *twitch_v5_get_user(const char *client_id, const char *id) {
   json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
 
+  if (value == NULL) {
+    return NULL;
+  }
+
   if (value->type != json_object) {
     fprintf(stderr, "Wrong JSON type of returned value.");
     exit(EXIT_FAILURE);
@@ -84,6 +88,10 @@ twitch_v5_user *twitch_v5_get_user_by_username(const char *client_id, const char
   json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
 
+  if (value == NULL) {
+    return NULL;
+  }
+  
   // Extract the relevant fields.
   int length = value->u.object.length;
 
@@ -121,6 +129,10 @@ twitch_v5_user_list *twitch_v5_get_users(const char *client_id, int usernames_co
   // Get the output.
   json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
+
+  if (value == NULL) {
+    return NULL;
+  }
 
   // Extract the relevant fields.
   twitch_v5_user **users = NULL;

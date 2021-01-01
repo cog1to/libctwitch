@@ -145,6 +145,11 @@ void **get_cursored_page(const char *client_id, cursor_page_url_builder builder,
   json_value *value = twitch_v5_get_json(client_id, url->ptr);
   string_free(url);
 
+  if (value == NULL) {
+    *size = 0;
+    return NULL;
+  }
+
   // Extract the relevant fields.
   void **elements = NULL;
 
