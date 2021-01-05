@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "v5/data.h"
+#include "helix/data.h"
 #include "parser.h"
 #include "string_utils.h"
 
@@ -48,6 +49,22 @@ void parse_string(void *dest, json_value *source) {
   }
 }
 
+void *_parse_string(json_value *source) {
+  char *string = immutable_string_copy(source->u.string.ptr);
+  return string;
+}
+
+void parse_string_list(void *dest, json_value *source) {
+  if (source->type == json_array) {
+    int size = 0;
+    twitch_string_list *list = dest;
+
+    char **items = (char **)parse_json_array(source, &size, &_parse_string);
+    list->count = size;
+    list->items = items;
+  }
+}
+
 void parse_bool(void *dest, json_value *source) {
   *((bool *)dest) = source->u.boolean;
 }
@@ -86,7 +103,7 @@ twitch_v5_art *parse_art(json_value *value) {
     { .name = "medium", .dest = &art->medium, .parser = &parse_string },
     { .name = "small", .dest = &art->small, .parser = &parse_string },
     { .name = "template", .dest = &art->template, .parser = &parse_string },
-  }; 
+  };
   parse_entity(value, sizeof(schema)/sizeof(field_spec), schema);
 
   return (void *)art;
@@ -112,7 +129,7 @@ void *parse_user(json_value *user_object) {
     { .name = "type", .dest = &user->type, .parser = &parse_string },
     { .name = "created_at", .dest = &user->created_at, .parser = &parse_string },
     { .name = "updated_at", .dest = &user->updated_at, .parser = &parse_string }
-  }; 
+  };
   parse_entity(user_object, sizeof(schema)/sizeof(field_spec), schema);
 
   return (void *)user;
@@ -340,7 +357,7 @@ void *parse_community(json_value *value) {
 
 void *parse_resolutions(json_value *value) {
   twitch_v5_resolutions *resolutions = twitch_v5_resolutions_alloc();
-  
+
   field_spec schema[] = {
     { .name = "chunked", .dest = &resolutions->chunked, .parser = &parse_string },
     { .name = "high", .dest = &resolutions->high, .parser = &parse_string },
@@ -382,7 +399,7 @@ void _parse_fps(void *dest, json_value *value) {
 
 void *parse_channel_ref(json_value *value) {
   twitch_v5_channel_ref *ref = twitch_v5_channel_ref_alloc();
-  
+
   field_spec schema[] = {
     { .name = "_id", .dest = &ref->id, .parser = &parse_id },
     { .name = "name", .dest = &ref->name, .parser = &parse_string },
@@ -401,7 +418,7 @@ void _parse_channel_ref(void *dest, json_value *value) {
 
 void *parse_thumbnail(json_value *value) {
   twitch_v5_thumbnail *thumb = twitch_v5_thumbnail_alloc();
-  
+
   field_spec schema[] = {
     { .name = "type", .dest = &thumb->type, .parser = &parse_string },
     { .name = "url", .dest = &thumb->url, .parser = &parse_string },
@@ -477,3 +494,17 @@ void *parse_video(json_value *value) {
   return (void *)video;
 }
 
+void *parse_auth_token(json_value *value) {
+  twitch_helix_auth_token *token = twitch_helix_auth_token_alloc();
+
+  field_spec schema[] = {
+    { .name = "access_token", .dest = &token->token, .parser = &parse_string },
+    { .name = "expires_in", .dest = &token->expires_in, .parser = &parse_int },
+    { .name = "token_type", .dest = &token->token_type, .parser = &parse_string },
+    { .name = "scope", .dest = &token->scope, .parser = &parse_string_list },
+  };
+  parse_entity(value, sizeof(schema)/sizeof(field_spec), schema);
+
+  return (void *)token;
+
+}

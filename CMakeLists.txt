@@ -23,6 +23,7 @@ add_library(ctwitch SHARED
   src/utils/array_utils.c
   src/utils/network_utils.c
   src/utils/parser.c
+  src/utils/data_utils.c
   src/v5/data.c
   src/v5/users.c
   src/v5/search.c
@@ -30,6 +31,8 @@ add_library(ctwitch SHARED
   src/v5/games.c
   src/v5/channels.c
   src/v5/teams.c
+  src/helix/data.c
+  src/helix/token.c
   src/init.c
 )
 
@@ -68,6 +71,7 @@ add_executable(twitch-remote
   src/utils/array_utils.c
   src/utils/network_utils.c
   src/utils/parser.c
+  src/utils/data_utils.c
   src/v5/data.c
   src/v5/users.c
   src/v5/search.c
@@ -75,10 +79,12 @@ add_executable(twitch-remote
   src/v5/games.c
   src/v5/channels.c
   src/v5/teams.c
+  src/helix/data.c
+  src/helix/token.c
   src/init.c
 )
 
 target_include_directories(twitch-remote PUBLIC ${EDV_PUBLIC_INCLUDE_DIRECTORIES})
 target_include_directories(twitch-remote PRIVATE ${EDV_PRIVATE_INCLUDE_DIRECTORIES})
 target_link_libraries(twitch-remote m ${CURL_LIB})
-
+target_compile_options(twitch-remote PUBLIC -g)

@@ -184,5 +184,14 @@ void *parse_video_thumbnails(json_value *value);
  */
 void *parse_video(json_value *value);
 
+/**
+ * Creates a new twitch_helix_auth_token struct and fills it with properties from JSON value.
+ *
+ * @param value: JSON value to parse.
+ *
+ * @return Pointer to twith_helix_auth_token struct with data from JSON.
+ */
+void *parse_auth_token(json_value *value);
+
 #endif
 

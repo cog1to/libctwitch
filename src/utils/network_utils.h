@@ -83,6 +83,15 @@ CURLcode twitch_v5_get(const char *client_id, const char *url, string_t *output)
 json_value *twitch_v5_get_json(const char *client_id, const char *url);
 
 /**
+ * Performs a POST request to given Twitch API endpoint URL, and returns parsed JSON value.
+ *
+ * @param url Target API endpoint URL.
+ *
+ * @return Parsed JSON value. (see utils/json library).
+ */
+json_value *twitch_auth_post_json(const char *url);
+
+/**
  * Downloads one page of paged data from Twitch API and parses it with given parsing params.
  * Paged data endpoints usually return data as a JSON object with the following structure:
  *

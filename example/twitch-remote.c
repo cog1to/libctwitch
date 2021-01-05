@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "v5.h"
+#include "helix.h"
 #include "ctwitch.h"
 
 /** A little bit of a hack - We reference library's internal methods here just to save some space. **/
@@ -41,7 +42,8 @@ typedef enum {
   channel_teams,
   channel_communities,
   channel_videos,
-  team
+  team,
+  token
 } command_type;
 
 // Command handler function  type.
@@ -129,6 +131,22 @@ char *get_client_id(int options_count, const char **options) {
   return client_id;
 }
 
+/** Gets client_id parameter from provided options array.
+ *
+ * @param options_count Number of options in the options array.
+ * @param options Options array.
+ *
+ * @return Client ID string or NULL if it's not provided.
+ */
+char *get_client_secret(int options_count, const char **options) {
+  char *client_secret = get_param("client-secret", options_count, options);
+  if (client_secret == NULL) {
+    fprintf(stderr, "Error: Client secret should be provided with '--client-secret=' option.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  return client_secret;
+}
 /**
  * Searches for channel with given name and returns it's stringified ID.
  *
@@ -503,6 +521,36 @@ void get_team(const char *query, int options_count, const char **options) {
   free(CLIENT_ID);
 }
 
+/**
+ * Gets and prints the app access token.
+ *
+ * @param param Parameter string (optional)
+ * @param options_count Number of provided options.
+ * @param options List of option strings.
+ */
+void get_token(const char *param, int options_count, const char **options) {
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *CLIENT_SECRET = get_client_secret(options_count, options);
+  char *scope[] = { "user:read:email" };
+
+  twitch_helix_auth_token *token = twitch_helix_get_app_access_token(CLIENT_ID, CLIENT_SECRET, 1, scope);
+  if (token != NULL) {
+    printf(
+      "Token:\n  access_token: %s\n  expires_in: %d\n  token_type: %s\n  scope: %d\n",
+      token->token,
+      token->expires_in,
+      token->token_type,
+      token->scope.count
+    );
+    for (int idx = 0; idx < token->scope.count; idx++) {
+      printf("    %s\n", token->scope.items[idx]);
+    }
+    twitch_helix_auth_token_free(token);
+  }
+
+  free(CLIENT_ID);
+  free(CLIENT_SECRET);
+}
 /** Main **/
 
 int main(int argc, char **argv) {
@@ -583,6 +631,13 @@ int main(int argc, char **argv) {
       .description = "Gets team description and users.",
       .has_parameter = true,
       .handler = &get_team
+    },
+    {
+      .command = token,
+      .name = "token",
+      .description = "Gets app access token.",
+      .has_parameter = false,
+      .handler = &get_token
     }
   };
 

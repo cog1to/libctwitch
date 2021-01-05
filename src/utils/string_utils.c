@@ -35,7 +35,7 @@ void string_append_format(string_t *s, const char *fmt, ...) {
 
   // Write formatted string to the buffer.
   va_start(args, fmt);
-  int result = sprintf(buffer, fmt, args);
+  int result = vsprintf(buffer, fmt, args);
   va_end(args);
 
   string_append(buffer, strlen(buffer), s);
@@ -70,7 +70,7 @@ string_t *string_joined(int count, const char **strings, const char *delimiter) 
   string_t *output = string_init();
   for (int index = 0; index < count - 1; index++) {
     string_append((void *)strings[index], strlen(strings[index]), output);
-    string_append(",", 1, output);
+    string_append(delimiter, 1, output);
   }
 
   string_append((void *)strings[count - 1], strlen(strings[count - 1]), output);

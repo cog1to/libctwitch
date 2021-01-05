@@ -5,14 +5,7 @@
 #include "utils/datagen.h"
 #include "v5/data.h"
 #include "utils/array_utils.h"
-
-/** Helper functions **/
-
-void free_if_not_empty(void *ptr, void(*deallocator)(void *)) {
-  if (ptr != NULL) {
-    (*deallocator)(ptr);
-  }
-}
+#include "utils/data_utils.h"
 
 /** User data **/
 
