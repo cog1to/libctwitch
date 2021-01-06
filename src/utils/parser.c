@@ -141,6 +141,25 @@ void _parse_user(void *dest, json_value *value) {
   }
 }
 
+void *parse_helix_user(json_value *user_object) {
+  twitch_helix_user *user = twitch_helix_user_alloc();
+
+  field_spec schema[] = {
+    { .name = "id", .dest = &user->id, .parser = &parse_id },
+    { .name = "display_name", .dest = &user->display_name, .parser = &parse_string },
+    { .name = "login", .dest = &user->login, .parser = &parse_string },
+    { .name = "type", .dest = &user->type, .parser = &parse_string },
+    { .name = "description", .dest = &user->description, .parser = &parse_string },
+    { .name = "profile_image_url", .dest = &user->profile_image_url, .parser = &parse_string },
+    { .name = "created_at", .dest = &user->created_at, .parser = &parse_string },
+    { .name = "offline_image_url", .dest = &user->offline_image_url, .parser = &parse_string },
+    { .name = "view_count", .dest = &user->view_count, .parser = &parse_int }
+  };
+  parse_entity(user_object, sizeof(schema)/sizeof(field_spec), schema);
+
+  return (void *)user;
+}
+
 /** Channel **/
 
 void *parse_channel(json_value *channel_object) {

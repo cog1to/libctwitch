@@ -7,7 +7,7 @@
 #include "utils/array_utils.h"
 #include "utils/data_utils.h"
 
-/** User data **/
+/** Token **/
 
 twitch_helix_auth_token *twitch_helix_auth_token_alloc() {
   GENERIC_ALLOC(twitch_helix_auth_token)
@@ -23,3 +23,23 @@ void twitch_helix_auth_token_free(twitch_helix_auth_token *token) {
   }
   free(token);
 }
+
+/** User data */
+
+twitch_helix_user *twitch_helix_user_alloc() {
+  GENERIC_ALLOC(twitch_helix_user);
+}
+
+void twitch_helix_user_free(twitch_helix_user *user) {
+  FREE(user->login);
+  FREE(user->display_name);
+  FREE(user->type);
+  FREE(user->description);
+  FREE(user->profile_image_url);
+  FREE(user->offline_image_url);
+  FREE(user->created_at);
+  free(user);
+}
+
+GENERIC_HELIX_LIST(user)
+

@@ -24,7 +24,7 @@ void twitch_v5_user_free(twitch_v5_user *user) {
   free(user);
 }
 
-GENERIC_LIST(user)
+GENERIC_V5_LIST(user)
 
 /** Channel data **/
 
@@ -51,7 +51,7 @@ void twitch_v5_channel_free(twitch_v5_channel *channel) {
   free(channel);
 }
 
-GENERIC_LIST(channel)
+GENERIC_V5_LIST(channel)
 
 /** Follow data **/
 
@@ -65,7 +65,7 @@ void twitch_v5_follow_free(twitch_v5_follow *follow) {
   free(follow);
 }
 
-GENERIC_LIST(follow)
+GENERIC_V5_LIST(follow)
 
 /** Streams **/
 
@@ -81,7 +81,7 @@ void twitch_v5_stream_free(twitch_v5_stream *stream) {
   free(stream);
 }
 
-GENERIC_LIST(stream)
+GENERIC_V5_LIST(stream)
 
 twitch_v5_summary *twitch_v5_summary_alloc() {
   GENERIC_ALLOC(twitch_v5_summary)
@@ -103,7 +103,7 @@ void twitch_v5_featured_stream_free(twitch_v5_featured_stream *stream) {
   free(stream);
 }
 
-GENERIC_LIST(featured_stream)
+GENERIC_V5_LIST(featured_stream)
 
 /** Art data **/
 
@@ -134,7 +134,7 @@ void twitch_v5_game_free(twitch_v5_game *game) {
   free(game);
 }
 
-GENERIC_LIST(game)
+GENERIC_V5_LIST(game)
 
 /** Top games data **/
 
@@ -147,7 +147,7 @@ void twitch_v5_top_game_free(twitch_v5_top_game *game) {
   free(game);
 }
 
-GENERIC_LIST(top_game)
+GENERIC_V5_LIST(top_game)
 
 /** Channel followers data **/
 
@@ -161,7 +161,7 @@ void twitch_v5_follower_free(twitch_v5_follower *follower) {
   free(follower);
 }
 
-GENERIC_LIST(follower)
+GENERIC_V5_LIST(follower)
 
 /** Communities data **/
 
@@ -184,7 +184,7 @@ void twitch_v5_community_free(twitch_v5_community *community) {
   free(community);
 }
 
-GENERIC_LIST(community)
+GENERIC_V5_LIST(community)
 
 /** Video data **/
 
@@ -229,7 +229,7 @@ void twitch_v5_thumbnail_free(twitch_v5_thumbnail *thumbnail) {
   free(thumbnail);
 }
 
-GENERIC_LIST(thumbnail)
+GENERIC_V5_LIST(thumbnail)
 
 twitch_v5_video_thumbnails *twitch_v5_video_thumbnails_alloc() {
   GENERIC_ALLOC(twitch_v5_video_thumbnails)
@@ -270,7 +270,7 @@ void twitch_v5_video_free(twitch_v5_video *video) {
   free(video);
 }
 
-GENERIC_LIST(video)
+GENERIC_V5_LIST(video)
 
 /** Teams data **/
 
@@ -291,5 +291,5 @@ void twitch_v5_team_free(twitch_v5_team *team) {
   free(team);
 }
 
-GENERIC_LIST(team)
+GENERIC_V5_LIST(team)
 

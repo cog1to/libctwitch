@@ -20,11 +20,20 @@
     deinit(prop); \
   }
 
-#define GENERIC_LIST(entity) \
+#define GENERIC_V5_LIST(entity) \
   twitch_v5_##entity##_list *twitch_v5_##entity##_list_alloc() { \
     GENERIC_ALLOC(twitch_v5_##entity##_list) \
   } \
   void twitch_v5_##entity##_list_free(twitch_v5_##entity##_list *list) { \
     pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_v5_##entity##_free); \
+    free(list); \
+  }
+
+#define GENERIC_HELIX_LIST(entity) \
+  twitch_helix_##entity##_list *twitch_helix_##entity##_list_alloc() { \
+    GENERIC_ALLOC(twitch_helix_##entity##_list) \
+  } \
+  void twitch_helix_##entity##_list_free(twitch_helix_##entity##_list *list) { \
+    pointer_array_free(list->count, (void **)list->items, (void(*)(void*))&twitch_helix_##entity##_free); \
     free(list); \
   }

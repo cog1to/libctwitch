@@ -22,6 +22,7 @@ add_library(ctwitch SHARED
   src/utils/string_utils.c
   src/utils/array_utils.c
   src/utils/network_utils.c
+  src/utils/network_helix_utils.c
   src/utils/parser.c
   src/utils/data_utils.c
   src/v5/data.c
@@ -33,6 +34,7 @@ add_library(ctwitch SHARED
   src/v5/teams.c
   src/helix/data.c
   src/helix/token.c
+  src/helix/users.c
   src/init.c
 )
 
@@ -70,6 +72,7 @@ add_executable(twitch-remote
   src/utils/string_utils.c
   src/utils/array_utils.c
   src/utils/network_utils.c
+  src/utils/network_helix_utils.c
   src/utils/parser.c
   src/utils/data_utils.c
   src/v5/data.c
@@ -81,6 +84,7 @@ add_executable(twitch-remote
   src/v5/teams.c
   src/helix/data.c
   src/helix/token.c
+  src/helix/users.c
   src/init.c
 )
 

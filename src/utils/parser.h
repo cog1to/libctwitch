@@ -193,5 +193,14 @@ void *parse_video(json_value *value);
  */
 void *parse_auth_token(json_value *value);
 
+/**
+ * Creates a new twitch_helix_user struct and tries to fill it with properties from provided JSON value.
+ *
+ * @param user_object JSON object holding user data fields.
+ *
+ * @return Pointer to newly allocated twitch_helix_user struct filled with data from JSON value.
+ */
+void *parse_helix_user(json_value *user_object);
+
 #endif
 

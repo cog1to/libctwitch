@@ -43,7 +43,8 @@ typedef enum {
   channel_communities,
   channel_videos,
   team,
-  token
+  token,
+  helix_user
 } command_type;
 
 // Command handler function  type.
@@ -551,6 +552,50 @@ void get_token(const char *param, int options_count, const char **options) {
   free(CLIENT_ID);
   free(CLIENT_SECRET);
 }
+
+/**
+ * Gets and prints username data.
+ *
+ * @param username Username to get user info for.
+ * @param options_count Number of CLI arguments.
+ * @param options List of arguments.
+ */
+void get_helix_user(const char *username, int options_count, const char **options) {
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *CLIENT_SECRET = get_client_secret(options_count, options);
+  const char *usernames[1] = { username };
+
+  twitch_helix_auth_token *token = twitch_helix_get_app_access_token(CLIENT_ID, CLIENT_SECRET, 0, NULL);
+  if (token == NULL) {
+    free(CLIENT_ID);
+    free(CLIENT_SECRET);
+    fprintf(stderr, "Error: failed to get auth token\n");
+    return;
+  }
+
+  twitch_helix_user_list *users = twitch_helix_get_users(CLIENT_ID, token->token, 1, usernames);
+  if (users != NULL) {
+    printf("Users: %d\n", users->count);
+    for (int idx = 0; idx < users->count; idx++) {
+      twitch_helix_user *user = users->items[idx];
+      printf(
+        "Username: %s\n  ID: %lld\n  Display Name: %s\n  Created At: %s\n  Type: %s\n  Description: %s\n",
+        user->login,
+        user->id,
+        user->display_name,
+        user->created_at,
+        user->type,
+        user->description
+      );
+    }
+    twitch_helix_user_list_free(users);
+  } else {
+    fprintf(stderr, "Error: user with login '%s' not found\n", username);
+  }
+
+  free(CLIENT_ID);
+  free(CLIENT_SECRET);
+}
 /** Main **/
 
 int main(int argc, char **argv) {
@@ -638,6 +683,13 @@ int main(int argc, char **argv) {
       .description = "Gets app access token.",
       .has_parameter = false,
       .handler = &get_token
+    },
+    {
+      .command = helix_user,
+      .name = "helix_user",
+      .description = "Gets user info for specific login",
+      .has_parameter = true,
+      .handler = &get_helix_user
     }
   };
 
