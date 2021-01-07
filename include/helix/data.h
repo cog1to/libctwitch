@@ -128,4 +128,54 @@ twitch_helix_follow_list *twitch_helix_follow_list_alloc();
  */
 void twitch_helix_follow_list_free(twitch_helix_follow_list *list);
 
+/** Streams **/
+
+typedef struct {
+  long long id;
+  long long user_id;
+  char *user_name;
+  long long game_id;
+  char *game_name;
+  char *type;
+  char *title;
+  int viewer_count;
+  char *started_at;
+  char *language;
+  char *thumbnail_url;
+} twitch_helix_stream;
+
+
+/**
+ * Creates new instance of twitch_helix_stream structure.
+ *
+ * @return Pointer to newly allocated twitch_helix_stream;
+ */
+twitch_helix_stream *twitch_helix_stream_alloc();
+
+/**
+ * Frees the memory occupied by twitch_helix_stream structure.
+ *
+ * @param stream Stream structure to deallocate.
+ */
+void twitch_helix_stream_free(twitch_helix_stream *stream);
+
+typedef struct {
+  int count;
+  twitch_helix_stream **items;
+} twitch_helix_stream_list;
+
+/**
+ * Allocates new twitch_helix_stream_list struct.
+ *
+ * @return Pointer to newly allocated list.
+ */
+twitch_helix_stream_list *twitch_helix_stream_list_alloc();
+
+/**
+ * Frees memory occupied by all twitch_helix_stream structs inside given list, then frees the list itself.
+ *
+ * @param list List to deallocate.
+ */
+void twitch_helix_stream_list_free(twitch_helix_stream_list *list);
+
 #endif

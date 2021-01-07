@@ -35,6 +35,7 @@ add_library(ctwitch SHARED
   src/helix/data.c
   src/helix/token.c
   src/helix/users.c
+  src/helix/streams.c
   src/init.c
 )
 
@@ -85,6 +86,7 @@ add_executable(twitch-remote
   src/helix/data.c
   src/helix/token.c
   src/helix/users.c
+  src/helix/streams.c
   src/init.c
 )
 

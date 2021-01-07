@@ -9,6 +9,15 @@
 #include "utils/parser.h"
 #include "json/json.h"
 
+#define MAX_PAGE_SIZE 100
+#define DEFAULT_PAGE_SIZE 20
+
+/** Helpers **/
+
+int min_int(int a, int b) {
+  if (a < b) { return a; } else { return b; }
+}
+
 /** cURL helpers **/
 
 extern size_t twitch_writefunc(void *ptr, size_t size, size_t nmemb, struct string *s);
@@ -82,7 +91,7 @@ void helix_append_cursor_params(string_t *url, int limit, const char *after, boo
   bool is_first_param_updated = is_first_param;
 
   if (limit > 0) {
-    string_append_format(url, "%sfirst=%i", is_first_param_updated ? "?" : "&", limit);
+    string_append_format(url, "%sfirst=%i", is_first_param_updated ? "?" : "&", min_int(limit, MAX_PAGE_SIZE));
     is_first_param_updated = false;
   }
 
@@ -151,7 +160,7 @@ void **get_all_helix_pages(
   parser_func parser,
   int *size
 ) {
-  const int PAGE_SIZE = 20;
+  const int PAGE_SIZE = DEFAULT_PAGE_SIZE;
 
   int count = 0;
   int total = 0;

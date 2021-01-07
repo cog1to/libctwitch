@@ -11,6 +11,7 @@
 #include "helix/data.h"
 #include "helix/token.h"
 #include "helix/users.h"
+#include "helix/streams.h"
 
 #endif
 

@@ -205,11 +205,20 @@ void *parse_helix_user(json_value *user_object);
 /**
  * Creates a new twitch_helix_follow struct and tries to fill it with properties from provided JSON value.
  *
- * @param follow_object JSON object holding user data fields.
+ * @param follow_object JSON object holding follow data fields.
  *
  * @return Pointer to newly allocated twitch_helix_follow struct filled with data from JSON value.
  */
 void *parse_helix_follow(json_value *follow_object);
+
+/**
+ * Creates a new twitch_helix_stream struct and tries to fill it with properties from provided JSON value.
+ *
+ * @param stream_object JSON object holding stream data fields.
+ *
+ * @return Pointer to newly allocated twitch_helix_stream struct filled with data from JSON value.
+ */
+void *parse_helix_stream(json_value *stream_object);
 
 #endif
 

@@ -13,7 +13,6 @@
 /** Constans **/
 
 #define MAX_USERS_COUNT 100
-#define MAX_PAGE_SIZE 100
 
 /** URL builders  **/
 
@@ -158,7 +157,7 @@ twitch_helix_follow_list *twitch_helix_get_follows(
     &parse_helix_follow,
     &list->count,
     next,
-    NULL
+    total
   );
   return list;
 }

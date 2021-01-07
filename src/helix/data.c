@@ -58,3 +58,22 @@ void twitch_helix_follow_free(twitch_helix_follow *follow) {
 
 GENERIC_HELIX_LIST(follow)
 
+/** Stream **/
+
+twitch_helix_stream *twitch_helix_stream_alloc() {
+  GENERIC_ALLOC(twitch_helix_stream)
+}
+
+void twitch_helix_stream_free(twitch_helix_stream *stream) {
+  FREE(stream->user_name);
+  FREE(stream->game_name);
+  FREE(stream->type);
+  FREE(stream->title);
+  FREE(stream->started_at);
+  FREE(stream->language);
+  FREE(stream->thumbnail_url);
+  free(stream);
+}
+
+GENERIC_HELIX_LIST(stream)
+

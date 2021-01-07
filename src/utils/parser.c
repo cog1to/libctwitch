@@ -175,6 +175,27 @@ void *parse_helix_follow(json_value *follow_object) {
   return (void *)follow;
 }
 
+void *parse_helix_stream(json_value *stream_object) {
+  twitch_helix_stream *stream = twitch_helix_stream_alloc();
+
+  field_spec schema[] = {
+    { .name = "id", .dest = &stream->id, .parser = &parse_id },
+    { .name = "user_id", .dest = &stream->user_id, .parser = &parse_id },
+    { .name = "user_name", .dest = &stream->user_name, .parser = &parse_string },
+    { .name = "game_id", .dest = &stream->game_id, .parser = &parse_id },
+    { .name = "game_name", .dest = &stream->game_name, .parser = &parse_string },
+    { .name = "type", .dest = &stream->type, .parser = &parse_string },
+    { .name = "title", .dest = &stream->title, .parser = &parse_string },
+    { .name = "viewer_count", .dest = &stream->viewer_count, .parser = &parse_int },
+    { .name = "started_at", .dest = &stream->started_at, .parser = &parse_string },
+    { .name = "language", .dest = &stream->language, .parser = &parse_string },
+    { .name = "thumbnail_url", .dest = &stream->thumbnail_url, .parser = &parse_string }
+  };
+  parse_entity(stream_object, sizeof(schema)/sizeof(field_spec), schema);
+
+  return (void *)stream;
+}
+
 /** Channel **/
 
 void *parse_channel(json_value *channel_object) {
