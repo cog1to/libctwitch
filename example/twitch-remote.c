@@ -44,7 +44,8 @@ typedef enum {
   channel_videos,
   team,
   token,
-  helix_user
+  helix_user,
+  helix_follows
 } command_type;
 
 // Command handler function  type.
@@ -596,6 +597,57 @@ void get_helix_user(const char *username, int options_count, const char **option
   free(CLIENT_ID);
   free(CLIENT_SECRET);
 }
+
+/**
+ * Gets and prints username data.
+ *
+ * @param username Username to get user info for.
+ * @param options_count Number of CLI arguments.
+ * @param options List of arguments.
+ */
+void get_helix_follows(const char *username, int options_count, const char **options) {
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *CLIENT_SECRET = get_client_secret(options_count, options);
+  const char *usernames[1] = { username };
+
+  twitch_helix_auth_token *token = twitch_helix_get_app_access_token(CLIENT_ID, CLIENT_SECRET, 0, NULL);
+  if (token == NULL) {
+    free(CLIENT_ID);
+    free(CLIENT_SECRET);
+    fprintf(stderr, "Error: failed to get auth token\n");
+    return;
+  }
+
+  twitch_helix_user_list *users = twitch_helix_get_users(CLIENT_ID, token->token, 1, usernames);
+  if (users != NULL) {
+    if (users->count > 0) {
+      twitch_helix_user *user = users->items[0];
+      twitch_helix_follow_list *follows = twitch_helix_get_all_follows(CLIENT_ID, token->token, user->id, 0);
+      if (follows != NULL) {
+        printf("Follows: %d\n", follows->count);
+        for (int idx = 0; idx < follows->count; idx++) {
+          twitch_helix_follow *follow = follows->items[idx];
+          printf("From: %s (%d)\nTo: %s (%d)\n\n",
+            follow->from_name,
+            follow->from_id,
+            follow->to_name,
+            follow->to_id
+          );
+        }
+        twitch_helix_follow_list_free(follows);
+      } else {
+        fprintf(stderr, "Error: user with login '%s' not found\n", username);
+      }
+    }
+    twitch_helix_user_list_free(users);
+  } else {
+    fprintf(stderr, "Error: user with login '%s' not found\n", username);
+  }
+
+  free(CLIENT_ID);
+  free(CLIENT_SECRET);
+}
+
 /** Main **/
 
 int main(int argc, char **argv) {
@@ -690,6 +742,13 @@ int main(int argc, char **argv) {
       .description = "Gets user info for specific login",
       .has_parameter = true,
       .handler = &get_helix_user
+    },
+    {
+      .command = helix_follows,
+      .name = "helix_follows",
+      .description = "Gets user's follows",
+      .has_parameter = true,
+      .handler = &get_helix_follows
     }
   };
 

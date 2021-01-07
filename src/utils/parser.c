@@ -160,6 +160,21 @@ void *parse_helix_user(json_value *user_object) {
   return (void *)user;
 }
 
+void *parse_helix_follow(json_value *follow_object) {
+  twitch_helix_follow *follow = twitch_helix_follow_alloc();
+
+  field_spec schema[] = {
+    { .name = "from_id", .dest = &follow->from_id, .parser = &parse_id },
+    { .name = "from_name", .dest = &follow->from_name, .parser = &parse_string },
+    { .name = "to_id", .dest = &follow->to_id, .parser = &parse_id },
+    { .name = "to_name", .dest = &follow->to_name, .parser = &parse_string },
+    { .name = "followed_at", .dest = &follow->followed_at, .parser = &parse_string }
+  };
+  parse_entity(follow_object, sizeof(schema)/sizeof(field_spec), schema);
+
+  return (void *)follow;
+}
+
 /** Channel **/
 
 void *parse_channel(json_value *channel_object) {

@@ -100,7 +100,8 @@ void **helix_get_page(
   const char *after,
   parser_func parser,
   int *size,
-  char *next
+  char **next,
+  int *total
 ) {
   string_t *url = builder(params, limit, after);
   json_value *value = twitch_helix_get_json(client_id, auth, url->ptr);
@@ -129,10 +130,12 @@ void **helix_get_page(
       json_value *pagination = value->u.object.values[x].value;
       int pagination_length = pagination->u.object.length;
       for (int y = 0; y < pagination_length; y++) {
-        if (strcmp(pagination->u.object.values[y].name, "cursor") == 0) {
-          next = immutable_string_copy(pagination->u.object.values[y].value->u.string.ptr);
+        if (strcmp(pagination->u.object.values[y].name, "cursor") == 0 && next != NULL) {
+          (*next) = immutable_string_copy(pagination->u.object.values[y].value->u.string.ptr);
         }
       }
+    } else if (strcmp(value->u.object.values[x].name, "total") == 0 && total != NULL) {
+      *total = value->u.object.values[x].value->u.integer;
     }
   }
 
@@ -140,3 +143,80 @@ void **helix_get_page(
   return elements;
 }
 
+void **get_all_helix_pages(
+  const char *client_id,
+  const char *auth,
+  helix_page_url_builder builder,
+  void *params,
+  parser_func parser,
+  int *size
+) {
+  const int PAGE_SIZE = 20;
+
+  int count = 0;
+  int total = 0;
+  int reported_total = 0;
+  void **elements = NULL;
+  char *cursor = NULL;
+  char *next_cursor = NULL;
+
+  do {
+    void **page = helix_get_page(
+      client_id,
+      auth,
+      builder,
+      params,
+      PAGE_SIZE,
+      cursor,
+      parser,
+      &count,
+      &next_cursor,
+      &reported_total
+    );
+
+    // Don't do anything if there are 0 items returned. It should mean we're at the end of the list.
+    if (count == 0 && next_cursor == NULL) {
+      break;
+    }
+
+    // (Re)allocate memory to store next page.
+    if (total == 0) {
+      elements = malloc(sizeof(void *) * count);
+    } else {
+      elements = realloc(elements, sizeof(void *) * (total + count));
+    }
+
+    if (elements == NULL) {
+      fprintf(stderr, "Failed to allocate memory for next page.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    // Copy page's content to the overall storage.
+    memcpy(&elements[total], page, sizeof(void *) * count);
+
+    // Update total count.
+    total += count;
+
+    // Free current page data.
+    free(page);
+
+    // Update cursor, if needed.
+    if (next_cursor != NULL) {
+      if (cursor != NULL) {
+        free(cursor);
+      }
+      cursor = immutable_string_copy(next_cursor);
+      free(next_cursor);
+      next_cursor = NULL;
+    }
+  } while (count > 0 && total < reported_total);
+
+  // Free the cursor memory.
+  if (cursor != NULL) {
+    free(cursor);
+  }
+
+  // Return the whole list.
+  *size = total;
+  return elements;
+}

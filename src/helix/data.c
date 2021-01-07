@@ -43,3 +43,18 @@ void twitch_helix_user_free(twitch_helix_user *user) {
 
 GENERIC_HELIX_LIST(user)
 
+/** Follows */
+
+twitch_helix_follow *twitch_helix_follow_alloc() {
+  GENERIC_ALLOC(twitch_helix_follow)
+}
+
+void twitch_helix_follow_free(twitch_helix_follow *follow) {
+  FREE(follow->from_name);
+  FREE(follow->to_name);
+  FREE(follow->followed_at);
+  free(follow);
+}
+
+GENERIC_HELIX_LIST(follow)
+
