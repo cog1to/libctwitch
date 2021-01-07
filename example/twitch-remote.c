@@ -703,7 +703,6 @@ void get_helix_live_follows(const char *username, int options_count, const char 
     return;
   }
 
-  // TODO: map user ids to an array, feed them to the twitch_helix_get_all_streams.
   long long *user_ids = malloc(sizeof(long long) * follows->count);
   for (int idx = 0; idx < follows->count; idx++) {
     user_ids[idx] = follows->items[idx]->to_id;
