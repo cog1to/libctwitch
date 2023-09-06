@@ -70,6 +70,7 @@ json_value *twitch_helix_get_json(const char *client_id, const char *auth, const
 
   // Check return code.
   if (code == CURLE_HTTP_RETURNED_ERROR) {
+    fprintf(stderr, "Error at url '%s'\n", url);
     string_free(output);
     return NULL;
   }

@@ -58,6 +58,21 @@ void twitch_helix_follow_free(twitch_helix_follow *follow) {
 
 GENERIC_HELIX_LIST(follow)
 
+/** Channel follows **/
+
+twitch_helix_channel_follow *twitch_helix_channel_follow_alloc() {
+  GENERIC_ALLOC(twitch_helix_channel_follow)
+}
+
+void twitch_helix_channel_follow_free(twitch_helix_channel_follow *follow) {
+  FREE(follow->broadcaster_login);
+  FREE(follow->broadcaster_name);
+  FREE(follow->followed_at);
+  free(follow);
+}
+
+GENERIC_HELIX_LIST(channel_follow)
+
 /** Stream **/
 
 twitch_helix_stream *twitch_helix_stream_alloc() {

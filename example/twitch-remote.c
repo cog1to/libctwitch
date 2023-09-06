@@ -46,7 +46,9 @@ typedef enum {
   token,
   helix_user,
   helix_follows,
-  helix_live_follows
+  helix_live_follows,
+  helix_channel_follows,
+  helix_live_channel_follows
 } command_type;
 
 // Command handler function  type.
@@ -80,14 +82,21 @@ void print_usage(int count, command_spec *commands) {
 
     // Format command usage string.
     char command_usage[32];
-    sprintf(command_usage, "%s%s", command.name, command.has_parameter ? " <query>" : "");
+    sprintf(
+      command_usage,
+      "%s%s",
+      command.name,
+      command.has_parameter ? " <query>" : ""
+    );
 
     printf("  %-25s\t%s\n", command_usage, command.description);
   }
 
   // Options
   printf("\nOptions:\n");
-  printf("  %-25s\t(REQUIRED) Registered Twitch API Client ID string.\n", "--client-id=CLIENT_ID\t");
+  printf("  %-25s\t(REQUIRED) Registered Twitch API Client ID string.\n",
+    "--client-id=CLIENT_ID\t"
+  );
 }
 
 /**
@@ -150,6 +159,24 @@ char *get_client_secret(int options_count, const char **options) {
 
   return client_secret;
 }
+
+/** Gets user_token parameter from provided options array.
+ *
+ * @param options_count Number of options in the options array.
+ * @param options Options array.
+ *
+ * @return Client ID string or NULL if it's not provided.
+ */
+char *get_user_token(int options_count, const char **options) {
+  char *user_token = get_param("user-token", options_count, options);
+  if (user_token == NULL) {
+    fprintf(stderr, "Error: User token should be provided with '--user_token=' option.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  return user_token;
+}
+
 /**
  * Searches for channel with given name and returns it's stringified ID.
  *
@@ -534,7 +561,7 @@ void get_team(const char *query, int options_count, const char **options) {
 void get_token(const char *param, int options_count, const char **options) {
   char *CLIENT_ID = get_client_id(options_count, options);
   char *CLIENT_SECRET = get_client_secret(options_count, options);
-  char *scope[] = { "user:read:email" };
+  char *scope[] = { "user:read:email", "user:read:follows" };
 
   twitch_helix_auth_token *token = twitch_helix_get_app_access_token(CLIENT_ID, CLIENT_SECRET, 1, scope);
   if (token != NULL) {
@@ -650,18 +677,85 @@ void get_helix_follows(const char *username, int options_count, const char **opt
 }
 
 /**
+ * Gets and prints list of follows from a given channel.
+ *
+ * @param username Username to get user info for.
+ * @param options_count Number of CLI arguments.
+ * @param options List of arguments.
+ */
+void get_helix_channel_follows(
+  const char *username,
+  int options_count,
+  const char **options
+) {
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *USER_TOKEN = get_user_token(options_count, options);
+  const char *usernames[1] = { username };
+
+  twitch_helix_user_list *users = twitch_helix_get_users(
+    CLIENT_ID,
+    USER_TOKEN,
+    1,
+    usernames
+  );
+  if (users != NULL) {
+    if (users->count > 0) {
+      twitch_helix_user *user = users->items[0];
+      twitch_helix_channel_follow_list *follows =
+        twitch_helix_get_all_channel_follows(
+          CLIENT_ID,
+          USER_TOKEN,
+          user->id,
+          0
+        );
+      if (follows != NULL) {
+        printf("Follows: %d\n", follows->count);
+        for (int idx = 0; idx < follows->count; idx++) {
+          twitch_helix_channel_follow *follow = follows->items[idx];
+          printf("Name: %s [Login: %s] (Id: %lld)\n",
+            follow->broadcaster_name,
+            follow->broadcaster_login,
+            follow->broadcaster_id
+          );
+        }
+        twitch_helix_channel_follow_list_free(follows);
+      } else {
+        fprintf(stderr, "Error: user with login '%s' not found\n", username);
+      }
+    }
+    twitch_helix_user_list_free(users);
+  } else {
+    fprintf(stderr, "Error: user with login '%s' not found\n", username);
+  }
+
+  free(CLIENT_ID);
+  free(USER_TOKEN);
+}
+
+
+/**
  * Gets and prints list of live follows from a given user.
  *
  * @param username Username to get user info for.
  * @param options_count Number of CLI arguments.
  * @param options List of arguments.
  */
-void get_helix_live_follows(const char *username, int options_count, const char **options) {
+void get_helix_live_follows(
+  const char *username,
+  int options_count,
+  const char **options
+) {
   char *CLIENT_ID = get_client_id(options_count, options);
   char *CLIENT_SECRET = get_client_secret(options_count, options);
   const char *usernames[1] = { username };
 
-  twitch_helix_auth_token *token = twitch_helix_get_app_access_token(CLIENT_ID, CLIENT_SECRET, 0, NULL);
+  twitch_helix_auth_token *token = twitch_helix_get_app_access_token(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    0,
+    NULL
+  );
+
   if (token == NULL) {
     fprintf(stderr, "Error: failed to get auth token\n");
     free(CLIENT_ID);
@@ -669,7 +763,12 @@ void get_helix_live_follows(const char *username, int options_count, const char 
     return;
   }
 
-  twitch_helix_user_list *users = twitch_helix_get_users(CLIENT_ID, token->token, 1, usernames);
+  twitch_helix_user_list *users = twitch_helix_get_users(
+    CLIENT_ID,
+    token->token,
+    1,
+    usernames
+  );
   if (users == NULL) {
     fprintf(stderr, "Error: failed to get user info\n");
     free(CLIENT_ID);
@@ -727,7 +826,8 @@ void get_helix_live_follows(const char *username, int options_count, const char 
     return;
   } else {
      for (int idx = 0; idx < streams->count; idx++) {
-       printf("ID: %lld\n  Game: %s\n  Channel: %s\n  Channel ID: %d\n  Title: %s\n", 
+       printf(
+         "ID: %lld\n  Game: %s\n  Channel: %s\n  Channel ID: %d\n  Title: %s\n",
          streams->items[idx]->id,
          streams->items[idx]->game_name,
          streams->items[idx]->user_name,
@@ -742,6 +842,108 @@ void get_helix_live_follows(const char *username, int options_count, const char 
   twitch_helix_follow_list_free(follows);
   free(CLIENT_ID);
   free(CLIENT_SECRET);
+}
+
+/**
+ * Gets and prints list of live follows from a given user using channel API.
+ *
+ * @param username Username to get user info for.
+ * @param options_count Number of CLI arguments.
+ * @param options List of arguments.
+ */
+void get_helix_live_channel_follows(
+  const char *username,
+  int options_count,
+  const char **options
+) {
+  char *CLIENT_ID = get_client_id(options_count, options);
+  char *USER_TOKEN = get_user_token(options_count, options);
+  const char *usernames[1] = { username };
+
+  twitch_helix_user_list *users = twitch_helix_get_users(
+    CLIENT_ID,
+    USER_TOKEN,
+    1,
+    usernames
+  );
+  if (users == NULL) {
+    fprintf(stderr, "Error: failed to get user info\n");
+    free(CLIENT_ID);
+    free(USER_TOKEN);
+    return;
+  }
+  if (users->count == 0) {
+    fprintf(stderr, "Error: user not found\n");
+    twitch_helix_user_list_free(users);
+    free(CLIENT_ID);
+    free(USER_TOKEN);
+    return;
+  }
+
+  twitch_helix_user *user = users->items[0];
+
+  twitch_helix_channel_follow_list *follows = twitch_helix_get_all_channel_follows(
+    CLIENT_ID,
+    USER_TOKEN,
+    user->id,
+    0
+  );
+  if (follows == NULL) {
+    fprintf(stderr, "Error: user with login '%s' not found\n", username);
+    twitch_helix_user_list_free(users);
+    free(CLIENT_ID);
+    free(USER_TOKEN);
+    return;
+  }
+  if (follows->count == 0) {
+    fprintf(stderr, "No follows returned for user %s\n", user->login);
+    twitch_helix_user_list_free(users);
+    twitch_helix_channel_follow_list_free(follows);
+    free(CLIENT_ID);
+    free(USER_TOKEN);
+    return;
+  }
+
+  long long *user_ids = malloc(sizeof(long long) * follows->count);
+  for (int idx = 0; idx < follows->count; idx++) {
+    user_ids[idx] = follows->items[idx]->broadcaster_id;
+  }
+  twitch_helix_stream_list *streams = twitch_helix_get_all_streams(
+    CLIENT_ID,
+    USER_TOKEN,
+    0,
+    NULL,
+    follows->count,
+    user_ids,
+    0,
+    NULL
+  );
+
+  if (streams == NULL) {
+    fprintf(stderr, "Error: failed to get/parse streams list\n");
+    twitch_helix_user_list_free(users);
+    twitch_helix_channel_follow_list_free(follows);
+    free(CLIENT_ID);
+    free(USER_TOKEN);
+    return;
+  } else {
+     for (int idx = 0; idx < streams->count; idx++) {
+       printf(
+         "ID: %lld\n  Game: %s\n  Channel: %s\n  Channel ID: %d\n  Title: %s\n",
+         streams->items[idx]->id,
+         streams->items[idx]->game_name,
+         streams->items[idx]->user_name,
+         streams->items[idx]->user_id,
+         streams->items[idx]->title
+       );
+     }
+  }
+
+  twitch_helix_stream_list_free(streams);
+  twitch_helix_user_list_free(users);
+  twitch_helix_channel_follow_list_free(follows);
+  free(CLIENT_ID);
+  free(USER_TOKEN);
 }
 
 /** Main **/
@@ -852,7 +1054,21 @@ int main(int argc, char **argv) {
       .description = "Gets live streams from user's follow list",
       .has_parameter = true,
       .handler = &get_helix_live_follows
-    }
+    },
+    {
+      .command = helix_channel_follows,
+      .name = "helix_channel_follows",
+      .description = "Gets channel's follows",
+      .has_parameter = true,
+      .handler = &get_helix_channel_follows
+    },
+    {
+      .command = helix_live_channel_follows,
+      .name = "helix_live_channel_follows",
+      .description = "Gets channel's live follows",
+      .has_parameter = true,
+      .handler = &get_helix_live_channel_follows
+    },
   };
 
   int commands_count = sizeof(commands)/sizeof(command_spec);

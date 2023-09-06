@@ -128,6 +128,49 @@ twitch_helix_follow_list *twitch_helix_follow_list_alloc();
  */
 void twitch_helix_follow_list_free(twitch_helix_follow_list *list);
 
+/** Channel follows **/
+
+typedef struct {
+  long long broadcaster_id;
+  char *broadcaster_login;
+  char *broadcaster_name;
+  char *followed_at;
+} twitch_helix_channel_follow;
+
+/**
+ * Creates new instance of twitch_helix_channel_follow structure.
+ *
+ * @return Pointer to newly allocated twitch_helix_channel_follow;
+ */
+twitch_helix_channel_follow *twitch_helix_channel_follow_alloc();
+
+/**
+ * Frees the memory occupied by twitch_helix_channel_follow structure.
+ *
+ * @param follow Follow structure to deallocate.
+ */
+void twitch_helix_channel_follow_free(twitch_helix_channel_follow *follow);
+
+typedef struct {
+  int count;
+  twitch_helix_channel_follow **items;
+} twitch_helix_channel_follow_list;
+
+/**
+ * Allocates new twitch_helix_channel_follow_list struct.
+ *
+ * @return Pointer to newly allocated list.
+ */
+twitch_helix_channel_follow_list *twitch_helix_channel_follow_list_alloc();
+
+/**
+ * Frees memory occupied by all twitch_helix_channel_follow structs inside
+ * given list, then frees the list itself.
+ *
+ * @param list List to deallocate.
+ */
+void twitch_helix_channel_follow_list_free(twitch_helix_channel_follow_list *list);
+
 /** Streams **/
 
 typedef struct {

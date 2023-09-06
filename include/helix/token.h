@@ -11,6 +11,11 @@
  *
  * @return Either a valid twitch_helix_auth_token struct filled with token data, or NULL in case something went wrong. It's caller's responsibility to deallocate the token with twitch_helix_auth_token_free().
  * */
-twitch_helix_auth_token *twitch_helix_get_app_access_token(const char *client_id, const char *client_secret, int scopesv, char **scopesc);
+twitch_helix_auth_token *twitch_helix_get_app_access_token(
+  const char *client_id,
+  const char *client_secret,
+  int scopesv,
+  char **scopesc
+);
 
 #endif

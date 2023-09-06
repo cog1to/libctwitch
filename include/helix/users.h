@@ -91,4 +91,57 @@ twitch_helix_follow_list *twitch_helix_get_all_follows(
   long long to_id
 );
 
+/**
+ * Returns one page of follow data for given channel. If `broadcaster_id` is
+ * specified, the result contains a list with one item if user follows given
+ * broadcaster, or an empty list otherwise.
+ *
+ * Requires a valid user access token obtained with "user:read:follows" scope
+ * instead of standard app access token.
+ *
+ * @param client_id Twitch Client ID.
+ * @param auth Authorization token.
+ * @param user_id ID of a user to query for outgoing follows.
+ * @param broadcaster_id ID of a user to query for incoming follows.
+ * @param limit Page limit.
+ * @param after Page offset cursor.
+ * @param total Returns a total number of follows for given params.
+ * @param next Returns cursor string to use in a request to fetch the next page
+ * of data.
+ *
+ * @return List of follows matching given parameters.
+ */
+twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
+  const char *client_id,
+  const char *auth,
+  long long user_id,
+  long long broadcaster_id,
+  int limit,
+  const char *after,
+  int *total,
+  char *next
+);
+
+/**
+ * Returns list of follow data for given channel. If `broadcaster_id` is
+ * specified, the result contains a list with one item if user follows given
+ * broadcaster, or an empty list otherwise.
+ *
+ * Requires a valid user access token obtained with "user:read:follows" scope
+ * instead of standard app access token.
+ *
+ * @param client_id Twitch Client ID.
+ * @param auth Authorization token.
+ * @param user_id ID of a user to query for outgoing follows.
+ * @param broadcaster_id ID of a user to query for incoming follows.
+ *
+ * @return List of follows matching given parameters.
+ */
+twitch_helix_channel_follow_list *twitch_helix_get_all_channel_follows(
+  const char *client_id,
+  const char *auth,
+  long long user_id,
+  long long broadcaster_id
+);
+
 #endif

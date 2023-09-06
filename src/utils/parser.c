@@ -175,6 +175,20 @@ void *parse_helix_follow(json_value *follow_object) {
   return (void *)follow;
 }
 
+void *parse_helix_channel_follow(json_value *follow_object) {
+  twitch_helix_channel_follow *follow = twitch_helix_channel_follow_alloc();
+
+  field_spec schema[] = {
+    { .name = "broadcaster_id", .dest = &follow->broadcaster_id, .parser = &parse_id },
+    { .name = "broadcaster_name", .dest = &follow->broadcaster_name, .parser = &parse_string },
+    { .name = "broadcaster_login", .dest = &follow->broadcaster_login, .parser = &parse_string },
+    { .name = "followed_at", .dest = &follow->followed_at, .parser = &parse_string }
+  };
+  parse_entity(follow_object, sizeof(schema)/sizeof(field_spec), schema);
+
+  return (void *)follow;
+}
+
 void *parse_helix_stream(json_value *stream_object) {
   twitch_helix_stream *stream = twitch_helix_stream_alloc();
 
