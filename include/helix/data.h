@@ -16,6 +16,7 @@ typedef struct {
 /** Auth token **/
 typedef struct {
   char *token;
+	char *refresh_token;
   int expires_in;
   char *token_type;
   twitch_string_list scope;

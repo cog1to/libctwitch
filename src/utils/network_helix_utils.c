@@ -20,10 +20,20 @@ int min_int(int a, int b) {
 
 /** cURL helpers **/
 
-extern size_t twitch_writefunc(void *ptr, size_t size, size_t nmemb, struct string *s);
+extern size_t twitch_writefunc(
+	void *ptr,
+	size_t size,
+	size_t nmemb,
+	struct string *s
+);
 extern const char *url_encode(const char *string);
 
-CURLcode twitch_helix_get(const char *client_id, const char *auth, const char *url, string_t *output) {
+CURLcode twitch_helix_get(
+	const char *client_id,
+	const char *auth,
+	const char *url,
+	string_t *output
+) {
   // Initialize curl.
   CURL *curl;
   curl = curl_easy_init();
