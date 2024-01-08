@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "v5/data.h"
-#include "helix/data.h"
+#include <ctwitch/v5/data.h>
+#include <ctwitch/helix/data.h>
 #include "parser.h"
 #include "string_utils.h"
 

@@ -8,10 +8,10 @@
 #ifndef _H_HELIX_TWITCH
 #define _H_HELIX_TWITCH
 
-#include "helix/data.h"
-#include "helix/token.h"
-#include "helix/users.h"
-#include "helix/streams.h"
+#include <ctwitch/helix/data.h>
+#include <ctwitch/helix/token.h>
+#include <ctwitch/helix/users.h>
+#include <ctwitch/helix/streams.h>
 
 #endif
 

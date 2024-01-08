@@ -1,5 +1,5 @@
 #include <curl/curl.h>
-#include "ctwitch.h"
+#include <ctwitch/ctwitch.h>
 
 void twitch_v5_init() {
   // Global cURL init.

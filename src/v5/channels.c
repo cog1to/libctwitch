@@ -8,7 +8,8 @@
 #include "utils/network_utils.h"
 #include "utils/parser.h"
 #include "json/json.h"
-#include "v5/data.h"
+
+#include <ctwitch/v5/data.h>
 
 /** URL builders  **/
 
@@ -17,7 +18,11 @@ typedef struct {
   const char *direction;
 } channel_followers_params;
 
-string_t *channel_followers_url_builder(void *params, int limit, const char *cursor) {
+string_t *channel_followers_url_builder(
+	void *params,
+	int limit,
+	const char *cursor
+) {
   char buffer[128];
   bool is_first_param = true;
 

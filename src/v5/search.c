@@ -7,7 +7,8 @@
 #include "utils/network_utils.h"
 #include "utils/parser.h"
 #include "json/json.h"
-#include "v5/data.h"
+
+#include <ctwitch/v5/data.h>
 
 /** URL builders  **/
 

@@ -9,10 +9,10 @@
 /** Art data **/
 
 typedef struct {
-  char *large;
-  char *medium;
-  char *small;
-  char *template;
+	char *large;
+	char *medium;
+	char *small;
+	char *template;
 } twitch_v5_art;
 
 /**
@@ -35,14 +35,14 @@ void twitch_v5_art_free(twitch_v5_art *art);
  * Twitch User info. All properties are dynamically allocated.
  */
 typedef struct {
-  long long id;
-  char *display_name;
-  char *name;
-  char *type;
-  char *bio;
-  char *created_at;
-  char *updated_at;
-  char *logo;
+	long long id;
+	char *display_name;
+	char *name;
+	char *type;
+	char *bio;
+	char *created_at;
+	char *updated_at;
+	char *logo;
 } twitch_v5_user;
 
 /**
@@ -60,8 +60,8 @@ twitch_v5_user *twitch_v5_user_alloc();
 void twitch_v5_user_free(twitch_v5_user *user);
 
 typedef struct {
-  int count;
-  twitch_v5_user **items;
+	int count;
+	twitch_v5_user **items;
 } twitch_v5_user_list;
 
 /**
@@ -72,7 +72,8 @@ typedef struct {
 twitch_v5_user_list *twitch_v5_user_list_alloc();
 
 /**
- * Frees memory occupied by all twitch_v5_user structs inside given list, then frees the list itself.
+ * Frees memory occupied by all twitch_v5_user structs inside given list, then
+ * frees the list itself.
  *
  * @param list List to deallocate.
  */
@@ -84,35 +85,37 @@ void twitch_v5_users_list_free(twitch_v5_user_list *list);
  * Twitch channel info. All string properties are dynamically allocated.
  */
 typedef struct {
-  long long int id;
-  char *game;
-  char *name;
-  char *status;
-  char *display_name;
-  char *broadcaster_language;
-  char *created_at;
-  int followers;
-  char *language;
-  char *logo;
-  bool mature;
-  bool partner;
-  char *profile_banner;
-  char *profile_banner_background_color;
-  char *updated_at;
-  char *url;
-  char *video_banner;
-  int views;
-  char *broadcaster_type;
-  char *broadcaster_software;
-  bool private_video;
-  bool privacy_options_enabled;
+	long long int id;
+	char *game;
+	char *name;
+	char *status;
+	char *display_name;
+	char *broadcaster_language;
+	char *created_at;
+	int followers;
+	char *language;
+	char *logo;
+	bool mature;
+	bool partner;
+	char *profile_banner;
+	char *profile_banner_background_color;
+	char *updated_at;
+	char *url;
+	char *video_banner;
+	int views;
+	char *broadcaster_type;
+	char *broadcaster_software;
+	bool private_video;
+	bool privacy_options_enabled;
 } twitch_v5_channel;
 
 /**
- * Dynamically allocates and initializes twitch_v5_channel struct. Use this to ensure all properties are set to NULL
+ * Dynamically allocates and initializes twitch_v5_channel struct. Use this to
+ * ensure all properties are set to NULL
  * by default.
  *
- * @return Pointer to new twitch_v5_channel struct. You'll have to manually free it later using twitch_v5_channel_free().
+ * @return Pointer to new twitch_v5_channel struct. You'll have to manually free
+ * it later using twitch_v5_channel_free().
  */
 twitch_v5_channel *twitch_v5_channel_alloc();
 
@@ -124,8 +127,8 @@ twitch_v5_channel *twitch_v5_channel_alloc();
 void twitch_v5_channel_free(twitch_v5_channel *channel);
 
 typedef struct {
-  int count;
-  twitch_v5_channel **items;
+	int count;
+	twitch_v5_channel **items;
 } twitch_v5_channel_list;
 
 /**
@@ -148,9 +151,9 @@ void twitch_v5_channel_list_free(twitch_v5_channel_list *list);
  * User's follow info.
  */
 typedef struct {
-  char *created_at;
-  int notifications;
-  twitch_v5_channel *channel;
+	char *created_at;
+	int notifications;
+	twitch_v5_channel *channel;
 } twitch_v5_follow;
 
 /**
@@ -168,8 +171,8 @@ twitch_v5_follow *twitch_v5_follow_alloc();
 void twitch_v5_follow_free(twitch_v5_follow *follow);
 
 typedef struct {
-  int count;
-  twitch_v5_follow **items;
+	int count;
+	twitch_v5_follow **items;
 } twitch_v5_follow_list;
 
 /**
@@ -180,8 +183,10 @@ typedef struct {
 twitch_v5_follow_list *twitch_v5_follow_list_alloc();
 
 /**
- * Helper function to release a dynamically allocated list of pointers to twitch_v5_follow elements.
- * Goes through the array and calls twitch_v5_follow_free on each element, and then frees the array itself.
+ * Helper function to release a dynamically allocated list of pointers to
+ * twitch_v5_follow elements.
+ * Goes through the array and calls twitch_v5_follow_free on each element, and
+ * then frees the array itself.
  *
  * @param list List to free.
  */
@@ -190,25 +195,25 @@ void twitch_v5_follow_list_free(twitch_v5_follow_list *list);
 /** Stream data **/
 
 typedef enum {
-  none,
-  hls,
-  rtmp
+	none,
+	hls,
+	rtmp
 } stream_filter;
 
 /**
  * Live stream data.
  */
 typedef struct {
-  long long int id;
-  double average_fps;
-  twitch_v5_channel *channel;
-  char *created_at;
-  int delay;
-  char *game;
-  int is_playlist;
-  int video_height;
-  int viewers;
-  twitch_v5_art *preview;
+	long long int id;
+	double average_fps;
+	twitch_v5_channel *channel;
+	char *created_at;
+	int delay;
+	char *game;
+	int is_playlist;
+	int video_height;
+	int viewers;
+	twitch_v5_art *preview;
 } twitch_v5_stream;
 
 /**
@@ -226,8 +231,8 @@ twitch_v5_stream *twitch_v5_stream_alloc();
 void twitch_v5_stream_free(twitch_v5_stream *stream);
 
 typedef struct {
-  int count;
-  twitch_v5_stream **items;
+	int count;
+	twitch_v5_stream **items;
 } twitch_v5_stream_list;
 
 /**
@@ -238,8 +243,9 @@ typedef struct {
 twitch_v5_stream_list *twitch_v5_stream_list_alloc();
 
 /**
- * Helper function to release dynamically allocated array of twitch_v5_stream elements.
- * Goes through array and calls twitch_v5_stream_free on each element, and frees the array itself afterwards.
+ * Helper function to release dynamically allocated array of twitch_v5_stream
+ * elements. Goes through array and calls twitch_v5_stream_free on each element,
+ * and frees the array itself afterwards.
  *
  * @param list Array of pointers to twitch_v5_stream elements.
  */
@@ -248,8 +254,8 @@ void twitch_v5_stream_list_free(twitch_v5_stream_list *list);
 /** Stream summary. **/
 
 typedef struct {
-  int channels;
-  int viewers;
+	int channels;
+	int viewers;
 } twitch_v5_summary;
 
 /**
@@ -268,13 +274,13 @@ void twitch_v5_summary_free(twitch_v5_summary *summary);
 
 /** Featured streams. **/
 typedef struct {
-  char *image;
-  int priority;
-  int scheduled;
-  int sponsored;
-  char *text;
-  char *title;
-  twitch_v5_stream *stream;
+	char *image;
+	int priority;
+	int scheduled;
+	int sponsored;
+	char *text;
+	char *title;
+	twitch_v5_stream *stream;
 } twitch_v5_featured_stream;
 
 /**
@@ -285,15 +291,16 @@ typedef struct {
 twitch_v5_featured_stream *twitch_v5_featured_stream_alloc();
 
 /**
- * Recursively frees memory allocated for twitch_v5_featured_stream struct and it's members.
+ * Recursively frees memory allocated for twitch_v5_featured_stream struct and
+ * it's members.
  *
  * @param stream Struct to deallocate.
  */
 void twitch_v5_featured_stream_free(twitch_v5_featured_stream *stream);
 
 typedef struct {
-  int count;
-  twitch_v5_featured_stream **items;
+	int count;
+	twitch_v5_featured_stream **items;
 } twitch_v5_featured_stream_list;
 
 /**
@@ -304,7 +311,8 @@ typedef struct {
 twitch_v5_featured_stream_list *twitch_v5_featured_stream_list_alloc();
 
 /**
- * Frees memory allocated for given array of featured stream objects and for all objects inside it.
+ * Frees memory allocated for given array of featured stream objects and for all
+ * objects inside it.
  *
  * @param list Pointer to the list holding featured stream objects.
  */
@@ -313,14 +321,14 @@ void twitch_v5_featured_stream_list_free(twitch_v5_featured_stream_list *list);
 /** Game data **/
 
 typedef struct {
-  long long int id;
-  long long int giantbomb_id;
-  char *name;
-  char *localized_name;
-  char *locale;
-  int popularity;
-  twitch_v5_art *box;
-  twitch_v5_art *logo;
+	long long int id;
+	long long int giantbomb_id;
+	char *name;
+	char *localized_name;
+	char *locale;
+	int popularity;
+	twitch_v5_art *box;
+	twitch_v5_art *logo;
 } twitch_v5_game;
 
 /**
@@ -331,15 +339,16 @@ typedef struct {
 twitch_v5_game *twitch_v5_game_alloc();
 
 /**
- * Frees the memory allocated for given twitch_v5_game instance and all it's properties.
+ * Frees the memory allocated for given twitch_v5_game instance and all its
+ * properties.
  *
  * @param game Struct to deallocate.
  */
 void twitch_v5_game_free(twitch_v5_game *game);
 
 typedef struct {
-  int count;
-  twitch_v5_game **items;
+	int count;
+	twitch_v5_game **items;
 } twitch_v5_game_list;
 
 /**
@@ -359,9 +368,9 @@ void twitch_v5_game_list_free(twitch_v5_game_list *list);
 /** Top games data **/
 
 typedef struct {
-  twitch_v5_game *game;
-  int channels;
-  int viewers;
+	twitch_v5_game *game;
+	int channels;
+	int viewers;
 } twitch_v5_top_game;
 
 /**
@@ -379,8 +388,8 @@ twitch_v5_top_game *twitch_v5_top_game_alloc();
 void twitch_v5_top_game_free(twitch_v5_top_game *game);
 
 typedef struct {
-  int count;
-  twitch_v5_top_game **items;
+	int count;
+	twitch_v5_top_game **items;
 } twitch_v5_top_game_list;
 
 /**
@@ -401,9 +410,9 @@ void twitch_v5_top_game_list_free(twitch_v5_top_game_list *list);
 /** Followers data **/
 
 typedef struct {
-  char *created_at;
-  bool notifications;
-  twitch_v5_user *user;
+	char *created_at;
+	bool notifications;
+	twitch_v5_user *user;
 } twitch_v5_follower;
 
 /**
@@ -414,15 +423,16 @@ typedef struct {
 twitch_v5_follower *twitch_v5_follower_alloc();
 
 /**
- * Frees the memory allocated for twitch_v5_follower struct and all its properties.
+ * Frees the memory allocated for twitch_v5_follower struct and all its
+ * properties.
  *
  * @param follower Object to deallocate.
  */
 void twitch_v5_follower_free(twitch_v5_follower *follower);
 
 typedef struct {
-  int count;
-  twitch_v5_follower **items;
+	int count;
+	twitch_v5_follower **items;
 } twitch_v5_follower_list;
 
 /**
@@ -442,18 +452,18 @@ void twitch_v5_follower_list_free(twitch_v5_follower_list *list);
 /** Communities **/
 
 typedef struct {
-  char *id;
-  long long int owner_id;
-  char *name;
-  char *display_name;
-  char *avatar_image_url;
-  char *cover_image_url;
-  char *description;
-  char *description_html;
-  char *rules;
-  char *rules_html;
-  char *language;
-  char *summary;
+	char *id;
+	long long int owner_id;
+	char *name;
+	char *display_name;
+	char *avatar_image_url;
+	char *cover_image_url;
+	char *description;
+	char *description_html;
+	char *rules;
+	char *rules_html;
+	char *language;
+	char *summary;
 } twitch_v5_community;
 
 /**
@@ -471,8 +481,8 @@ twitch_v5_community *twitch_v5_community_alloc();
 void twitch_v5_community_free(twitch_v5_community *community);
 
 typedef struct {
-  int count;
-  twitch_v5_community **items;
+	int count;
+	twitch_v5_community **items;
 } twitch_v5_community_list;
 
 /**
@@ -492,11 +502,11 @@ void twitch_v5_community_list_free(twitch_v5_community_list *list);
 /** Videos **/
 
 typedef struct {
-  char *chunked;
-  char *high;
-  char *low;
-  char *medium;
-  char *mobile;
+	char *chunked;
+	char *high;
+	char *low;
+	char *medium;
+	char *mobile;
 } twitch_v5_resolutions;
 
 /**
@@ -514,11 +524,11 @@ twitch_v5_resolutions *twitch_v5_resolutions_alloc();
 void twitch_v5_resolutions_free(twitch_v5_resolutions *resolutions);
 
 typedef struct {
-  float chunked;
-  float high;
-  float low;
-  float medium;
-  float mobile;
+	float chunked;
+	float high;
+	float low;
+	float medium;
+	float mobile;
 } twitch_v5_fps;
 
 /**
@@ -536,9 +546,9 @@ twitch_v5_fps *twitch_v5_fps_alloc();
 void twitch_v5_fps_free(twitch_v5_fps *fps);
 
 typedef struct {
-  long long int id;
-  char *display_name;
-  char *name;
+	long long int id;
+	char *display_name;
+	char *name;
 } twitch_v5_channel_ref;
 
 /**
@@ -556,8 +566,8 @@ twitch_v5_channel_ref *twitch_v5_channel_ref_alloc();
 void twitch_v5_channel_ref_free(twitch_v5_channel_ref *ref);
 
 typedef struct {
-  char *type;
-  char *url;
+	char *type;
+	char *url;
 } twitch_v5_thumbnail;
 
 /**
@@ -568,15 +578,15 @@ typedef struct {
 twitch_v5_thumbnail *twitch_v5_thumbnail_alloc();
 
 /**
- * Frees the memory occupied by twitch_v5_thumbnail struct and it's properties.
+ * Frees the memory occupied by twitch_v5_thumbnail struct and its properties.
  *
  * @param thumbnail Pointer to thumbnail struct to deallocate.
  */
 void twitch_v5_thumbnail_free(twitch_v5_thumbnail *thumbnail);
 
 typedef struct {
-  size_t count;
-  twitch_v5_thumbnail **items;
+	size_t count;
+	twitch_v5_thumbnail **items;
 } twitch_v5_thumbnail_list;
 
 /**
@@ -587,17 +597,18 @@ typedef struct {
 twitch_v5_thumbnail_list *twitch_v5_thumbnail_list_alloc();
 
 /**
- * Frees the memory allocated for twitch_v5_thumbnail_list struct and it's content.
+ * Frees the memory allocated for twitch_v5_thumbnail_list struct and its
+ * content.
  *
  * @param list List to deallocate.
  */
 void twitch_v5_thumbnail_list_free(twitch_v5_thumbnail_list *list);
 
 typedef struct {
-  twitch_v5_thumbnail_list* large;
-  twitch_v5_thumbnail_list* medium;
-  twitch_v5_thumbnail_list* small;
-  twitch_v5_thumbnail_list* template;
+	twitch_v5_thumbnail_list* large;
+	twitch_v5_thumbnail_list* medium;
+	twitch_v5_thumbnail_list* small;
+	twitch_v5_thumbnail_list* template;
 } twitch_v5_video_thumbnails;
 
 /**
@@ -608,35 +619,36 @@ typedef struct {
 twitch_v5_video_thumbnails *twitch_v5_video_thumbnails_alloc();
 
 /**
- * Frees the memory allocated for twitch_v5_video_thumbnails struct and it's content.
+ * Frees the memory allocated for twitch_v5_video_thumbnails struct and its
+ * content.
  *
  * @param list List to deallocate.
  */
 void twitch_v5_video_thumbnails_free(twitch_v5_video_thumbnails *thumbnails);
 
 typedef struct {
-  char *id;
-  int broadcast_id;
-  char *broadcast_type;
-  twitch_v5_channel_ref *channel;
-  char *created_at;
-  char *description;
-  char *description_html;
-  twitch_v5_fps *fps;
-  char *game;
-  char *language;
-  int length;
-  twitch_v5_art *preview;
-  char *published_at;
-  twitch_v5_resolutions *resolutions;
-  char *status;
-  char *tag_list;
-  twitch_v5_video_thumbnails *thumbnails;
-  char *title;
-  char *url;
-  char *viewable;
-  char *viewable_at;
-  int views;
+	char *id;
+	int broadcast_id;
+	char *broadcast_type;
+	twitch_v5_channel_ref *channel;
+	char *created_at;
+	char *description;
+	char *description_html;
+	twitch_v5_fps *fps;
+	char *game;
+	char *language;
+	int length;
+	twitch_v5_art *preview;
+	char *published_at;
+	twitch_v5_resolutions *resolutions;
+	char *status;
+	char *tag_list;
+	twitch_v5_video_thumbnails *thumbnails;
+	char *title;
+	char *url;
+	char *viewable;
+	char *viewable_at;
+	int views;
 } twitch_v5_video;
 
 /**
@@ -654,8 +666,8 @@ twitch_v5_video *twitch_v5_video_alloc();
 void twitch_v5_video_free(twitch_v5_video *video);
 
 typedef struct {
-  int count;
-  twitch_v5_video **items;
+	int count;
+	twitch_v5_video **items;
 } twitch_v5_video_list;
 
 /**
@@ -675,16 +687,16 @@ void twitch_v5_video_list_free(twitch_v5_video_list *list);
 /** Teams **/
 
 typedef struct {
-  long long int id;
-  char *background;
-  char *banner;
-  char *created_at;
-  char *display_name;
-  char *info;
-  char *logo;
-  char *name;
-  char *updated_at;
-  twitch_v5_channel_list *users;
+	long long int id;
+	char *background;
+	char *banner;
+	char *created_at;
+	char *display_name;
+	char *info;
+	char *logo;
+	char *name;
+	char *updated_at;
+	twitch_v5_channel_list *users;
 } twitch_v5_team;
 
 /**
@@ -702,8 +714,8 @@ twitch_v5_team *twitch_v5_team_alloc();
 void twitch_v5_team_free(twitch_v5_team *team);
 
 typedef struct {
-  int count;
-  twitch_v5_team **items;
+	int count;
+	twitch_v5_team **items;
 } twitch_v5_team_list;
 
 /**
@@ -714,7 +726,8 @@ typedef struct {
 twitch_v5_team_list *twitch_v5_team_list_alloc();
 
 /**
- * Frees memory allocated for each twitch_v5_team struct in given array, and the array itself
+ * Frees memory allocated for each twitch_v5_team struct in given array, and the
+ * array itself.
  *
  * @param list Array to deallocate.
  */

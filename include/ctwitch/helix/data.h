@@ -6,19 +6,18 @@
 #include <string.h>
 #include <stdbool.h>
 
-
 /** String list **/
 typedef struct {
-  int count;
-  char **items;
+	int count;
+	char **items;
 } twitch_string_list;
 
 /** Auth token **/
 typedef struct {
-  char *token;
-  int expires_in;
-  char *token_type;
-  twitch_string_list scope;
+	char *token;
+	int expires_in;
+	char *token_type;
+	twitch_string_list scope;
 } twitch_helix_auth_token;
 
 /**
@@ -29,7 +28,8 @@ typedef struct {
 twitch_helix_auth_token *twitch_helix_auth_token_alloc();
 
 /**
- * Frees the memory for given twitch_helix_auth_token struct and all it's properties.
+ * Frees the memory for given twitch_helix_auth_token struct and all its
+ * properties.
  *
  * @param art Struct to deallocate.
  */
@@ -41,15 +41,15 @@ void twitch_helix_auth_token_free(twitch_helix_auth_token *token);
  * Twitch User info. All properties are dynamically allocated.
  */
 typedef struct {
-  long long id;
-  char *display_name;
-  char *login;
-  char *type;
-  char *description;
-  char *profile_image_url;
-  char *offline_image_url;
-  int view_count;
-  char *created_at;
+	long long id;
+	char *display_name;
+	char *login;
+	char *type;
+	char *description;
+	char *profile_image_url;
+	char *offline_image_url;
+	int view_count;
+	char *created_at;
 } twitch_helix_user;
 
 /**
@@ -60,15 +60,16 @@ typedef struct {
 twitch_helix_user *twitch_helix_user_alloc();
 
 /**
- * Frees the memory allocated for twitch_helix_user struct and all its properties.
+ * Frees the memory allocated for twitch_helix_user struct and all its
+ * properties.
  *
  * @param user Dynamically allocated twitch user data struct.
  */
 void twitch_helix_user_free(twitch_helix_user *user);
 
 typedef struct {
-  int count;
-  twitch_helix_user **items;
+	int count;
+	twitch_helix_user **items;
 } twitch_helix_user_list;
 
 /**
@@ -79,7 +80,8 @@ typedef struct {
 twitch_helix_user_list *twitch_helix_user_list_alloc();
 
 /**
- * Frees memory occupied by all twitch_helix_user structs inside given list, then frees the list itself.
+ * Frees memory occupied by all twitch_helix_user structs inside given list,
+ * then frees the list itself.
  *
  * @param list List to deallocate.
  */
@@ -88,11 +90,11 @@ void twitch_helix_user_list_free(twitch_helix_user_list *list);
 /** Follows **/
 
 typedef struct {
-  long long from_id;
-  char *from_name;
-  long long to_id;
-  char *to_name;
-  char *followed_at;
+	long long from_id;
+	char *from_name;
+	long long to_id;
+	char *to_name;
+	char *followed_at;
 } twitch_helix_follow;
 
 /**
@@ -110,8 +112,8 @@ twitch_helix_follow *twitch_helix_follow_alloc();
 void twitch_helix_follow_free(twitch_helix_follow *follow);
 
 typedef struct {
-  int count;
-  twitch_helix_follow **items;
+	int count;
+	twitch_helix_follow **items;
 } twitch_helix_follow_list;
 
 /**
@@ -122,7 +124,8 @@ typedef struct {
 twitch_helix_follow_list *twitch_helix_follow_list_alloc();
 
 /**
- * Frees memory occupied by all twitch_helix_follow structs inside given list, then frees the list itself.
+ * Frees memory occupied by all twitch_helix_follow structs inside given list,
+ * then frees the list itself.
  *
  * @param list List to deallocate.
  */
@@ -131,10 +134,10 @@ void twitch_helix_follow_list_free(twitch_helix_follow_list *list);
 /** Channel follows **/
 
 typedef struct {
-  long long broadcaster_id;
-  char *broadcaster_login;
-  char *broadcaster_name;
-  char *followed_at;
+	long long broadcaster_id;
+	char *broadcaster_login;
+	char *broadcaster_name;
+	char *followed_at;
 } twitch_helix_channel_follow;
 
 /**
@@ -152,8 +155,8 @@ twitch_helix_channel_follow *twitch_helix_channel_follow_alloc();
 void twitch_helix_channel_follow_free(twitch_helix_channel_follow *follow);
 
 typedef struct {
-  int count;
-  twitch_helix_channel_follow **items;
+	int count;
+	twitch_helix_channel_follow **items;
 } twitch_helix_channel_follow_list;
 
 /**
@@ -169,22 +172,24 @@ twitch_helix_channel_follow_list *twitch_helix_channel_follow_list_alloc();
  *
  * @param list List to deallocate.
  */
-void twitch_helix_channel_follow_list_free(twitch_helix_channel_follow_list *list);
+void twitch_helix_channel_follow_list_free(
+	twitch_helix_channel_follow_list *list
+);
 
 /** Streams **/
 
 typedef struct {
-  long long id;
-  long long user_id;
-  char *user_name;
-  long long game_id;
-  char *game_name;
-  char *type;
-  char *title;
-  int viewer_count;
-  char *started_at;
-  char *language;
-  char *thumbnail_url;
+	long long id;
+	long long user_id;
+	char *user_name;
+	long long game_id;
+	char *game_name;
+	char *type;
+	char *title;
+	int viewer_count;
+	char *started_at;
+	char *language;
+	char *thumbnail_url;
 } twitch_helix_stream;
 
 
@@ -203,8 +208,8 @@ twitch_helix_stream *twitch_helix_stream_alloc();
 void twitch_helix_stream_free(twitch_helix_stream *stream);
 
 typedef struct {
-  int count;
-  twitch_helix_stream **items;
+	int count;
+	twitch_helix_stream **items;
 } twitch_helix_stream_list;
 
 /**
@@ -215,7 +220,8 @@ typedef struct {
 twitch_helix_stream_list *twitch_helix_stream_list_alloc();
 
 /**
- * Frees memory occupied by all twitch_helix_stream structs inside given list, then frees the list itself.
+ * Frees memory occupied by all twitch_helix_stream structs inside given list,
+ * then frees the list itself.
  *
  * @param list List to deallocate.
  */

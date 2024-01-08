@@ -11,10 +11,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "data.h"
+#include <ctwitch/helix/data.h>
 
 /**
- * Returns one page of live streams data for given parameters. 
+ * Returns one page of live streams data for given parameters.
  *
  * @param client_id Twitch Client ID.
  * @param auth Authorization token.
@@ -27,27 +27,28 @@
  * @param limit Page size.
  * @param after Page offset cursor.
  * @param total Returns a total number of items for given params.
- * @param next Returns cursor string to use in a request to fetch the next page of data.
+ * @param next Returns cursor string to use in a request to fetch the next page
+ * of data.
  *
  * @return List of live streams matching given parameters.
  */
 twitch_helix_stream_list *twitch_helix_get_streams(
-  const char *client_id,
-  const char *auth,
-  long long game_id,
-  const char *language,
-  int users_count,
-  long long *users,
-  int logins_count,
-  const char **logins,
-  int limit,
-  const char *after,
-  int *total,
-  char **next
+	const char *client_id,
+	const char *auth,
+	long long game_id,
+	const char *language,
+	int users_count,
+	long long *users,
+	int logins_count,
+	const char **logins,
+	int limit,
+	const char *after,
+	int *total,
+	char **next
 );
 
 /**
- * Returns full list of live streams data for given parameters. 
+ * Returns full list of live streams data for given parameters.
  *
  * @param client_id Twitch Client ID.
  * @param auth Authorization token.
@@ -61,14 +62,14 @@ twitch_helix_stream_list *twitch_helix_get_streams(
  * @return List of live streams matching given parameters.
  */
 twitch_helix_stream_list *twitch_helix_get_all_streams(
-  const char *client_id,
-  const char *auth,
-  long long game_id,
-  const char *language,
-  int users_count,
-  long long *users,
-  int logins_count,
-  const char **logins
+	const char *client_id,
+	const char *auth,
+	long long game_id,
+	const char *language,
+	int users_count,
+	long long *users,
+	int logins_count,
+	const char **logins
 );
 
 #endif
