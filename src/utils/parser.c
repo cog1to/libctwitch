@@ -571,7 +571,6 @@ void *parse_auth_token(json_value *value) {
     { .name = "expires_in", .dest = &token->expires_in, .parser = &parse_int },
     { .name = "token_type", .dest = &token->token_type, .parser = &parse_string },
     { .name = "scope", .dest = &token->scope, .parser = &parse_string_list },
-    { .name = "refresh_token", .dest = &token->refresh_token, .parser = &parse_string },
   };
   parse_entity(value, sizeof(schema)/sizeof(field_spec), schema);
 
