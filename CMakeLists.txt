@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
 project(ctwitch VERSION 0.1 DESCRIPTION "Single-threaded C99 library for Twitch API.")
-include(GNUInstallDirs)
 
 # Find libCURL
 find_library(CURL_LIB curl)
@@ -16,6 +15,9 @@ set(EDV_PRIVATE_INCLUDE_DIRECTORIES
   src/
 )
 
+# Global headers
+include(GNUInstallDirs)
+
 # Library source code
 add_library(ctwitch SHARED
   src/json/json.c
@@ -25,6 +27,7 @@ add_library(ctwitch SHARED
   src/utils/network_helix_utils.c
   src/utils/parser.c
   src/utils/data_utils.c
+  src/auth.c
   src/v5/data.c
   src/v5/users.c
   src/v5/search.c
@@ -33,7 +36,6 @@ add_library(ctwitch SHARED
   src/v5/channels.c
   src/v5/teams.c
   src/helix/data.c
-  src/helix/token.c
   src/helix/users.c
   src/helix/streams.c
   src/init.c
@@ -76,6 +78,7 @@ add_executable(twitch-remote
   src/utils/network_helix_utils.c
   src/utils/parser.c
   src/utils/data_utils.c
+  src/auth.c
   src/v5/data.c
   src/v5/users.c
   src/v5/search.c
@@ -84,7 +87,6 @@ add_executable(twitch-remote
   src/v5/channels.c
   src/v5/teams.c
   src/helix/data.c
-  src/helix/token.c
   src/helix/users.c
   src/helix/streams.c
   src/init.c

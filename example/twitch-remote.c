@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include <ctwitch/auth.h>
 #include <ctwitch/v5.h>
 #include <ctwitch/helix.h>
 #include <ctwitch/ctwitch.h>
@@ -659,27 +660,21 @@ void get_team(const char *query, int options_count, const char **options) {
 void get_token(const char *param, int options_count, const char **options) {
 	char *CLIENT_ID = get_client_id(options_count, options);
 	char *CLIENT_SECRET = get_client_secret(options_count, options);
-	char *scope[] = { "user:read:email", "user:read:follows" };
+	//char *scope[] = { "user:read:email", "user:read:follows" };
 
-	twitch_helix_auth_token *token = twitch_helix_get_app_access_token(
+	twitch_app_access_token *token = twitch_get_app_access_token(
 		CLIENT_ID,
-		CLIENT_SECRET,
-		1,
-		scope
+		CLIENT_SECRET
 	);
 
 	if (token != NULL) {
 		printf(
-			"Token:\n  access_token: %s\n  expires_in: %d\n  token_type: %s\n  scope: %d\n",
+			"Token:\n  access_token: %s\n  expires_in: %d\n  token_type: %s\n",
 			token->token,
 			token->expires_in,
-			token->token_type,
-			token->scope.count
+			token->token_type
 		);
-		for (int idx = 0; idx < token->scope.count; idx++) {
-			printf("	%s\n", token->scope.items[idx]);
-		}
-		twitch_helix_auth_token_free(token);
+		twitch_app_access_token_free(token);
 	}
 
 	free(CLIENT_ID);
@@ -702,11 +697,9 @@ void get_helix_user(
 	char *CLIENT_SECRET = get_client_secret(options_count, options);
 	const char *usernames[1] = { username };
 
-	twitch_helix_auth_token *token = twitch_helix_get_app_access_token(
+	twitch_app_access_token *token = twitch_get_app_access_token(
 		CLIENT_ID,
-		CLIENT_SECRET,
-		0,
-		NULL
+		CLIENT_SECRET
 	);
 	if (token == NULL) {
 		free(CLIENT_ID);
@@ -761,11 +754,9 @@ void get_helix_follows(
 	char *CLIENT_SECRET = get_client_secret(options_count, options);
 	const char *usernames[1] = { username };
 
-	twitch_helix_auth_token *token = twitch_helix_get_app_access_token(
+	twitch_app_access_token *token = twitch_get_app_access_token(
 		CLIENT_ID,
-		CLIENT_SECRET,
-		0,
-		NULL
+		CLIENT_SECRET
 	);
 
 	if (token == NULL) {
@@ -888,11 +879,9 @@ void get_helix_live_follows(
 	char *CLIENT_SECRET = get_client_secret(options_count, options);
 	const char *usernames[1] = { username };
 
-	twitch_helix_auth_token *token = twitch_helix_get_app_access_token(
+	twitch_app_access_token *token = twitch_get_app_access_token(
 		CLIENT_ID,
-		CLIENT_SECRET,
-		0,
-		NULL
+		CLIENT_SECRET
 	);
 
 	if (token == NULL) {
@@ -930,6 +919,7 @@ void get_helix_live_follows(
 		user->id,
 		0
 	);
+
 	if (follows == NULL) {
 		fprintf(stderr, "Error: user with login '%s' not found\n", username);
 		twitch_helix_user_list_free(users);

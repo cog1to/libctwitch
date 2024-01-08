@@ -8,6 +8,7 @@
 #ifndef _H_TWITCH
 #define _H_TWITCH
 
+#include <ctwitch/auth.h>
 #include <ctwitch/v5/data.h>
 #include <ctwitch/v5/search.h>
 #include <ctwitch/v5/users.h>
