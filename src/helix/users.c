@@ -255,6 +255,7 @@ twitch_helix_follow_list *twitch_helix_get_all_follows(
 		&helix_follows_url_builder,
 		(void *)&params,
 		&parse_helix_follow,
+		0,
 		&follows->count
 	);
 
@@ -310,6 +311,7 @@ twitch_helix_channel_follow_list *twitch_helix_get_all_channel_follows(
 		&helix_channel_follows_url_builder,
 		(void *)&params,
 		&parse_helix_channel_follow,
+		0,
 		&follows->count
 	);
 

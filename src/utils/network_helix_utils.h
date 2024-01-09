@@ -33,14 +33,20 @@ typedef void *(*parser_func)(json_value *);
  * @param url URL string to add limit and offset params to.
  * @param limit Page size.
  * @param after Offset cursor.
- * @parm is_first_param Flag indicating whether there are query parameters already added
- *   to the URL.
+ * @parm is_first_param Flag indicating whether there are query parameters
+ * already added to the URL.
  */
-void helix_append_cursor_params(string_t *url, int limit, const char *after, bool is_first_param);
+void helix_append_cursor_params(
+	string_t *url,
+	int limit,
+	const char *after,
+	bool is_first_param
+);
 
 
 /**
- * Performs GET request to Twitch Helix API and writes the output to dynamic string.
+ * Performs GET request to Twitch Helix API and writes the output to dynamic
+ * string.
  *
  * @param client_id Twitch API client ID string.
  * @param auth Authorization token.
@@ -49,10 +55,16 @@ void helix_append_cursor_params(string_t *url, int limit, const char *after, boo
  *
  * @return cURL request result code.
  */
-CURLcode twitch_helix_get(const char *client_id, const char *auth, const char *url, string_t *output);
+CURLcode twitch_helix_get(
+	const char *client_id,
+	const char *auth,
+	const char *url,
+	string_t *output
+);
 
 /**
- * Performs a GET request to given Twitch API endpoint URL, and returns parsed JSON value.
+ * Performs a GET request to given Twitch API endpoint URL, and returns parsed
+ * JSON value.
  *
  * @param client_id Twitch API client ID.
  * @param auth Authorization token.
@@ -60,10 +72,15 @@ CURLcode twitch_helix_get(const char *client_id, const char *auth, const char *u
  *
  * @return Parsed JSON value. (see utils/json library).
  */
-json_value *twitch_helix_get_json(const char *client_id, const char *auth, const char *url);
+json_value *twitch_helix_get_json(
+	const char *client_id,
+	const char *auth,
+	const char *url
+);
 
 /**
- * Performs a POST request to given Twitch API endpoint URL, and returns parsed JSON value.
+ * Performs a POST request to given Twitch API endpoint URL, and returns parsed
+ * JSON value.
  *
  * @param url Target API endpoint URL.
  *
@@ -72,8 +89,11 @@ json_value *twitch_helix_get_json(const char *client_id, const char *auth, const
 json_value *twitch_auth_post_json(const char *url);
 
 /**
- * Downloads one page of paged data from Twitch Helix API and parses it with given parsing params.
- * Paged data endpoints usually return data as a JSON object with the following structure:
+ * Downloads one page of paged data from Twitch Helix API and parses it with
+ * given parsing params.
+ *
+ * Paged data endpoints usually return data as a JSON object with the following
+ * structure:
  *
  * {
  *   "data": [{...}, {...}, {...},...],
@@ -82,8 +102,9 @@ json_value *twitch_auth_post_json(const char *url);
  *   }
  * }
  *
- * There "cursor" contains cursor string to use as "after" parameter to fetch the next page of
- * data from the same response indicate the overall number of items matching given request or que
+ * There "cursor" contains cursor string to use as "after" parameter to fetch
+ * the next page of data from the same response indicate the overall number of
+ * items matching given request or que
  *
  * @param client_id Twitch API client ID.
  * @param auth Authorization token.
@@ -91,7 +112,8 @@ json_value *twitch_auth_post_json(const char *url);
  * @param params URL/request params to provide to the builder function.
  * @param limit Page size.
  * @param after Page offset.
- * @param parser Parser function to parse each value object inside the values JSON array.
+ * @param parser Parser function to parse each value object inside the values
+ * JSON array.
  * @param size Returns number of parsed items.
  * @param next Returns cursor string to fetch the next page.
  * @param total (Optional) Returns total number of items in the collection.
@@ -112,8 +134,11 @@ void **helix_get_page(
 );
 
 /**
- * Downloads all pages of paged data from Twitch Helix API and parses them with given parsing params.
- * Paged data endpoints usually return data as a JSON object with the following structure:
+ * Downloads all pages of paged data from Twitch Helix API and parses them with
+ * given parsing params.
+ *
+ * Paged data endpoints usually return data as a JSON object with the following
+ * structure:
  *
  * {
  *   "data": [{...}, {...}, {...},...],
@@ -123,14 +148,16 @@ void **helix_get_page(
  *   "total": 123
  * }
  *
- * There "cursor" contains cursor string to use as "after" parameter to fetch the next page of
- * data from the same response indicate the overall number of items matching given request or que
+ * There "cursor" contains cursor string to use as "after" parameter to fetch
+ * the next page of data from the same response indicate the overall number of
+ * items matching given request or que
  *
  * @param client_id Twitch API client ID.
  * @param auth Authorization token.
  * @param builder Twitch API URL builder function.
  * @param params URL/request params to provide to the builder function.
- * @param parser Parser function to parse each value object inside the values JSON array.
+ * @param parser Parser function to parse each value object inside the values
+ * JSON array.
  * @param size Returns number of parsed items.
  *
  * @return Array of pointers to downloaded and parsed items.
@@ -141,6 +168,7 @@ void **get_all_helix_pages(
   helix_page_url_builder builder,
   void *params,
   parser_func parser,
+	int limit,
   int *size
 );
 

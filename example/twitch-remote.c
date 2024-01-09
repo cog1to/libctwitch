@@ -183,12 +183,13 @@ char *get_client_secret(int options_count, const char **options) {
  *
  * @param options_count Number of options in the options array.
  * @param options Options array.
+ * @param fail Exit the program with failure if it's not present.
  *
- * @return Client ID string or NULL if it's not provided.
+ * @return User access token string or NULL if it's not provided.
  */
-char *get_user_token(int options_count, const char **options) {
+char *get_user_token(int options_count, const char **options, int fail) {
 	char *user_token = get_param("user-token", options_count, options);
-	if (user_token == NULL) {
+	if (user_token == NULL && fail) {
 		fprintf(
 			stderr,
 			"Error: User token should be provided with '--user_token=' option.\n"
@@ -456,6 +457,28 @@ void get_live_follows(const char *username, int options_count, const char **opti
  */
 void get_top_games(const char *query, int options_count, const char **options) {
 	char *CLIENT_ID = get_client_id(options_count, options);
+	char *BEARER = get_user_token(options_count, options, 0);
+	twitch_app_access_token *token = NULL;
+
+	if (BEARER == NULL) {
+		char *CLIENT_SECRET = get_client_secret(options_count, options);
+
+		token = twitch_get_app_access_token(
+			CLIENT_ID,
+			CLIENT_SECRET
+		);
+
+		BEARER = token->token;
+		free(CLIENT_SECRET);
+	}
+
+	if (BEARER == NULL) {
+		fprintf(
+			stderr,
+			"Error: client ID or user token should be provided with.\n"
+		);
+		exit(EXIT_FAILURE);
+	}
 
 	int limit = atoi(query);
 	if (limit <= 0) {
@@ -467,27 +490,28 @@ void get_top_games(const char *query, int options_count, const char **options) {
 	}
 
 	int size = 0, total = 0;
-	twitch_v5_top_game_list *games = twitch_v5_get_top_games(
+	twitch_helix_game_list *games = twitch_helix_get_all_top_games(
 		CLIENT_ID,
-		limit,
-		0,
-		&total
+		BEARER,
+		limit
 	);
 
 	if (games != NULL && games->count > 0) {
-		printf("Total: %d\n", total);
+		printf("Total: %d\n", games->count);
 		for (int index = 0; index < games->count; index++) {
-			twitch_v5_top_game *game = games->items[index];
+			twitch_helix_game *game = games->items[index];
 			printf(
-				"Game: %s\n  Viewers: %d\n	Channels: %d\n",
-				game->game->name,
-				game->viewers,
-				game->channels
+				"Game: %s\n  ID: %s\n  IGDB ID: %s\n  Art: %s\n\n",
+				game->name,
+				game->id,
+				game->igdb_id,
+				game->box_art_url
 			);
 		}
-		twitch_v5_top_game_list_free(games);
+		twitch_helix_game_list_free(games);
 	}
 
+	twitch_app_access_token_free(token);
 	free(CLIENT_ID);
 }
 
@@ -627,24 +651,54 @@ void get_channel_videos(
 
 void get_team(const char *query, int options_count, const char **options) {
 	char *CLIENT_ID = get_client_id(options_count, options);
+	char *BEARER = get_user_token(options_count, options, 0);
+	twitch_app_access_token *token = NULL;
 
-	twitch_v5_team *team = twitch_v5_get_team(CLIENT_ID, query);
+	if (BEARER == NULL) {
+		char *CLIENT_SECRET = get_client_secret(options_count, options);
+
+		token = twitch_get_app_access_token(
+			CLIENT_ID,
+			CLIENT_SECRET
+		);
+
+		BEARER = token->token;
+		free(CLIENT_SECRET);
+	}
+
+	if (BEARER == NULL) {
+		fprintf(
+			stderr,
+			"Error: client ID or user token should be provided with.\n"
+		);
+		exit(EXIT_FAILURE);
+	}
+
+	twitch_helix_team *team = twitch_helix_get_team(
+		CLIENT_ID,
+		BEARER,
+		query,
+		NULL
+	);
+
 	if (team != NULL) {
-		printf("Team: %s\n", team->display_name);
+		printf(
+			"Team: %s\n  Display Name: %s\n  Info:\n=======\n%s\n=======\n  Users:\n",
+			team->name,
+			team->display_name,
+			team->info
+		);
 		if (team->users != NULL) {
 			for (int index = 0; index < team->users->count; index++) {
 				printf(
-					"%d: %s\n	Display name: %s\n",
+					"    %d: %s, Name: %s\n",
 					index,
-					team->users->items[index]->name,
-					team->users->items[index]->display_name
+					team->users->items[index]->login,
+					team->users->items[index]->name
 				);
-				printf("	Game: %s\n", team->users->items[index]->game);
-				printf("	Status: %s\n", team->users->items[index]->status);
-				printf("	URL: %s\n", team->users->items[index]->url);
 			}
 		}
-		twitch_v5_team_free(team);
+		twitch_helix_team_free(team);
 	}
 
 	free(CLIENT_ID);
@@ -819,7 +873,7 @@ void get_helix_channel_follows(
 	const char **options
 ) {
 	char *CLIENT_ID = get_client_id(options_count, options);
-	char *USER_TOKEN = get_user_token(options_count, options);
+	char *USER_TOKEN = get_user_token(options_count, options, 1);
 	const char *usernames[1] = { username };
 
 	twitch_helix_user_list *users = twitch_helix_get_users(
@@ -991,7 +1045,7 @@ void get_helix_live_channel_follows(
 	const char **options
 ) {
 	char *CLIENT_ID = get_client_id(options_count, options);
-	char *USER_TOKEN = get_user_token(options_count, options);
+	char *USER_TOKEN = get_user_token(options_count, options, 1);
 	const char *usernames[1] = { username };
 
 	twitch_helix_user_list *users = twitch_helix_get_users(

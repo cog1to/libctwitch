@@ -1151,5 +1151,156 @@ void *parse_user_auth_token(json_value *value) {
 	parse_entity(value, sizeof(schema)/sizeof(field_spec), schema);
 
 	return (void *)token;
+}
 
+void *parse_helix_game(json_value *game_object) {
+	twitch_helix_game *game = twitch_helix_game_alloc();
+
+	field_spec schema[] = {
+		{
+			.name = "id",
+			.dest = &game->id,
+			.parser = &parse_string
+		},
+		{
+			.name = "igdb_id",
+			.dest = &game->igdb_id,
+			.parser = &parse_string
+		},
+		{
+			.name = "name",
+			.dest = &game->name,
+			.parser = &parse_string
+		},
+		{
+			.name = "box_art_url",
+			.dest = &game->box_art_url,
+			.parser = &parse_string
+		}
+	};
+	parse_entity(game_object, sizeof(schema)/sizeof(field_spec), schema);
+
+	return (void *)game;
+}
+
+void *parse_team_member(json_value *value) {
+	twitch_helix_team_member *member = twitch_helix_team_member_alloc();
+
+	field_spec schema[] = {
+		{
+			.name = "user_id",
+			.dest = &member->id,
+			.parser = &parse_string
+		},
+		{
+			.name = "user_name",
+			.dest = &member->name,
+			.parser = &parse_string
+		},
+		{
+			.name = "user_login",
+			.dest = &member->login,
+			.parser = &parse_string
+		},
+	};
+	parse_entity(value, sizeof(schema)/sizeof(field_spec), schema);
+
+	return (void *)member;
+}
+
+void _parse_team_member_list(void *dest, json_value *value) {
+	if (value->type == json_array) {
+		int size = 0;
+		twitch_helix_team_member_list *list = twitch_helix_team_member_list_alloc();
+
+		twitch_helix_team_member **items =
+			(twitch_helix_team_member **)parse_json_array(
+				value,
+				&size,
+				&parse_team_member
+			);
+		list->count = size;
+		list->items = items;
+
+		*((void **)dest) = list;
+	}
+}
+
+void *parse_helix_team(json_value *value) {
+	json_value *team_object = NULL;
+
+	int length = value->u.object.length;
+	for (int x = 0; x < length; x++) {
+		if (strcmp(value->u.object.values[x].name, "data") == 0) {
+			json_value *elements_value = value->u.object.values[x].value;
+			int elements_length = elements_value->u.array.length;
+			if (elements_length == 0) {
+				break;
+			}
+
+			team_object = elements_value->u.array.values[0];
+		}
+	}
+
+	if (team_object == NULL) {
+		return NULL;
+	}
+
+	twitch_helix_team *team = twitch_helix_team_alloc();
+
+	field_spec schema[] = {
+		{
+			.name = "id",
+			.dest = &team->id,
+			.parser = &parse_string
+		},
+		{
+			.name = "created_at",
+			.dest = &team->created_at,
+			.parser = &parse_string
+		},
+		{
+			.name = "updated_at",
+			.dest = &team->updated_at,
+			.parser = &parse_string
+		},
+		{
+			.name = "background_image_url",
+			.dest = &team->background,
+			.parser = &parse_string
+		},
+		{
+			.name = "thumbnail_url",
+			.dest = &team->thumbnail,
+			.parser = &parse_string
+		},
+		{
+			.name = "banner",
+			.dest = &team->banner,
+			.parser = &parse_string
+		},
+		{
+			.name = "info",
+			.dest = &team->info,
+			.parser = &parse_string
+		},
+		{
+			.name = "team_display_name",
+			.dest = &team->display_name,
+			.parser = &parse_string
+		},
+		{
+			.name = "team_name",
+			.dest = &team->name,
+			.parser = &parse_string
+		},
+		{
+			.name = "users",
+			.dest = &team->users,
+			.parser = &_parse_team_member_list
+		},
+	};
+	parse_entity(team_object, sizeof(schema)/sizeof(field_spec), schema);
+
+	return (void *)team;
 }

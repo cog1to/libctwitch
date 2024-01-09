@@ -279,5 +279,27 @@ void *parse_helix_channel_follow(json_value *follow_object);
  */
 void *parse_helix_stream(json_value *stream_object);
 
+/**
+ * Creates a new twitch_helix_game struct and tries to fill it with properties
+ * from provided JSON value.
+ *
+ * @param stream_object JSON object holding stream data fields.
+ *
+ * @return Pointer to newly allocated twitch_helix_game struct filled with
+ * data from JSON value.
+ */
+void *parse_helix_game(json_value *stream_object);
+
+/**
+ * Creates a new twitch_helix_team struct and tries to fill it with properties
+ * from provided JSON value.
+ *
+ * @param stream_object JSON object holding stream data fields.
+ *
+ * @return Pointer to newly allocated twitch_helix_team struct filled with
+ * data from JSON value.
+ */
+void *parse_helix_team(json_value *team_object);
+
 #endif
 

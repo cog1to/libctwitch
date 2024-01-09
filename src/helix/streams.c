@@ -143,6 +143,7 @@ twitch_helix_stream_list *twitch_helix_get_all_streams(
 		&helix_streams_url_builder,
 		(void *)&params,
 		&parse_helix_stream,
+		0,
 		&streams->count
 	);
 

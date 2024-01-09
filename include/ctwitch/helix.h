@@ -12,6 +12,8 @@
 #include <ctwitch/helix/data.h>
 #include <ctwitch/helix/users.h>
 #include <ctwitch/helix/streams.h>
+#include <ctwitch/helix/games.h>
+#include <ctwitch/helix/teams.h>
 
 #endif
 

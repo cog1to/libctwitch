@@ -76,3 +76,51 @@ void twitch_helix_stream_free(twitch_helix_stream *stream) {
 
 GENERIC_HELIX_LIST(stream)
 
+/** Games **/
+
+twitch_helix_game *twitch_helix_game_alloc() {
+	GENERIC_ALLOC(twitch_helix_game)
+}
+
+void twitch_helix_game_free(twitch_helix_game *game) {
+	FREE(game->id)
+	FREE(game->igdb_id)
+	FREE(game->name)
+	FREE(game->box_art_url)
+	free(game);
+}
+
+GENERIC_HELIX_LIST(game)
+
+/** Teams **/
+
+twitch_helix_team_member *twitch_helix_team_member_alloc() {
+	GENERIC_ALLOC(twitch_helix_team_member)
+}
+
+void twitch_helix_team_member_free(twitch_helix_team_member *user) {
+	FREE(user->id)
+	FREE(user->name)
+	FREE(user->login)
+	free(user);
+}
+
+GENERIC_HELIX_LIST(team_member)
+
+twitch_helix_team *twitch_helix_team_alloc() {
+	GENERIC_ALLOC(twitch_helix_team)
+}
+
+void twitch_helix_team_free(twitch_helix_team *team) {
+	FREE(team->background)
+	FREE(team->banner)
+	FREE(team->created_at)
+	FREE(team->updated_at)
+	FREE(team->info)
+	FREE(team->thumbnail)
+	FREE(team->name)
+	FREE(team->display_name)
+	FREE(team->id)
+	FREE_CUSTOM(team->users, twitch_helix_team_member_list_free)
+	free(team);
+}
