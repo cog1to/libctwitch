@@ -237,41 +237,6 @@ void *parse_helix_user(json_value *user_object) {
 	return (void *)user;
 }
 
-void *parse_helix_follow(json_value *follow_object) {
-	twitch_helix_follow *follow = twitch_helix_follow_alloc();
-
-	field_spec schema[] = {
-		{
-			.name = "from_id",
-			.dest = &follow->from_id,
-			.parser = &parse_id
-		},
-		{
-			.name = "from_name",
-			.dest = &follow->from_name,
-			.parser = &parse_string
-		},
-		{
-			.name = "to_id",
-			.dest = &follow->to_id,
-			.parser = &parse_id
-		},
-		{
-			.name = "to_name",
-			.dest = &follow->to_name,
-			.parser = &parse_string
-		},
-		{
-			.name = "followed_at",
-			.dest = &follow->followed_at,
-			.parser = &parse_string
-		}
-	};
-	parse_entity(follow_object, sizeof(schema)/sizeof(field_spec), schema);
-
-	return (void *)follow;
-}
-
 void *parse_helix_channel_follow(json_value *follow_object) {
 	twitch_helix_channel_follow *follow = twitch_helix_channel_follow_alloc();
 
@@ -1229,17 +1194,23 @@ void _parse_team_member_list(void *dest, json_value *value) {
 void *parse_helix_team(json_value *value) {
 	json_value *team_object = NULL;
 
-	int length = value->u.object.length;
-	for (int x = 0; x < length; x++) {
-		if (strcmp(value->u.object.values[x].name, "data") == 0) {
-			json_value *elements_value = value->u.object.values[x].value;
-			int elements_length = elements_value->u.array.length;
-			if (elements_length == 0) {
-				break;
-			}
+	if (value->type == json_array) {
+		int length = value->u.object.length;
+		for (int x = 0; x < length; x++) {
+			if (strcmp(value->u.object.values[x].name, "data") == 0) {
+				json_value *elements_value = value->u.object.values[x].value;
+				int elements_length = elements_value->u.array.length;
+				if (elements_length == 0) {
+					break;
+				}
 
-			team_object = elements_value->u.array.values[0];
+				team_object = elements_value->u.array.values[0];
+			}
 		}
+	} else if (value->type == json_object) {
+		team_object = value;
+	} else {
+		return NULL;
 	}
 
 	if (team_object == NULL) {
@@ -1304,3 +1275,34 @@ void *parse_helix_team(json_value *value) {
 
 	return (void *)team;
 }
+
+void *parse_helix_follower(json_value *object) {
+	twitch_helix_follower *follower = twitch_helix_follower_alloc();
+
+	field_spec schema[] = {
+		{
+			.name = "user_id",
+			.dest = &follower->user_id,
+			.parser = &parse_string
+		},
+		{
+			.name = "user_name",
+			.dest = &follower->user_name,
+			.parser = &parse_string
+		},
+		{
+			.name = "user_login",
+			.dest = &follower->user_login,
+			.parser = &parse_string
+		},
+		{
+			.name = "followed_at",
+			.dest = &follower->followed_at,
+			.parser = &parse_string
+		}
+	};
+	parse_entity(object, sizeof(schema)/sizeof(field_spec), schema);
+
+	return (void *)follower;
+}
+

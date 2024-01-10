@@ -50,51 +50,6 @@ string_t *helix_users_url_builder(void *params, int limit, const char *after) {
 }
 
 typedef struct {
-	long long from_id;
-	long long to_id;
-} helix_follows_params;
-
-string_t *helix_follows_url_builder(
-	void *params,
-	int limit,
-	const char *after
-) {
-	char buffer[128];
-	bool is_first_param = true;
-
-	helix_follows_params *fparams = (helix_follows_params *)params;
-
-	// Construct the link.
-	string_t *url = string_init_with_value(
-		"https://api.twitch.tv/helix/users/follows"
-	);
-
-	if (fparams->from_id > 0) {
-		string_append_format(
-			url,
-			"%sfrom_id=%lld",
-			is_first_param ? "?" : "&",
-			fparams->from_id
-		);
-		is_first_param = false;
-	}
-
-	if (fparams->to_id > 0) {
-		string_append_format(
-			url,
-			"%sto_id=%lld",
-			is_first_param ? "?" : "&",
-			fparams->to_id
-		);
-		is_first_param = false;
-	}
-
-	helix_append_cursor_params(url, limit, after, is_first_param);
-
-	return url;
-}
-
-typedef struct {
 	long long user_id;
 	long long broadcaster_id;
 } helix_channel_follows_params;
@@ -204,62 +159,6 @@ twitch_helix_user *twitch_helix_get_user(
 
 	twitch_helix_user_list_free(users);
 	return output;
-}
-
-twitch_helix_follow_list *twitch_helix_get_follows(
-	const char *client_id,
-	const char *auth,
-	long long from_id,
-	long long to_id,
-	int limit,
-	const char *after,
-	int *total,
-	char **next
-) {
-	helix_follows_params params = {
-		.from_id = from_id,
-		.to_id = to_id
-	};
-
-	twitch_helix_follow_list *list = twitch_helix_follow_list_alloc();
-	list->items = (twitch_helix_follow **)helix_get_page(
-		client_id,
-		auth,
-		&helix_follows_url_builder,
-		(void *)&params,
-		limit,
-		after,
-		&parse_helix_follow,
-		&list->count,
-		next,
-		total
-	);
-	return list;
-}
-
-twitch_helix_follow_list *twitch_helix_get_all_follows(
-	const char *client_id,
-	const char *auth,
-	long long from_id,
-	long long to_id
-) {
-	helix_follows_params params = {
-		.from_id = from_id,
-		.to_id = to_id
-	};
-
-	twitch_helix_follow_list *follows = twitch_helix_follow_list_alloc();
-	follows->items = (twitch_helix_follow **)get_all_helix_pages(
-		client_id,
-		auth,
-		&helix_follows_url_builder,
-		(void *)&params,
-		&parse_helix_follow,
-		0,
-		&follows->count
-	);
-
-	return follows;
 }
 
 twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(

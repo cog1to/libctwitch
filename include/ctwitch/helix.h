@@ -14,6 +14,7 @@
 #include <ctwitch/helix/streams.h>
 #include <ctwitch/helix/games.h>
 #include <ctwitch/helix/teams.h>
+#include <ctwitch/helix/channels.h>
 
 #endif
 

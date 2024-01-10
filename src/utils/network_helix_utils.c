@@ -171,11 +171,19 @@ void **helix_get_page(
 			json_value *pagination = value->u.object.values[x].value;
 			int pagination_length = pagination->u.object.length;
 			for (int y = 0; y < pagination_length; y++) {
-				if (strcmp(pagination->u.object.values[y].name, "cursor") == 0 && next != NULL) {
-					(*next) = immutable_string_copy(pagination->u.object.values[y].value->u.string.ptr);
+				if (
+					strcmp(pagination->u.object.values[y].name, "cursor") == 0 &&
+					next != NULL
+				) {
+					(*next) = immutable_string_copy(
+						pagination->u.object.values[y].value->u.string.ptr
+					);
 				}
 			}
-		} else if (strcmp(value->u.object.values[x].name, "total") == 0 && total != NULL) {
+		} else if (
+			strcmp(value->u.object.values[x].name, "total") == 0 &&
+			total != NULL
+		) {
 			*total = value->u.object.values[x].value->u.integer;
 		}
 	}

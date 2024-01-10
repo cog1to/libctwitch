@@ -27,21 +27,6 @@ void twitch_helix_user_free(twitch_helix_user *user) {
 
 GENERIC_HELIX_LIST(user)
 
-/** Follows */
-
-twitch_helix_follow *twitch_helix_follow_alloc() {
-	GENERIC_ALLOC(twitch_helix_follow)
-}
-
-void twitch_helix_follow_free(twitch_helix_follow *follow) {
-	FREE(follow->from_name);
-	FREE(follow->to_name);
-	FREE(follow->followed_at);
-	free(follow);
-}
-
-GENERIC_HELIX_LIST(follow)
-
 /** Channel follows **/
 
 twitch_helix_channel_follow *twitch_helix_channel_follow_alloc() {
@@ -124,3 +109,22 @@ void twitch_helix_team_free(twitch_helix_team *team) {
 	FREE_CUSTOM(team->users, twitch_helix_team_member_list_free)
 	free(team);
 }
+
+GENERIC_HELIX_LIST(team)
+
+/** Followers **/
+
+twitch_helix_follower *twitch_helix_follower_alloc() {
+	GENERIC_ALLOC(twitch_helix_follower)
+}
+
+void twitch_helix_follower_free(twitch_helix_follower *follower) {
+	FREE(follower->user_id)
+	FREE(follower->user_name)
+	FREE(follower->user_login)
+	FREE(follower->followed_at)
+	free(follower);
+}
+
+GENERIC_HELIX_LIST(follower)
+
