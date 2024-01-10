@@ -212,24 +212,27 @@ char *get_user_token(int options_count, const char **options, int fail) {
  * @return A valid bearer token, either app access or user access token.
  */
 char *get_bearer_token(int options_count, const char **options) {
-	char *BEARER = get_user_token(options_count, options, 0);
+	char *bearer = get_user_token(options_count, options, 0);
 	twitch_app_access_token *token = NULL;
 
-	if (BEARER == NULL) {
-		char *CLIENT_ID = get_client_id(options_count, options);
-		char *CLIENT_SECRET = get_client_secret(options_count, options);
+	if (bearer == NULL) {
+		char *client_id = get_client_id(options_count, options);
+		char *secret = get_client_secret(options_count, options);
 
 		token = twitch_get_app_access_token(
-			CLIENT_ID,
-			CLIENT_SECRET
+			client_id,
+			secret
 		);
 
-		BEARER = token->token;
-		free(CLIENT_SECRET);
-		free(CLIENT_ID);
+		bearer = calloc(32, 1);
+		strcpy(bearer, token->token);
+
+		free(secret);
+		free(client_id);
+		twitch_app_access_token_free(token);
 	}
 
-	if (BEARER == NULL) {
+	if (bearer == NULL) {
 		fprintf(
 			stderr,
 			"Error: client ID or user token should be provided with.\n"
@@ -237,7 +240,7 @@ char *get_bearer_token(int options_count, const char **options) {
 		exit(EXIT_FAILURE);
 	}
 
-	return BEARER;
+	return bearer;
 }
 
 /**
