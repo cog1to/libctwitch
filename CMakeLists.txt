@@ -41,6 +41,7 @@ add_library(ctwitch SHARED
   src/helix/games.c
   src/helix/teams.c
   src/helix/channels.c
+  src/helix/videos.c
   src/init.c
 )
 
@@ -95,6 +96,7 @@ add_executable(twitch-remote
   src/helix/games.c
   src/helix/teams.c
   src/helix/channels.c
+  src/helix/videos.c
   src/init.c
 )
 

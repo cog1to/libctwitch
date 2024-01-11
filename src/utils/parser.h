@@ -312,5 +312,27 @@ void *parse_helix_team(json_value *team_object);
  */
 void *parse_helix_follower(json_value *object);
 
+/**
+ * Creates a new twitch_helix_segment struct and tries to fill it with
+ * properties from provided JSON value.
+ *
+ * @param object JSON object holding stream data fields.
+ *
+ * @return Pointer to newly allocated twitch_helix_segment struct filled with
+ * data from JSON value.
+ */
+void *parse_helix_segment(json_value *object);
+
+/**
+ * Creates a new twitch_helix_video struct and tries to fill it with
+ * properties from provided JSON value.
+ *
+ * @param object JSON object holding stream data fields.
+ *
+ * @return Pointer to newly allocated twitch_helix_video struct filled with
+ * data from JSON value.
+ */
+void *parse_helix_video(json_value *object);
+
 #endif
 

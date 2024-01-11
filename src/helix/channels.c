@@ -37,7 +37,7 @@ string_t *helix_channel_followers_url_builder(
 		string_append_format(url, "&user_id=%s", fparams->user_id);
 	}
 
-	helix_append_cursor_params(url, limit, after, true);
+	helix_append_cursor_params(url, limit, after, false);
 
 	return url;
 }
@@ -142,3 +142,5 @@ twitch_helix_team_list *twitch_helix_get_channel_teams(
 
 	return list;
 }
+
+

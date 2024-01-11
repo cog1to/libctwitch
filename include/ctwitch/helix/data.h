@@ -16,6 +16,7 @@ typedef struct {
 	char *display_name;
 	char *login;
 	char *type;
+	char *broadcaster_type;
 	char *description;
 	char *profile_image_url;
 	char *offline_image_url;
@@ -331,5 +332,98 @@ twitch_helix_follower_list* twitch_helix_follower_list_alloc();
  * @param list List to deallocate.
  */
 void twitch_helix_follower_list_free(twitch_helix_follower_list *list);
+
+/** Videos **/
+
+typedef struct {
+	int duration;
+	int offset;
+} twitch_helix_segment;
+
+/**
+ * Allocates new twitch_helix_segment struct.
+ *
+ * @return Pointer to allocated struct.
+ */
+twitch_helix_segment *twitch_helix_segment_alloc();
+
+/**
+ * Frees the memory allocated for twitch_helix_video struct and it's content.
+ *
+ * @param Struct to deallocate.
+ */
+void twitch_helix_segment_free(twitch_helix_segment *segment);
+
+typedef struct {
+	int count;
+	twitch_helix_segment **items;
+} twitch_helix_segment_list;
+
+/**
+ * Allocates new twitch_segment_video_list struct.
+ *
+ * @return Pointer to new struct.
+ */
+twitch_helix_segment_list *twitch_helix_segment_list_alloc();
+
+/**
+ * Frees memory occupied by array of twitch_segment_video structs.
+ *
+ * @param list List to free.
+ */
+void twitch_helix_segment_list_free(twitch_helix_segment_list *list);
+
+typedef struct {
+	char *id;
+	char *stream_id;
+	char *user_id;
+	char *user_login;
+	char *user_name;
+	char *title;
+	char *description;
+	char *created_at;
+	char *published_at;
+	char *url;
+	char *thumbnail_url;
+	char *viewable;
+	int view_count;
+	char *language;
+	char *type;
+	char *duration;
+	twitch_helix_segment_list *muted_segments;
+} twitch_helix_video;
+
+/**
+ * Allocates new twitch_helix_video struct.
+ *
+ * @return Pointer to allocated struct.
+ */
+twitch_helix_video *twitch_helix_video_alloc();
+
+/**
+ * Frees the memory allocated for twitch_helix_video struct and it's content.
+ *
+ * @param Struct to deallocate.
+ */
+void twitch_helix_video_free(twitch_helix_video *video);
+
+typedef struct {
+	int count;
+	twitch_helix_video **items;
+} twitch_helix_video_list;
+
+/**
+ * Allocates new twitch_helix_video_list struct.
+ *
+ * @return Pointer to new struct.
+ */
+twitch_helix_video_list *twitch_helix_video_list_alloc();
+
+/**
+ * Frees memory occupied by array of twitch_helix_video structs.
+ *
+ * @param list List to free.
+ */
+void twitch_helix_video_list_free(twitch_helix_video_list *list);
 
 #endif

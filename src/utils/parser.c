@@ -207,6 +207,11 @@ void *parse_helix_user(json_value *user_object) {
 			.parser = &parse_string
 		},
 		{
+			.name = "broadcaster_type",
+			.dest = &user->broadcaster_type,
+			.parser = &parse_string
+		},
+		{
 			.name = "description",
 			.dest = &user->description,
 			.parser = &parse_string
@@ -1304,5 +1309,138 @@ void *parse_helix_follower(json_value *object) {
 	parse_entity(object, sizeof(schema)/sizeof(field_spec), schema);
 
 	return (void *)follower;
+}
+
+void *parse_helix_segment(json_value *object) {
+	twitch_helix_segment *segment = twitch_helix_segment_alloc();
+
+	field_spec schema[] = {
+		{
+			.name = "duration",
+			.dest = &segment->duration,
+			.parser = &parse_int
+		},
+		{
+			.name = "offset",
+			.dest = &segment->offset,
+			.parser = &parse_int
+		}
+	};
+	parse_entity(object, sizeof(schema)/sizeof(field_spec), schema);
+
+	return (void *)segment;
+}
+
+void parse_helix_segment_list(void *dest, json_value *value) {
+	if (value->type == json_array) {
+		int size = 0;
+		twitch_helix_segment_list *list = twitch_helix_segment_list_alloc();
+
+		twitch_helix_segment **items =
+			(twitch_helix_segment **)parse_json_array(
+				value,
+				&size,
+				&parse_helix_segment
+			);
+		list->count = size;
+		list->items = items;
+
+		*((void **)dest) = list;
+	}
+}
+
+void *parse_helix_video(json_value *object) {
+	twitch_helix_video *video = twitch_helix_video_alloc();
+
+	field_spec schema[] = {
+		{
+			.name = "id",
+			.dest = &video->id,
+			.parser = &parse_string
+		},
+		{
+			.name = "stream_id",
+			.dest = &video->stream_id,
+			.parser = &parse_string
+		},
+		{
+			.name = "user_id",
+			.dest = &video->user_id,
+			.parser = &parse_string
+		},
+		{
+			.name = "user_login",
+			.dest = &video->user_login,
+			.parser = &parse_string
+		},
+		{
+			.name = "user_name",
+			.dest = &video->user_name,
+			.parser = &parse_string
+		},
+		{
+			.name = "title",
+			.dest = &video->title,
+			.parser = &parse_string
+		},
+		{
+			.name = "description",
+			.dest = &video->description,
+			.parser = &parse_string
+		},
+		{
+			.name = "created_at",
+			.dest = &video->created_at,
+			.parser = &parse_string
+		},
+		{
+			.name = "published_at",
+			.dest = &video->published_at,
+			.parser = &parse_string
+		},
+		{
+			.name = "url",
+			.dest = &video->url,
+			.parser = &parse_string
+		},
+		{
+			.name = "thumbnail_url",
+			.dest = &video->thumbnail_url,
+			.parser = &parse_string
+		},
+		{
+			.name = "viewable",
+			.dest = &video->viewable,
+			.parser = &parse_string
+		},
+		{
+			.name = "view_count",
+			.dest = &video->view_count,
+			.parser = &parse_int
+		},
+		{
+			.name = "language",
+			.dest = &video->language,
+			.parser = &parse_string
+		},
+		{
+			.name = "type",
+			.dest = &video->type,
+			.parser = &parse_string
+		},
+		{
+			.name = "duration",
+			.dest = &video->duration,
+			.parser = &parse_string
+		},
+		{
+			.name = "muted_segments",
+			.dest = &video->muted_segments,
+			.parser = &parse_helix_segment_list
+		},
+	};
+	parse_entity(object, sizeof(schema)/sizeof(field_spec), schema);
+
+	return (void *)video;
 }
 

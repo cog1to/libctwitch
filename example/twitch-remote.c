@@ -285,6 +285,43 @@ char *find_channel_id(char *client_id, const char *query) {
 	return channel_id;
 }
 
+/**
+ * Searches for channel with given name and returns it's stringified ID.
+ *
+ * @param client_id Twitch API client ID.
+ * @param query Search string.
+ *
+ * @return String containing channel's ID value, or null if it's not found.
+ */
+char *find_user_id(char *client_id, char *bearer, const char *query) {
+	const char *usernames[1] = { query };
+	twitch_helix_user_list *users = twitch_helix_get_users(
+		client_id,
+		bearer,
+		1,
+		usernames
+	);
+
+	if (users == NULL) {
+		fprintf(stderr, "Error: failed to get user info\n");
+		return NULL;
+	}
+
+	if (users->count == 0) {
+		fprintf(stderr, "Error: user not found\n");
+		twitch_helix_user_list_free(users);
+		return NULL;
+	}
+
+	twitch_helix_user *user = users->items[0];
+
+	// Convert channel ID.
+	char* channel_id = malloc(32 * sizeof(char));
+	sprintf(channel_id, "%lld", user->id);
+
+	twitch_helix_user_list_free(users);
+	return channel_id;
+}
 
 /**
  * Gets and prints the featured streams.
@@ -651,71 +688,66 @@ void get_channel_teams(
 	twitch_helix_user_list_free(users);
 }
 
-void get_channel_communities(
-	const char *query,
-	int options_count,
-	const char **options
-) {
-	char *CLIENT_ID = get_client_id(options_count, options);
-	char *channel_id = find_channel_id(CLIENT_ID, query);
-
-	if (channel_id == NULL) {
-		printf("Channel '%s' not found\n", query);
-		return;
-	}
-
-	twitch_v5_community_list *communities = twitch_v5_get_channel_communities(
-		CLIENT_ID,
-		channel_id
-	);
-	if (communities->count > 0) {
-		for (int index = 0; index < communities->count; index++) {
-			twitch_v5_community *community = communities->items[index];
-			printf("%s\n	Name: %s\n	ID: %s\n	Summary: %s\n",
-				community->display_name,
-				community->name,
-				community->id,
-				community->summary
-			);
-		}
-		twitch_v5_community_list_free(communities);
-	}
-
-	free(CLIENT_ID);
-	free(channel_id);
-}
-
 void get_channel_videos(
 	const char *query,
 	int options_count,
 	const char **options
 ) {
-	char *CLIENT_ID = get_client_id(options_count, options);
-	char *channel_id = find_channel_id(CLIENT_ID, query);
+	char *client_id = get_client_id(options_count, options);
+	char *bearer = get_bearer_token(options_count, options);
+	char *channel_id = find_user_id(client_id, bearer, query);
 
 	if (channel_id == NULL) {
 		printf("Channel '%s' not found\n", query);
+		free(client_id);
+		free(bearer);
 		return;
 	}
 
-	twitch_v5_video_list *videos = twitch_v5_get_all_channel_videos(
-		CLIENT_ID, channel_id,
+	twitch_helix_video_list *videos = twitch_helix_get_all_videos(
+		client_id,
+		bearer,
+		channel_id,
+		NULL,
+		0,
 		NULL,
 		NULL,
-		NULL
+		NULL,
+		NULL,
+		NULL,
+		20
 	);
 	if (videos->count > 0) {
 		for (int index = 0; index < videos->count; index++) {
-			twitch_v5_video *video = videos->items[index];
+			twitch_helix_video *video = videos->items[index];
 			printf(
-				"%s\n	Title: %s\n  Game: %s\n  Description: %s\n",
-				video->id, video->title, video->game, video->description
+				"[%s] %s\n  URL: %s\n  Duration: %s\n  Description: %s\n",
+				video->id, video->title, video->url, video->duration, video->description
 			);
+			printf(
+				"  Created at: %s\n  Published at: %s\n  Language: %s\n",
+				video->created_at, video->published_at, video->language
+			);
+			printf(
+				"  Type: %s\n  Views: %d\n",
+				video->type, video->view_count
+			);
+
+			if (video->muted_segments != NULL) {
+				for (int seg = 0; seg < video->muted_segments->count; seg++) {
+					printf(
+						"  Muted segment: %d from %d\n",
+						video->muted_segments->items[seg]->duration,
+						video->muted_segments->items[seg]->offset
+					);
+				}
+			}
 		}
-		twitch_v5_video_list_free(videos);
+		twitch_helix_video_list_free(videos);
 	}
 
-	free(CLIENT_ID);
+	free(client_id);
+	free(bearer);
 	free(channel_id);
 }
 
@@ -797,24 +829,14 @@ void get_helix_user(
 	int options_count,
 	const char **options
 ) {
-	char *CLIENT_ID = get_client_id(options_count, options);
-	char *CLIENT_SECRET = get_client_secret(options_count, options);
+	char *client_id = get_client_id(options_count, options);
+	char *bearer = get_bearer_token(options_count, options);
+
 	const char *usernames[1] = { username };
 
-	twitch_app_access_token *token = twitch_get_app_access_token(
-		CLIENT_ID,
-		CLIENT_SECRET
-	);
-	if (token == NULL) {
-		free(CLIENT_ID);
-		free(CLIENT_SECRET);
-		fprintf(stderr, "Error: failed to get auth token\n");
-		return;
-	}
-
 	twitch_helix_user_list *users = twitch_helix_get_users(
-		CLIENT_ID,
-		token->token,
+		client_id,
+		bearer,
 		1,
 		usernames
 	);
@@ -824,12 +846,13 @@ void get_helix_user(
 		for (int idx = 0; idx < users->count; idx++) {
 			twitch_helix_user *user = users->items[idx];
 			printf(
-				"Username: %s\n  ID: %lld\n  Display Name: %s\n  Created At: %s\n  Type: %s\n  Description: %s\n",
+				"Username: %s\n  ID: %lld\n  Display Name: %s\n  Created At: %s\n  Type: %s\n  Broadcaster type: %s\n  Description: %s\n",
 				user->login,
 				user->id,
 				user->display_name,
 				user->created_at,
 				user->type,
+				user->broadcaster_type,
 				user->description
 			);
 		}
@@ -838,8 +861,8 @@ void get_helix_user(
 		fprintf(stderr, "Error: user with login '%s' not found\n", username);
 	}
 
-	free(CLIENT_ID);
-	free(CLIENT_SECRET);
+	free(client_id);
+	free(bearer);
 }
 
 /**
@@ -1059,13 +1082,6 @@ int main(int argc, char **argv) {
 			.description = "Gets all teams of specific channel.",
 			.has_parameter = true,
 			.handler = &get_channel_teams
-		},
-		{
-			.command = channel_communities,
-			.name = "communities",
-			.description = "Gets all communities of specific channel.",
-			.has_parameter = true,
-			.handler = &get_channel_communities
 		},
 		{
 			.command = channel_videos,

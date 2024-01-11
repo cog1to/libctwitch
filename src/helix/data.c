@@ -18,6 +18,7 @@ void twitch_helix_user_free(twitch_helix_user *user) {
 	FREE(user->login);
 	FREE(user->display_name);
 	FREE(user->type);
+	FREE(user->broadcaster_type);
 	FREE(user->description);
 	FREE(user->profile_image_url);
 	FREE(user->offline_image_url);
@@ -127,4 +128,42 @@ void twitch_helix_follower_free(twitch_helix_follower *follower) {
 }
 
 GENERIC_HELIX_LIST(follower)
+
+/** Video **/
+
+twitch_helix_segment *twitch_helix_segment_alloc() {
+	GENERIC_ALLOC(twitch_helix_segment)
+}
+
+void twitch_helix_segment_free(twitch_helix_segment *segment) {
+	free(segment);
+}
+
+GENERIC_HELIX_LIST(segment)
+
+twitch_helix_video *twitch_helix_video_alloc() {
+	GENERIC_ALLOC(twitch_helix_video)
+}
+
+void twitch_helix_video_free(twitch_helix_video *video) {
+	FREE(video->id)
+	FREE(video->stream_id)
+	FREE(video->user_id)
+	FREE(video->user_login)
+	FREE(video->user_name)
+	FREE(video->title)
+	FREE(video->description)
+	FREE(video->created_at)
+	FREE(video->published_at)
+	FREE(video->url)
+	FREE(video->thumbnail_url)
+	FREE(video->viewable)
+	FREE(video->language)
+	FREE(video->type)
+	FREE(video->duration)
+	FREE_CUSTOM(video->muted_segments, twitch_helix_segment_list_free)
+	free(video);
+}
+
+GENERIC_HELIX_LIST(video)
 
