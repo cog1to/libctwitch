@@ -23,18 +23,11 @@ add_library(ctwitch SHARED
   src/json/json.c
   src/utils/string_utils.c
   src/utils/array_utils.c
-  src/utils/network_utils.c
   src/utils/network_helix_utils.c
+  src/utils/network_utils.c
   src/utils/parser.c
   src/utils/data_utils.c
   src/auth.c
-  src/v5/data.c
-  src/v5/users.c
-  src/v5/search.c
-  src/v5/streams.c
-  src/v5/games.c
-  src/v5/channels.c
-  src/v5/teams.c
   src/helix/data.c
   src/helix/users.c
   src/helix/streams.c
@@ -79,18 +72,11 @@ add_executable(twitch-remote
   src/json/json.c
   src/utils/string_utils.c
   src/utils/array_utils.c
-  src/utils/network_utils.c
   src/utils/network_helix_utils.c
+  src/utils/network_utils.c
   src/utils/parser.c
   src/utils/data_utils.c
   src/auth.c
-  src/v5/data.c
-  src/v5/users.c
-  src/v5/search.c
-  src/v5/streams.c
-  src/v5/games.c
-  src/v5/channels.c
-  src/v5/teams.c
   src/helix/data.c
   src/helix/users.c
   src/helix/streams.c
