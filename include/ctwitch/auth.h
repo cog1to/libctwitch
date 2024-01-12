@@ -87,7 +87,18 @@ typedef struct {
 	twitch_string_list scopes;
 } twitch_user_access_token;
 
+/**
+ * Allocates a dynamic string list struct.
+ *
+ * @return A pointer to the allocated twitch_string_list struct.
+ */
 twitch_string_list *twitch_string_list_alloc();
+
+/**
+ * Releases memory occupied by the string list and all if its items.
+ *
+ * @param list List to deallocate
+ */
 void twitch_string_list_free(twitch_string_list *list);
 
 /**
@@ -166,7 +177,7 @@ twitch_user_access_token *twitch_get_user_access_token(
  *
  * @return Either a valid user acess token or NULL if there were some errors.
  */
-twitch_user_access_token **twitch_refresh_access_token(
+twitch_user_access_token *twitch_refresh_access_token(
 	const char *client_id,
 	const char *client_secret,
 	const char *token

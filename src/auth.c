@@ -26,7 +26,7 @@ void twitch_string_list_free(twitch_string_list *list) {
 	if (list->items != NULL) {
 		for (int idx = 0; idx < list->count; idx++) {
 			free(list->items[idx]);
-		}	
+		}
 		free(list->items);
 	}
 
@@ -111,6 +111,40 @@ twitch_user_access_token *twitch_get_user_access_token(
 	string_append_format(url, "&code=%s", code);
 	string_append(grant_type, strlen(grant_type), url);
 	string_append_format(url, "&redirect_uri=%s", redirect_uri);
+
+	// Get JSON.
+	json_value *value = twitch_auth_post_json(url->ptr);
+	string_free(url);
+
+	if (value == NULL) {
+		return NULL;
+	}
+
+	if (value->type != json_object) {
+		fprintf(stderr, "Wrong JSON type of returned value.");
+		exit(EXIT_FAILURE);
+	}
+
+	token = parse_user_auth_token(value);
+	json_value_free(value);
+
+	return token;
+}
+
+twitch_user_access_token *twitch_refresh_access_token(
+	const char *client_id,
+	const char *client_secret,
+	const char *refresh_token
+) {
+	twitch_user_access_token *token = NULL;
+	const char *grant_type = "&grant_type=refresh_token";
+
+	// Construct the link.
+	string_t *url = string_init_with_value("https://id.twitch.tv/oauth2/token");
+	string_append_format(url, "?client_id=%s", client_id);
+	string_append_format(url, "&client_secret=%s", client_secret);
+	string_append_format(url, "&refresh_token=%s", refresh_token);
+	string_append(grant_type, strlen(grant_type), url);
 
 	// Get JSON.
 	json_value *value = twitch_auth_post_json(url->ptr);
