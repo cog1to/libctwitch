@@ -392,23 +392,31 @@ void get_user(const char *username, int options_count, const char **options) {
  * @param options List of command line arguments.
  */
 void get_games(const char *name, int options_count, const char **options) {
-	char *CLIENT_ID = get_client_id(options_count, options);
+	char *client_id = get_client_id(options_count, options);
+	char *bearer = get_bearer_token(options_count, options);
 
-	twitch_v5_game_list *games = twitch_v5_search_games(CLIENT_ID, name, false);
+	twitch_helix_category_list *games = twitch_helix_get_all_categories(
+		client_id,
+		bearer,
+		name,
+		0
+	);
+
 	if (games != NULL && games->count > 0) {
 		for (int index = 0; index < games->count; index++) {
-			twitch_v5_game *game = games->items[index];
+			twitch_helix_category *game = games->items[index];
 			printf(
-				"ID: %lld\n  Name: %s\n  Popularity: %d\n  Giantbomb ID: %lld\n",
+				"ID: %s\n  Name: %s\n  Art: %s\n",
 				game->id,
 				game->name,
-				game->popularity,
-				game->giantbomb_id);
+				game->box_art_url
+			);
 		}
-		twitch_v5_game_list_free(games);
+		twitch_helix_category_list_free(games);
 	}
 
-	free(CLIENT_ID);
+	free(client_id);
+	free(bearer);
 }
 
 /**
@@ -419,31 +427,49 @@ void get_games(const char *name, int options_count, const char **options) {
  * @param options List of command line arguments.
  */
 void get_streams(const char *query, int options_count, const char **options) {
-	char *CLIENT_ID = get_client_id(options_count, options);
+	char *client_id = get_client_id(options_count, options);
+	char *bearer = get_bearer_token(options_count, options);
 
-	twitch_v5_stream_list *streams = twitch_v5_search_all_streams(
-		CLIENT_ID,
+	twitch_helix_channel_search_item_list *streams =
+		twitch_helix_search_all_channels(
+		client_id,
+		bearer,
 		query,
-		none
+		1, // Live-only
+		0
 	);
 
 	if (streams != NULL && streams->count > 0) {
 		printf("Streams found: %d\n", streams->count);
 		for (int index = 0; index < streams->count; index++) {
-			twitch_v5_stream *stream = streams->items[index];
+			twitch_helix_channel_search_item *stream = streams->items[index];
+
 			printf(
-				"ID: %lld\n  Game: %s\n  Channel: %s\n	Status: %s\n	URL: %s\n",
+				"ID: %s\n  Login: %s\n  Title: %s\n  Game: %s\n  Channel: %s\n",
 				stream->id,
-				stream->game,
-				stream->channel->name,
-				stream->channel->status,
-				stream->channel->url
+				stream->broadcaster_login,
+				stream->title,
+				stream->game_name,
+				stream->display_name
 			);
+
+			if (stream->tags != NULL && stream->tags->count > 0) {
+				printf("  Tags: ");
+				for (int tidx = 0; tidx < stream->tags->count; tidx++) {
+					printf(
+						"%s%s",
+						stream->tags->items[tidx],
+						tidx == (stream->tags->count - 1) ? "" : ", "
+					);
+				}
+				printf("\n");
+			}
 		}
-		twitch_v5_stream_list_free(streams);
+		twitch_helix_channel_search_item_list_free(streams);
 	}
 
-	free(CLIENT_ID);
+	free(client_id);
+	free(bearer);
 }
 
 /**

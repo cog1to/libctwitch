@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <curl/curl.h>
 
 #include "string_utils.h"
 
@@ -76,3 +77,16 @@ string_t *string_joined(int count, const char **strings, const char *delimiter) 
   string_append((void *)strings[count - 1], strlen(strings[count - 1]), output);
   return output;
 }
+
+char *url_encode(const char *string) {
+  // Initialize curl.
+  CURL *curl;
+  curl = curl_easy_init();
+
+  // Perform URL escaping.
+  char *escaped = curl_easy_escape(curl, string, strlen(string));
+
+  curl_easy_cleanup(curl);
+  return escaped;
+}
+

@@ -53,15 +53,6 @@ void append_paging_params(string_t *url, int limit, int offset, bool is_first_pa
 void append_cursor(string_t *url, const char *cursor, bool is_first_param);
 
 /**
- * Returns URL-encoded version of the string.
- *
- * @param string Input string to URL-encode.
- *
- * @return URL-encoded string.
- */
-const char *url_encode(const char *string);
-
-/**
  * Performs GET request to Twitch API and writes the output to dynamic string.
  *
  * @param client_id Twitch API client ID string.

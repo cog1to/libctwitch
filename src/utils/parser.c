@@ -71,6 +71,19 @@ void parse_string_list(void *dest, json_value *source) {
 	}
 }
 
+void make_string_list(void *dest, json_value *value) {
+	if (value->type == json_array) {
+		int size = 0;
+		twitch_string_list *list = twitch_string_list_alloc();
+
+		char **items = (char **)parse_json_array(value, &size, &_parse_string);
+		list->count = size;
+		list->items = items;
+
+		*((void **)dest) = list;
+	}
+}
+
 void parse_bool(void *dest, json_value *source) {
 	*((bool *)dest) = source->u.boolean;
 }
@@ -1444,3 +1457,93 @@ void *parse_helix_video(json_value *object) {
 	return (void *)video;
 }
 
+void *parse_helix_category(json_value *object) {
+	twitch_helix_category *category = twitch_helix_category_alloc();
+
+	field_spec schema[] = {
+		{
+			.name = "id",
+			.dest = &category->id,
+			.parser = &parse_string
+		},
+		{
+			.name = "name",
+			.dest = &category->name,
+			.parser = &parse_string
+		},
+		{
+			.name = "box_art_url",
+			.dest = &category->box_art_url,
+			.parser = &parse_string
+		}
+	};
+	parse_entity(object, sizeof(schema)/sizeof(field_spec), schema);
+
+	return (void *)category;
+}
+
+void *parse_helix_channel_search_item(json_value *object) {
+	twitch_helix_channel_search_item *item =
+		twitch_helix_channel_search_item_alloc();
+
+	field_spec schema[] = {
+		{
+			.name = "id",
+			.dest = &item->id,
+			.parser = &parse_string
+		},
+		{
+			.name = "game_id",
+			.dest = &item->game_id,
+			.parser = &parse_string
+		},
+		{
+			.name = "game_name",
+			.dest = &item->game_name,
+			.parser = &parse_string
+		},
+		{
+			.name = "display_name",
+			.dest = &item->display_name,
+			.parser = &parse_string
+		},
+		{
+			.name = "broadcaster_language",
+			.dest = &item->broadcaster_language,
+			.parser = &parse_string
+		},
+		{
+			.name = "broadcaster_login",
+			.dest = &item->broadcaster_login,
+			.parser = &parse_string
+		},
+		{
+			.name = "is_live",
+			.dest = &item->is_live,
+			.parser = &parse_bool
+		},
+		{
+			.name = "thumbnail_url",
+			.dest = &item->thumbnail_url,
+			.parser = &parse_string
+		},
+		{
+			.name = "title",
+			.dest = &item->title,
+			.parser = &parse_string
+		},
+		{
+			.name = "started_at",
+			.dest = &item->started_at,
+			.parser = &parse_string
+		},
+		{
+			.name = "tags",
+			.dest = &item->tags,
+			.parser = &make_string_list
+		},
+	};
+	parse_entity(object, sizeof(schema)/sizeof(field_spec), schema);
+
+	return (void *)item;
+}

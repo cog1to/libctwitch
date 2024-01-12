@@ -334,5 +334,27 @@ void *parse_helix_segment(json_value *object);
  */
 void *parse_helix_video(json_value *object);
 
+/**
+ * Creates a new twitch_helix_category struct and tries to fill it with
+ * properties from provided JSON value.
+ *
+ * @param object JSON object holding category data fields.
+ *
+ * @return Pointer to newly allocated twitch_helix_category struct filled with
+ * data from JSON value.
+ */
+void *parse_helix_category(json_value *object);
+
+/**
+ * Creates a new twitch_helix_channel_search_item struct and tries to fill it
+ * with properties from provided JSON value.
+ *
+ * @param object JSON object holding category data fields.
+ *
+ * @return Pointer to newly allocated twitch_helix_channel_search_item struct
+ * filled with data from JSON value.
+ */
+void *parse_helix_channel_search_item(json_value *object);
+
 #endif
 

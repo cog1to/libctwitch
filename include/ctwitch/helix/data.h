@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include <ctwitch/auth.h>
+
 /** User data **/
 
 /**
@@ -425,5 +427,98 @@ twitch_helix_video_list *twitch_helix_video_list_alloc();
  * @param list List to free.
  */
 void twitch_helix_video_list_free(twitch_helix_video_list *list);
+
+/** Search results **/
+
+typedef struct {
+	char *id;
+	char *name;
+	char *box_art_url;
+} twitch_helix_category;
+
+/**
+ * Allocates new twitch_helix_category struct.
+ *
+ * @return Pointer to allocated struct.
+ */
+twitch_helix_category *twitch_helix_category_alloc();
+
+/**
+ * Frees the memory allocated for twitch_helix_category struct and it's content.
+ *
+ * @param Struct to deallocate.
+ */
+void twitch_helix_category_free(twitch_helix_category *category);
+
+typedef struct {
+	int count;
+	twitch_helix_category **items;
+} twitch_helix_category_list;
+
+/**
+ * Allocates new twitch_helix_category_list struct.
+ *
+ * @return Pointer to new struct.
+ */
+twitch_helix_category_list *twitch_helix_category_list_alloc();
+
+/**
+ * Frees memory occupied by array of twitch_helix_category structs.
+ *
+ * @param list List to free.
+ */
+void twitch_helix_category_list_free(twitch_helix_category_list *list);
+
+typedef struct {
+	char *id;
+	char *display_name;
+	char *game_id;
+	char *game_name;
+	char *broadcaster_language;
+	char *broadcaster_login;
+	int is_live;
+	char *thumbnail_url;
+	char *title;
+	char *started_at;
+	twitch_string_list *tags;
+} twitch_helix_channel_search_item;
+
+/**
+ * Allocates new twitch_helix_channel_search_item struct.
+ *
+ * @return Pointer to allocated struct.
+ */
+twitch_helix_channel_search_item *twitch_helix_channel_search_item_alloc();
+
+/**
+ * Frees the memory allocated for twitch_helix_channel_search_item struct and
+ * it's content.
+ *
+ * @param Struct to deallocate.
+ */
+void twitch_helix_channel_search_item_free(
+	twitch_helix_channel_search_item *item
+);
+
+typedef struct {
+	int count;
+	twitch_helix_channel_search_item **items;
+} twitch_helix_channel_search_item_list;
+
+/**
+ * Allocates new twitch_helix_channel_search_item_list struct.
+ *
+ * @return Pointer to new struct.
+ */
+twitch_helix_channel_search_item_list *twitch_helix_channel_search_item_list_alloc();
+
+/**
+ * Frees memory occupied by array of twitch_helix_channel_search_item structs.
+ *
+ * @param list List to free.
+ */
+void twitch_helix_channel_search_item_list_free(
+	twitch_helix_channel_search_item_list *list
+);
 
 #endif

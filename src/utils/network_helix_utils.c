@@ -26,7 +26,6 @@ extern size_t twitch_writefunc(
 	size_t nmemb,
 	struct string *s
 );
-extern const char *url_encode(const char *string);
 
 CURLcode twitch_helix_get(
 	const char *client_id,

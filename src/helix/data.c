@@ -167,3 +167,40 @@ void twitch_helix_video_free(twitch_helix_video *video) {
 
 GENERIC_HELIX_LIST(video)
 
+/** Search results **/
+
+twitch_helix_category *twitch_helix_category_alloc() {
+	GENERIC_ALLOC(twitch_helix_category)
+}
+
+void twitch_helix_category_free(twitch_helix_category *category) {
+	FREE(category->id)
+	FREE(category->name)
+	FREE(category->box_art_url)
+	free(category);
+}
+
+GENERIC_HELIX_LIST(category)
+
+twitch_helix_channel_search_item *twitch_helix_channel_search_item_alloc() {
+	GENERIC_ALLOC(twitch_helix_channel_search_item)
+}
+
+void twitch_helix_channel_search_item_free(
+	twitch_helix_channel_search_item *item
+) {
+	FREE(item->id)
+	FREE(item->display_name)
+	FREE(item->game_id)
+	FREE(item->game_name)
+	FREE(item->broadcaster_language)
+	FREE(item->broadcaster_login)
+	FREE(item->thumbnail_url)
+	FREE(item->title)
+	FREE(item->started_at)
+	FREE_CUSTOM(item->tags, twitch_string_list_free)
+	free(item);
+}
+
+GENERIC_HELIX_LIST(channel_search_item)
+

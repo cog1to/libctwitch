@@ -16,6 +16,7 @@
 #include <ctwitch/helix/teams.h>
 #include <ctwitch/helix/channels.h>
 #include <ctwitch/helix/videos.h>
+#include <ctwitch/helix/search.h>
 
 #endif
 

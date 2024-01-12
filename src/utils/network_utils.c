@@ -17,18 +17,6 @@ size_t twitch_writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) 
   return append_size;
 }
 
-const char *url_encode(const char *string) {
-  // Initialize curl.
-  CURL *curl;
-  curl = curl_easy_init();
-
-  // Perform URL escaping.
-  const char *escaped = curl_easy_escape(curl, string, strlen(string));
-
-  curl_easy_cleanup(curl);
-  return escaped;
-}
-
 CURLcode twitch_v5_get(const char *client_id, const char *url, string_t *output) {
   // Initialize curl.
   CURL *curl;

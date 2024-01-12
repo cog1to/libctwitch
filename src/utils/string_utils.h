@@ -78,5 +78,14 @@ char *immutable_string_copy(const char *src);
  */
 string_t *string_joined(int count, const char **strings, const char *delimiter);
 
+/**
+ * Returns URL-encoded version of the string.
+ *
+ * @param string Input string to URL-encode.
+ *
+ * @return URL-encoded string.
+ */
+char *url_encode(const char *string);
+
 #endif
 

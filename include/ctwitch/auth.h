@@ -87,6 +87,9 @@ typedef struct {
 	twitch_string_list scopes;
 } twitch_user_access_token;
 
+twitch_string_list *twitch_string_list_alloc();
+void twitch_string_list_free(twitch_string_list *list);
+
 /**
  * Allocates and clears memory for new twitch_app_access_token struct.
  *
