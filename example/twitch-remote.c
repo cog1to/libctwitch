@@ -258,7 +258,7 @@ char *find_user_id(char *client_id, char *bearer, const char *query) {
 
 	// Convert channel ID.
 	char* channel_id = malloc(32 * sizeof(char));
-	sprintf(channel_id, "%lld", user->id);
+	strcpy(channel_id, user->id);
 
 	twitch_helix_user_list_free(users);
 	return channel_id;
@@ -436,13 +436,10 @@ void get_channel_followers(
 
 	twitch_helix_user *user = users->items[0];
 
-	char user_id[128] = { 0 };
-	sprintf(user_id, "%lld", user->id);
-
 	twitch_helix_follower_list *followers = twitch_helix_get_all_channel_followers(
 		client_id,
 		bearer,
-		user_id,
+		user->id,
 		NULL,
 		0
 	);
@@ -477,39 +474,36 @@ void get_channel_teams(
 	const char **options
 ) {
 	char *client_id = get_client_id(options_count, options);
-	char *BEARER = get_bearer_token(options_count, options);
+	char *bearer = get_bearer_token(options_count, options);
 
 	const char *usernames[1] = { query };
 
 	twitch_helix_user_list *users = twitch_helix_get_users(
 		client_id,
-		BEARER,
+		bearer,
 		1,
 		usernames
 	);
 	if (users == NULL) {
 		fprintf(stderr, "Error: failed to get user info\n");
 		free(client_id);
-		free(BEARER);
+		free(bearer);
 		return;
 	}
 	if (users->count == 0) {
 		fprintf(stderr, "Error: user not found\n");
 		twitch_helix_user_list_free(users);
 		free(client_id);
-		free(BEARER);
+		free(bearer);
 		return;
 	}
 
 	twitch_helix_user *user = users->items[0];
 
-	char user_id[128] = { 0 };
-	sprintf(user_id, "%lld", user->id);
-
 	twitch_helix_team_list *teams = twitch_helix_get_channel_teams(
 		client_id,
-		BEARER,
-		user_id
+		bearer,
+		user->id
 	);
 
 	if (teams->count > 0) {
@@ -522,7 +516,7 @@ void get_channel_teams(
 	}
 
 	free(client_id);
-	free(BEARER);
+	free(bearer);
 	twitch_helix_user_list_free(users);
 }
 
@@ -697,7 +691,7 @@ void get_user(
 		for (int idx = 0; idx < users->count; idx++) {
 			twitch_helix_user *user = users->items[idx];
 			printf(
-				"Username: %s\n  ID: %lld\n  Display Name: %s\n  Created At: %s\n  Type: %s\n  Broadcaster type: %s\n  Description: %s\n",
+				"Username: %s\n  ID: %s\n  Display Name: %s\n  Created At: %s\n  Type: %s\n  Broadcaster type: %s\n  Description: %s\n",
 				user->login,
 				user->id,
 				user->display_name,
@@ -752,7 +746,7 @@ void get_channel_follows(
 				printf("Follows: %d\n", follows->count);
 				for (int idx = 0; idx < follows->count; idx++) {
 					twitch_helix_channel_follow *follow = follows->items[idx];
-					printf("Name: %s [Login: %s] (Id: %lld)\n",
+					printf("Name: %s [Login: %s] (Id: %s)\n",
 						follow->broadcaster_name,
 						follow->broadcaster_login,
 						follow->broadcaster_id
@@ -862,7 +856,7 @@ void get_live_channel_follows(
 	} else {
 		for (int idx = 0; idx < streams->count; idx++) {
 			printf(
-				"ID: %lld\n	Game: %s\n	Channel: %s\n  Channel ID: %d\n  Title: %s\n",
+				"ID: %s\n  Game: %s\n  Channel: %s\n  Channel ID: %s\n  Title: %s\n",
 				streams->items[idx]->id,
 				streams->items[idx]->game_name,
 				streams->items[idx]->user_name,
