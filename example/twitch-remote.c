@@ -17,14 +17,7 @@
  * A little bit of a hack - We reference library's internal methods here just
  * to save some space.
  **/
-
 extern char *immutable_string_copy(const char *src);
-extern void **pointer_array_map(
-	void **src,
-	size_t src_count,
-	void *(*getter)(void *)
-);
-extern void pointer_array_free(int count, void **src, void(*deinit)(void *));
 
 /** Command-line data **/
 
@@ -732,6 +725,7 @@ void get_channel_follows(
 		1,
 		usernames
 	);
+
 	if (users != NULL) {
 		if (users->count > 0) {
 			twitch_helix_user *user = users->items[0];
