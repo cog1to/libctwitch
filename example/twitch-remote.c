@@ -39,7 +39,8 @@ typedef enum {
 	token,
 	user,
 	follows,
-	live_follows
+	live_follows,
+	channel_followers
 } command_type;
 
 // Command handler function  type.
@@ -397,6 +398,13 @@ void get_top_games(const char *query, int options_count, const char **options) {
 	free(bearer);
 }
 
+/**
+ * Retrieves a list of followers for given channel.
+ *
+ * @param query Channel name, i.e. user login.
+ * @param options_count Number of command line arguments.
+ * @param options List of command line arguments.
+ */
 void get_channel_followers(
 	const char *query,
 	int options_count,
@@ -456,6 +464,13 @@ void get_channel_followers(
 	twitch_helix_user_list_free(users);
 }
 
+/**
+ * Retrieves a list of teams a given channel belongs to.
+ *
+ * @param query Channel name, i.e. user login.
+ * @param options_count Number of command line arguments.
+ * @param options List of command line arguments.
+ */
 void get_channel_teams(
 	const char *query,
 	int options_count,
@@ -511,6 +526,13 @@ void get_channel_teams(
 	twitch_helix_user_list_free(users);
 }
 
+/**
+ * Retrieves a list of videos on a given channel
+ *
+ * @param query Channel name, i.e. user login.
+ * @param options_count Number of command line arguments.
+ * @param options List of command line arguments.
+ */
 void get_channel_videos(
 	const char *query,
 	int options_count,
@@ -574,6 +596,13 @@ void get_channel_videos(
 	free(channel_id);
 }
 
+/**
+ * Retrieves team data for given team name.
+ *
+ * @param query Team name.
+ * @param options_count Number of command line arguments.
+ * @param options List of command line arguments.
+ */
 void get_team(const char *query, int options_count, const char **options) {
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_bearer_token(options_count, options);
@@ -646,7 +675,7 @@ void get_token(const char *param, int options_count, const char **options) {
  * @param options_count Number of CLI arguments.
  * @param options List of arguments.
  */
-void get_helix_user(
+void get_user(
 	const char *username,
 	int options_count,
 	const char **options
@@ -694,7 +723,7 @@ void get_helix_user(
  * @param options_count Number of CLI arguments.
  * @param options List of arguments.
  */
-void get_helix_channel_follows(
+void get_channel_follows(
 	const char *username,
 	int options_count,
 	const char **options
@@ -750,7 +779,7 @@ void get_helix_channel_follows(
  * @param options_count Number of CLI arguments.
  * @param options List of arguments.
  */
-void get_helix_live_channel_follows(
+void get_live_channel_follows(
 	const char *username,
 	int options_count,
 	const char **options
@@ -878,6 +907,13 @@ int main(int argc, char **argv) {
 			.handler = &get_channel_teams
 		},
 		{
+			.command = channel_followers,
+			.name = "followers",
+			.description = "Gets channel's followers.",
+			.has_parameter = true,
+			.handler = &get_channel_followers
+		},
+		{
 			.command = channel_videos,
 			.name = "videos",
 			.description = "Gets all videos of specific channel.",
@@ -903,21 +939,21 @@ int main(int argc, char **argv) {
 			.name = "user",
 			.description = "Gets user info for specific login",
 			.has_parameter = true,
-			.handler = &get_helix_user
+			.handler = &get_user
 		},
 		{
 			.command = follows,
 			.name = "follows",
 			.description = "Gets channel's follows",
 			.has_parameter = true,
-			.handler = &get_helix_channel_follows
+			.handler = &get_channel_follows
 		},
 		{
 			.command = live_follows,
 			.name = "live_follows",
 			.description = "Gets channel's live follows",
 			.has_parameter = true,
-			.handler = &get_helix_live_channel_follows
+			.handler = &get_live_channel_follows
 		},
 	};
 
