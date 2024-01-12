@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include <curl/curl.h>
 
-#include "utils/network_utils.h"
-#include "utils/string_utils.h"
-#include "utils/parser.h"
+#include "utils/network/network.h"
+#include "utils/strings/strings.h"
+#include "utils/parser/parser.h"
 #include "json/json.h"
 
 /** cURL helpers **/

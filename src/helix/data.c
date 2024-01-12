@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "utils/datagen.h"
-#include "utils/array_utils.h"
-#include "utils/data_utils.h"
+#include "utils/arrays/arrays.h"
+#include "utils/data/data.h"
 
 #include <ctwitch/helix/data.h>
 

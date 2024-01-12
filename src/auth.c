@@ -5,9 +5,9 @@
 #include <curl/curl.h>
 
 #include "utils/datagen.h"
-#include "utils/string_utils.h"
-#include "utils/network_helix_utils.h"
-#include "utils/parser.h"
+#include "utils/strings/strings.h"
+#include "utils/network/helix.h"
+#include "utils/parser/parser.h"
 #include "json/json.h"
 
 #include <ctwitch/auth.h>

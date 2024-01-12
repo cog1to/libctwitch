@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "data_utils.h"
+#include "utils/data/data.h"
 
 /** Helper functions **/
 

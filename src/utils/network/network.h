@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <curl/curl.h>
 
-#include "string_utils.h"
+#include "utils/strings/strings.h"
 #include "json/json.h"
 
 /**

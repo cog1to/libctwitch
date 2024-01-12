@@ -2,7 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
-void **pointer_array_map(void **src, size_t src_count, void *(*getter)(void *)) {
+void **pointer_array_map(
+	void **src,
+	size_t src_count,
+	void *(*getter)(void *)
+) {
   void **dest = malloc(sizeof(void *) * src_count);
 
   for (int index = 0; index < src_count; index++) {

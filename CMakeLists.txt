@@ -21,12 +21,12 @@ include(GNUInstallDirs)
 # Library source code
 add_library(ctwitch SHARED
   src/json/json.c
-  src/utils/string_utils.c
-  src/utils/array_utils.c
-  src/utils/network_helix_utils.c
-  src/utils/network_utils.c
-  src/utils/parser.c
-  src/utils/data_utils.c
+  src/utils/strings/strings.c
+  src/utils/arrays/arrays.c
+  src/utils/network/helix.c
+  src/utils/network/network.c
+  src/utils/parser/parser.c
+  src/utils/data/data.c
   src/auth.c
   src/helix/data.c
   src/helix/users.c
@@ -70,12 +70,12 @@ install(FILES ${CMAKE_BINARY_DIR}/libctwitch.pc DESTINATION ${CMAKE_INSTALL_LIBD
 add_executable(twitch-remote
   example/twitch-remote.c
   src/json/json.c
-  src/utils/string_utils.c
-  src/utils/array_utils.c
-  src/utils/network_helix_utils.c
-  src/utils/network_utils.c
-  src/utils/parser.c
-  src/utils/data_utils.c
+  src/utils/strings/strings.c
+  src/utils/arrays/arrays.c
+  src/utils/network/helix.c
+  src/utils/network/network.c
+  src/utils/parser/parser.c
+  src/utils/data/data.c
   src/auth.c
   src/helix/data.c
   src/helix/users.c

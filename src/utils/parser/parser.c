@@ -7,7 +7,7 @@
 #include <ctwitch/helix/data.h>
 
 #include "parser.h"
-#include "string_utils.h"
+#include "utils/strings/strings.h"
 
 /** JSON array parser **/
 

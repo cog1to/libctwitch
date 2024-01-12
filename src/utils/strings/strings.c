@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <curl/curl.h>
 
-#include "string_utils.h"
+#include "utils/strings/strings.h"
 
 string_t *string_init() {
   string_t *s = malloc(sizeof(string_t));
