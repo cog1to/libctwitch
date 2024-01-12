@@ -38,7 +38,7 @@ twitch_helix_stream_list *twitch_helix_get_streams(
 	long long game_id,
 	const char *language,
 	int users_count,
-	long long *users,
+	const char **users,
 	int logins_count,
 	const char **logins,
 	int limit,
@@ -64,10 +64,10 @@ twitch_helix_stream_list *twitch_helix_get_streams(
 twitch_helix_stream_list *twitch_helix_get_all_streams(
 	const char *client_id,
 	const char *auth,
-	long long game_id,
+	const char *game_id,
 	const char *language,
 	int users_count,
-	long long *users,
+	const char **users,
 	int logins_count,
 	const char **logins
 );

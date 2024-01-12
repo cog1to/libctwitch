@@ -14,7 +14,7 @@
  * Twitch User info. All properties are dynamically allocated.
  */
 typedef struct {
-	long long id;
+	char *id;
 	char *display_name;
 	char *login;
 	char *type;
@@ -64,7 +64,7 @@ void twitch_helix_user_list_free(twitch_helix_user_list *list);
 /** Channel follows **/
 
 typedef struct {
-	long long broadcaster_id;
+	char *broadcaster_id;
 	char *broadcaster_login;
 	char *broadcaster_name;
 	char *followed_at;
@@ -109,10 +109,10 @@ void twitch_helix_channel_follow_list_free(
 /** Streams **/
 
 typedef struct {
-	long long id;
-	long long user_id;
+	char *id;
+	char *user_id;
 	char *user_name;
-	long long game_id;
+	char *game_id;
 	char *game_name;
 	char *type;
 	char *title;

@@ -50,8 +50,8 @@ string_t *helix_users_url_builder(void *params, int limit, const char *after) {
 }
 
 typedef struct {
-	long long user_id;
-	long long broadcaster_id;
+	const char *user_id;
+	const char *broadcaster_id;
 } helix_channel_follows_params;
 
 string_t *helix_channel_follows_url_builder(
@@ -72,7 +72,7 @@ string_t *helix_channel_follows_url_builder(
 	if (fparams->user_id > 0) {
 		string_append_format(
 			url,
-			"%suser_id=%lld",
+			"%suser_id=%s",
 			is_first_param ? "?" : "&",
 			fparams->user_id
 		);
@@ -82,7 +82,7 @@ string_t *helix_channel_follows_url_builder(
 	if (fparams->broadcaster_id > 0) {
 		string_append_format(
 			url,
-			"%sbroadcaster_id=%lld",
+			"%sbroadcaster_id=%s",
 			is_first_param ? "?" : "&",
 			fparams->broadcaster_id
 		);
@@ -164,8 +164,8 @@ twitch_helix_user *twitch_helix_get_user(
 twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 	const char *client_id,
 	const char *auth,
-	long long user_id,
-	long long broadcaster_id,
+	const char *user_id,
+	const char *broadcaster_id,
 	int limit,
 	const char *after,
 	int *total,
@@ -195,8 +195,8 @@ twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 twitch_helix_channel_follow_list *twitch_helix_get_all_channel_follows(
 	const char *client_id,
 	const char *auth,
-	long long user_id,
-	long long broadcaster_id
+	const char *user_id,
+	const char *broadcaster_id
 ) {
 	helix_channel_follows_params params = {
 		.user_id = user_id,

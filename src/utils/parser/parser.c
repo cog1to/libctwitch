@@ -40,14 +40,6 @@ void **parse_json_array(
 
 /** Generic entity parsing **/
 
-void parse_id(void *dest, json_value *source) {
-	if (source->type == json_integer) {
-		*((int *)dest) = source->u.integer;
-	} else if (source->type == json_string) {
-		*((int *)dest) = strtoimax(source->u.string.ptr, NULL, 10);
-	}
-}
-
 void parse_string(void *dest, json_value *source) {
 	if (source->type == json_string) {
 		*((char **)dest) = immutable_string_copy(source->u.string.ptr);
@@ -123,7 +115,7 @@ void *parse_helix_user(json_value *user_object) {
 		{
 			.name = "id",
 			.dest = &user->id,
-			.parser = &parse_id
+			.parser = &parse_string
 		},
 		{
 			.name = "display_name",
@@ -185,12 +177,12 @@ void *parse_helix_stream(json_value *stream_object) {
 		{
 			.name = "id",
 			.dest = &stream->id,
-			.parser = &parse_id
+			.parser = &parse_string
 		},
 		{
 			.name = "user_id",
 			.dest = &stream->user_id,
-			.parser = &parse_id
+			.parser = &parse_string
 		},
 		{
 			.name = "user_name",
@@ -200,7 +192,7 @@ void *parse_helix_stream(json_value *stream_object) {
 		{
 			.name = "game_id",
 			.dest = &stream->game_id,
-			.parser = &parse_id
+			.parser = &parse_string
 		},
 		{
 			.name = "game_name",
@@ -252,7 +244,7 @@ void *parse_helix_channel_follow(json_value *follow_object) {
 		{
 			.name = "broadcaster_id",
 			.dest = &follow->broadcaster_id,
-			.parser = &parse_id
+			.parser = &parse_string
 		},
 		{
 			.name = "broadcaster_name",

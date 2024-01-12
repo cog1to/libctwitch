@@ -15,6 +15,7 @@ twitch_helix_user *twitch_helix_user_alloc() {
 }
 
 void twitch_helix_user_free(twitch_helix_user *user) {
+	FREE(user->id);
 	FREE(user->login);
 	FREE(user->display_name);
 	FREE(user->type);
@@ -35,6 +36,7 @@ twitch_helix_channel_follow *twitch_helix_channel_follow_alloc() {
 }
 
 void twitch_helix_channel_follow_free(twitch_helix_channel_follow *follow) {
+	FREE(follow->broadcaster_id);
 	FREE(follow->broadcaster_login);
 	FREE(follow->broadcaster_name);
 	FREE(follow->followed_at);
@@ -50,7 +52,10 @@ twitch_helix_stream *twitch_helix_stream_alloc() {
 }
 
 void twitch_helix_stream_free(twitch_helix_stream *stream) {
+	FREE(stream->id);
+	FREE(stream->user_id);
 	FREE(stream->user_name);
+	FREE(stream->game_id);
 	FREE(stream->game_name);
 	FREE(stream->type);
 	FREE(stream->title);

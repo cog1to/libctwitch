@@ -16,10 +16,10 @@
 /** URL builders	**/
 
 typedef struct {
-	long long game_id;
+	const char *game_id;
 	const char *language;
 	int users_count;
-	long long *users;
+	const char **users;
 	int logins_count;
 	const char **logins;
 } helix_streams_params;
@@ -38,7 +38,7 @@ string_t *helix_streams_url_builder(
 	string_t *url = string_init_with_value("https://api.twitch.tv/helix/streams");
 
 	if (sparams->game_id > 0) {
-		string_append_format(url, "?game_id=%d", sparams->game_id);
+		string_append_format(url, "?game_id=%s", sparams->game_id);
 		is_first_param = false;
 	}
 
@@ -67,7 +67,7 @@ string_t *helix_streams_url_builder(
 		idx < sparams->users_count && idx < MAX_USERS_COUNT;
 		idx++
 	) {
-		string_append_format(url, "%suser_id=%d",
+		string_append_format(url, "%suser_id=%s",
 			is_first_param ? "?" : "&", sparams->users[idx]
 		);
 		is_first_param = false;
@@ -81,10 +81,10 @@ string_t *helix_streams_url_builder(
 twitch_helix_stream_list *twitch_helix_get_streams(
 	const char *client_id,
 	const char *auth,
-	long long game_id,
+	const char *game_id,
 	const char *language,
 	int users_count,
-	long long *users,
+	const char **users,
 	int logins_count,
 	const char **logins,
 	int limit,
@@ -120,10 +120,10 @@ twitch_helix_stream_list *twitch_helix_get_streams(
 twitch_helix_stream_list *twitch_helix_get_all_streams(
 	const char *client_id,
 	const char *auth,
-	long long game_id,
+	const char *game_id,
 	const char *language,
 	int users_count,
-	long long *users,
+	const char **users,
 	int logins_count,
 	const char **logins
 ) {

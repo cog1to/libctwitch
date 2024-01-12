@@ -72,8 +72,8 @@ twitch_helix_user_list *twitch_helix_get_users(
 twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 	const char *client_id,
 	const char *auth,
-	long long user_id,
-	long long broadcaster_id,
+	const char *user_id,
+	const char *broadcaster_id,
 	int limit,
 	const char *after,
 	int *total,
@@ -98,8 +98,8 @@ twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 twitch_helix_channel_follow_list *twitch_helix_get_all_channel_follows(
 	const char *client_id,
 	const char *auth,
-	long long user_id,
-	long long broadcaster_id
+	const char *user_id,
+	const char *broadcaster_id
 );
 
 #endif

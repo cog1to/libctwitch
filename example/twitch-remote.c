@@ -794,12 +794,14 @@ void get_live_channel_follows(
 		1,
 		usernames
 	);
+
 	if (users == NULL) {
 		fprintf(stderr, "Error: failed to get user info\n");
 		free(client_id);
 		free(bearer);
 		return;
 	}
+
 	if (users->count == 0) {
 		fprintf(stderr, "Error: user not found\n");
 		twitch_helix_user_list_free(users);
@@ -816,6 +818,7 @@ void get_live_channel_follows(
 		user->id,
 		0
 	);
+
 	if (follows == NULL) {
 		fprintf(stderr, "Error: user with login '%s' not found\n", username);
 		twitch_helix_user_list_free(users);
@@ -823,6 +826,7 @@ void get_live_channel_follows(
 		free(bearer);
 		return;
 	}
+
 	if (follows->count == 0) {
 		fprintf(stderr, "No follows returned for user %s\n", user->login);
 		twitch_helix_user_list_free(users);
@@ -832,17 +836,18 @@ void get_live_channel_follows(
 		return;
 	}
 
-	long long *user_ids = malloc(sizeof(long long) * follows->count);
+	char **user_ids = malloc(sizeof(char *) * follows->count);
 	for (int idx = 0; idx < follows->count; idx++) {
 		user_ids[idx] = follows->items[idx]->broadcaster_id;
 	}
+
 	twitch_helix_stream_list *streams = twitch_helix_get_all_streams(
 		client_id,
 		bearer,
 		0,
 		NULL,
 		follows->count,
-		user_ids,
+		(const char **)user_ids,
 		0,
 		NULL
 	);
@@ -950,7 +955,7 @@ int main(int argc, char **argv) {
 		},
 		{
 			.command = live_follows,
-			.name = "live_follows",
+			.name = "live-follows",
 			.description = "Gets channel's live follows",
 			.has_parameter = true,
 			.handler = &get_live_channel_follows
