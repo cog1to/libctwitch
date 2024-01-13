@@ -17,10 +17,16 @@
 #include "utils/strings/strings.h"
 #include "json/json.h"
 
+#include <ctwitch/common.h>
+
 /**
  * Convenience function type for URL builder functions.
  */
-typedef string_t *(*helix_page_url_builder)(void *, int limit, const char *after);
+typedef string_t *(*helix_page_url_builder)(
+	void *,
+	int limit,
+	const char *after
+);
 
 /**
  * Convenience JSON parser function type.
@@ -50,14 +56,17 @@ void helix_append_cursor_params(
  *
  * @param client_id Twitch API client ID string.
  * @param auth Authorization token.
+ * @param error Error struct to hold any error info.
  * @param url Target URL string.
  * @param output String to write output to.
+ * @param http_code Will containt the HTTP code returned in response.
  *
  * @return cURL request result code.
  */
 CURLcode twitch_helix_get(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *url,
 	string_t *output
 );
@@ -68,6 +77,7 @@ CURLcode twitch_helix_get(
  *
  * @param client_id Twitch API client ID.
  * @param auth Authorization token.
+ * @param error Error struct to hold any error info.
  * @param url Target API endpoint URL.
  *
  * @return Parsed JSON value. (see utils/json library).
@@ -75,6 +85,7 @@ CURLcode twitch_helix_get(
 json_value *twitch_helix_get_json(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *url
 );
 
@@ -96,10 +107,10 @@ json_value *twitch_auth_post_json(const char *url);
  * structure:
  *
  * {
- *   "data": [{...}, {...}, {...},...],
- *   "pagination": {
- *     "cursor": "..."
- *   }
+ *	 "data": [{...}, {...}, {...},...],
+ *	 "pagination": {
+ *		 "cursor": "..."
+ *	 }
  * }
  *
  * There "cursor" contains cursor string to use as "after" parameter to fetch
@@ -121,16 +132,17 @@ json_value *twitch_auth_post_json(const char *url);
  * @return Array of pointers to downloaded and parsed items.
  */
 void **helix_get_page(
-  const char *client_id,
-  const char *auth,
-  helix_page_url_builder builder,
-  void *params,
-  int limit,
-  const char *after,
-  parser_func parser,
-  int *size,
-  char **next,
-  int *total
+	const char *client_id,
+	const char *auth,
+	twitch_error *error,
+	helix_page_url_builder builder,
+	void *params,
+	int limit,
+	const char *after,
+	parser_func parser,
+	int *size,
+	char **next,
+	int *total
 );
 
 /**
@@ -141,11 +153,11 @@ void **helix_get_page(
  * structure:
  *
  * {
- *   "data": [{...}, {...}, {...},...],
- *   "pagination": {
- *     "cursor": "..."
- *   },
- *   "total": 123
+ *	 "data": [{...}, {...}, {...},...],
+ *	 "pagination": {
+ *		 "cursor": "..."
+ *	 },
+ *	 "total": 123
  * }
  *
  * There "cursor" contains cursor string to use as "after" parameter to fetch
@@ -163,13 +175,14 @@ void **helix_get_page(
  * @return Array of pointers to downloaded and parsed items.
  */
 void **get_all_helix_pages(
-  const char *client_id,
-  const char *auth,
-  helix_page_url_builder builder,
-  void *params,
-  parser_func parser,
+	const char *client_id,
+	const char *auth,
+	twitch_error *error,
+	helix_page_url_builder builder,
+	void *params,
+	parser_func parser,
 	int limit,
-  int *size
+	int *size
 );
 
 #endif

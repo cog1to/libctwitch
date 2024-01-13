@@ -9,6 +9,8 @@
 #define _H_TWITCH_HELIX_VIDEOS
 
 #include <stdlib.h>
+
+#include <ctwitch/common.h>
 #include <ctwitch/helix/data.h>
 
 /**
@@ -20,6 +22,7 @@
  *
  * @param client_id Twitch API client ID.
  * @param token Bearer token.
+ * @param error Error holder struct.
  * @param user_id ID of user from whom to fetch videos.
  * @param game_id ID of the game or category.
  * @param id_count Number of video IDs in `ids` param.
@@ -40,6 +43,7 @@
 twitch_helix_video_list *twitch_helix_get_videos(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *user_id,
 	const char *game_id,
 	int id_count,
@@ -62,6 +66,7 @@ twitch_helix_video_list *twitch_helix_get_videos(
  *
  * @param client_id Twitch API client ID.
  * @param token Bearer token.
+ * @oaram error Error holder struct.
  * @param user_id ID of user from whom to fetch videos.
  * @param game_id ID of the game or category.
  * @param id_count Number of video IDs in `ids` param.
@@ -81,6 +86,7 @@ twitch_helix_video_list *twitch_helix_get_videos(
 twitch_helix_video_list *twitch_helix_get_all_videos(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *user_id,
 	const char *game_id,
 	int id_count,

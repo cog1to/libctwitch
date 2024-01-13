@@ -2,6 +2,8 @@
 #define _H_TWITCH_HELIX_CHANNELS
 
 #include <stdlib.h>
+
+#include <ctwitch/common.h>
 #include <ctwitch/helix/data.h>
 
 /**
@@ -11,6 +13,7 @@
  * @param client_id Twitch API client ID.
  * @param token User access token. Must be issued with
  * "moderator:read:followers" permission.
+ * @param error Error holder.
  * @param channel_id Channel ID.
  * @param first Page size. Must be between 1 and 100, including.
  * @param after Pagination cursor.
@@ -23,6 +26,7 @@
 twitch_helix_follower_list *twitch_helix_get_channel_followers(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *channel_id,
 	const char *user_id,
 	int first,
@@ -37,6 +41,7 @@ twitch_helix_follower_list *twitch_helix_get_channel_followers(
  * @param client_id Twitch API client ID.
  * @param token User access token. Must be issued with
  * "moderator:read:followers" permission.
+ * @param error Error holder struct.
  * @param channel_id Channel ID.
  * @param user_id Used to check if a specific user follows given channel ID. If
  * you're interested in all followers, pass NULL. If not NULL, it will return
@@ -50,6 +55,7 @@ twitch_helix_follower_list *twitch_helix_get_channel_followers(
 twitch_helix_follower_list *twitch_helix_get_all_channel_followers(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *channel_id,
 	const char *user_id,
 	int limit
@@ -60,6 +66,7 @@ twitch_helix_follower_list *twitch_helix_get_all_channel_followers(
  *
  * @param client_id Twitch API client ID.
  * @param token Bearer token.
+ * @param error Error holder struct.
  * @param channel_id Channel ID.
  *
  * @return Instance of twitch_team_list containing all channel's teams.
@@ -67,6 +74,7 @@ twitch_helix_follower_list *twitch_helix_get_all_channel_followers(
 twitch_helix_team_list *twitch_helix_get_channel_teams(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *channel_id
 );
 

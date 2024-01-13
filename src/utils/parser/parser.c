@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <ctwitch/auth.h>
+#include <ctwitch/common.h>
 #include <ctwitch/helix/data.h>
 
 #include "parser.h"

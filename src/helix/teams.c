@@ -9,6 +9,7 @@
 #include "utils/parser/parser.h"
 #include "json/json.h"
 
+#include <ctwitch/common.h>
 #include <ctwitch/helix/data.h>
 
 /** URL builders	**/
@@ -37,6 +38,7 @@ string_t *helix_team_url_builder(void *params) {
 twitch_helix_team *twitch_helix_get_team(
 	const char *client_id,
 	const char *bearer,
+	twitch_error *error,
 	const char *name,
 	const char *id
 ) {
@@ -46,7 +48,7 @@ twitch_helix_team *twitch_helix_get_team(
 	};
 
 	string_t *url = helix_team_url_builder(&params);
-	json_value *value = twitch_helix_get_json(client_id, bearer, url->ptr);
+	json_value *value = twitch_helix_get_json(client_id, bearer, error, url->ptr);
 	string_free(url);
 
 	void *team = parse_helix_team(value);

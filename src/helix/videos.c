@@ -103,6 +103,7 @@ string_t *helix_videos_url_builder(
 twitch_helix_video_list *twitch_helix_get_videos(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *user_id,
 	const char *game_id,
 	int id_count,
@@ -131,6 +132,7 @@ twitch_helix_video_list *twitch_helix_get_videos(
 	list->items = (twitch_helix_video **)helix_get_page(
 		client_id,
 		token,
+		error,
 		&helix_videos_url_builder,
 		(void *)&params,
 		first,
@@ -147,6 +149,7 @@ twitch_helix_video_list *twitch_helix_get_videos(
 twitch_helix_video_list *twitch_helix_get_all_videos(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *user_id,
 	const char *game_id,
 	int id_count,
@@ -173,6 +176,7 @@ twitch_helix_video_list *twitch_helix_get_all_videos(
 	list->items = (twitch_helix_video **)get_all_helix_pages(
 		client_id,
 		token,
+		error,
 		&helix_videos_url_builder,
 		(void *)&params,
 		&parse_helix_video,

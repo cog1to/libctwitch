@@ -81,6 +81,7 @@ string_t *helix_streams_url_builder(
 twitch_helix_stream_list *twitch_helix_get_streams(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *game_id,
 	const char *language,
 	int users_count,
@@ -105,6 +106,7 @@ twitch_helix_stream_list *twitch_helix_get_streams(
 	list->items = (twitch_helix_stream **)helix_get_page(
 		client_id,
 		auth,
+		error,
 		&helix_streams_url_builder,
 		(void *)&params,
 		limit,
@@ -120,6 +122,7 @@ twitch_helix_stream_list *twitch_helix_get_streams(
 twitch_helix_stream_list *twitch_helix_get_all_streams(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *game_id,
 	const char *language,
 	int users_count,
@@ -140,6 +143,7 @@ twitch_helix_stream_list *twitch_helix_get_all_streams(
 	streams->items = (twitch_helix_stream **)get_all_helix_pages(
 		client_id,
 		auth,
+		error,
 		&helix_streams_url_builder,
 		(void *)&params,
 		&parse_helix_stream,

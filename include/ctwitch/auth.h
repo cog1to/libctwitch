@@ -65,11 +65,7 @@
 #ifndef _H_TWITCH_AUTH
 #define _H_TWITCH_AUTH
 
-/** String list **/
-typedef struct {
-	int count;
-	char **items;
-} twitch_string_list;
+#include <ctwitch/common.h>
 
 /** App access token **/
 typedef struct {
@@ -86,20 +82,6 @@ typedef struct {
 	char *token_type;
 	twitch_string_list scopes;
 } twitch_user_access_token;
-
-/**
- * Allocates a dynamic string list struct.
- *
- * @return A pointer to the allocated twitch_string_list struct.
- */
-twitch_string_list *twitch_string_list_alloc();
-
-/**
- * Releases memory occupied by the string list and all if its items.
- *
- * @param list List to deallocate
- */
-void twitch_string_list_free(twitch_string_list *list);
 
 /**
  * Allocates and clears memory for new twitch_app_access_token struct.

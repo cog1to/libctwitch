@@ -39,6 +39,7 @@ string_t *helix_categories_url_builder(
 twitch_helix_category_list *twitch_helix_get_categories(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *query,
 	int first,
 	const char *after,
@@ -49,6 +50,7 @@ twitch_helix_category_list *twitch_helix_get_categories(
 	list->items = (twitch_helix_category **)helix_get_page(
 		client_id,
 		token,
+		error,
 		&helix_categories_url_builder,
 		(void *)query,
 		first,
@@ -65,6 +67,7 @@ twitch_helix_category_list *twitch_helix_get_categories(
 twitch_helix_category_list *twitch_helix_get_all_categories(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *query,
 	int limit
 ) {
@@ -73,6 +76,7 @@ twitch_helix_category_list *twitch_helix_get_all_categories(
 	list->items = (twitch_helix_category **)get_all_helix_pages(
 		client_id,
 		token,
+		error,
 		&helix_categories_url_builder,
 		(void *)query,
 		&parse_helix_category,
@@ -120,6 +124,7 @@ string_t *helix_channel_search_url_builder(
 twitch_helix_channel_search_item_list *twitch_helix_search_channels(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *query,
 	int live_only,
 	int first,
@@ -137,6 +142,7 @@ twitch_helix_channel_search_item_list *twitch_helix_search_channels(
 	list->items = (twitch_helix_channel_search_item **)helix_get_page(
 		client_id,
 		token,
+		error,
 		&helix_channel_search_url_builder,
 		(void *)&params,
 		first,
@@ -153,6 +159,7 @@ twitch_helix_channel_search_item_list *twitch_helix_search_channels(
 twitch_helix_channel_search_item_list *twitch_helix_search_all_channels(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *query,
 	int live_only,
 	int limit
@@ -168,6 +175,7 @@ twitch_helix_channel_search_item_list *twitch_helix_search_all_channels(
 	list->items = (twitch_helix_channel_search_item **)get_all_helix_pages(
 		client_id,
 		token,
+		error,
 		&helix_channel_search_url_builder,
 		(void *)&params,
 		&parse_helix_channel_search_item,

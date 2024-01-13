@@ -9,6 +9,7 @@
 #include "utils/parser/parser.h"
 #include "json/json.h"
 
+#include <ctwitch/common.h>
 #include <ctwitch/helix/data.h>
 
 /** Channel followers **/
@@ -45,6 +46,7 @@ string_t *helix_channel_followers_url_builder(
 twitch_helix_follower_list *twitch_helix_get_channel_followers(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *channel_id,
 	const char *user_id,
 	int first,
@@ -62,6 +64,7 @@ twitch_helix_follower_list *twitch_helix_get_channel_followers(
 	list->items = (twitch_helix_follower **)helix_get_page(
 		client_id,
 		token,
+		error,
 		&helix_channel_followers_url_builder,
 		(void *)&params,
 		first,
@@ -78,6 +81,7 @@ twitch_helix_follower_list *twitch_helix_get_channel_followers(
 twitch_helix_follower_list *twitch_helix_get_all_channel_followers(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *channel_id,
 	const char *user_id,
 	int limit
@@ -92,6 +96,7 @@ twitch_helix_follower_list *twitch_helix_get_all_channel_followers(
 	list->items = (twitch_helix_follower **)get_all_helix_pages(
 		client_id,
 		token,
+		error,
 		&helix_channel_followers_url_builder,
 		(void *)&params,
 		&parse_helix_follower,
@@ -123,6 +128,7 @@ string_t *helix_channel_teams_url_builder(
 twitch_helix_team_list *twitch_helix_get_channel_teams(
 	const char *client_id,
 	const char *token,
+	twitch_error *error,
 	const char *channel_id
 ) {
 	twitch_helix_team_list *list = twitch_helix_team_list_alloc();
@@ -130,6 +136,7 @@ twitch_helix_team_list *twitch_helix_get_channel_teams(
 	list->items = (twitch_helix_team **)helix_get_page(
 		client_id,
 		token,
+		error,
 		&helix_channel_teams_url_builder,
 		(void *)channel_id,
 		0,
@@ -142,5 +149,4 @@ twitch_helix_team_list *twitch_helix_get_channel_teams(
 
 	return list;
 }
-
 

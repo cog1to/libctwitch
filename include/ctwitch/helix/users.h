@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+#include <ctwitch/common.h>
 #include <ctwitch/helix/data.h>
 
 /**
@@ -19,6 +21,7 @@
  *
  * @param login User login name.
  * @param client_id Twitch API client ID.
+ * @param error Error holder to fill with error info.
  * @param auth Authorization token.
  *
  * @return Dynamically allocated twitch_helix_user struct describing user.
@@ -27,6 +30,7 @@
 twitch_helix_user *twitch_helix_get_user(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *login
 );
 
@@ -37,6 +41,7 @@ twitch_helix_user *twitch_helix_get_user(
  * @param login_names Login names array.
  * @param client_id Twitch API client ID.
  * @param auth Authorization token.
+ * @param error Error holder struct.
  *
  * @return Dynamically allocated twitch_helix_user_list struct describing user.
  * You have to manually free the memory using twitch_helix_user_list_free()
@@ -45,6 +50,7 @@ twitch_helix_user *twitch_helix_get_user(
 twitch_helix_user_list *twitch_helix_get_users(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	int logins_count,
 	const char **logins
 );
@@ -59,6 +65,7 @@ twitch_helix_user_list *twitch_helix_get_users(
  *
  * @param client_id Twitch Client ID.
  * @param auth Authorization token.
+ * @param error Error holder struct.
  * @param user_id ID of a user to query for outgoing follows.
  * @param broadcaster_id ID of a user to query for incoming follows.
  * @param limit Page limit.
@@ -72,6 +79,7 @@ twitch_helix_user_list *twitch_helix_get_users(
 twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *user_id,
 	const char *broadcaster_id,
 	int limit,
@@ -90,6 +98,7 @@ twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
  *
  * @param client_id Twitch Client ID.
  * @param auth Authorization token.
+ * @param error Error holder struct.
  * @param user_id ID of a user to query for outgoing follows.
  * @param broadcaster_id ID of a user to query for incoming follows.
  *
@@ -98,6 +107,7 @@ twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 twitch_helix_channel_follow_list *twitch_helix_get_all_channel_follows(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *user_id,
 	const char *broadcaster_id
 );

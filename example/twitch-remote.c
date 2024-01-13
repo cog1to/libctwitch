@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include <ctwitch/common.h>
 #include <ctwitch/auth.h>
 #include <ctwitch/helix.h>
 #include <ctwitch/ctwitch.h>
@@ -18,6 +19,27 @@
  * to save some space.
  **/
 extern char *immutable_string_copy(const char *src);
+
+/** Helpers **/
+
+void print_error(twitch_error *error) {
+	if (error == NULL) {
+		return;
+	}
+
+	if (error->curl_code == CURLE_OK) {
+		return;
+	}
+
+	fprintf(
+		stderr, "libctwitch error:\n  Curl code: %ld\n  HTTP code: %ld\n",
+		error->curl_code, error->http_code
+	);
+
+	if (error->output != NULL) {
+		fprintf(stderr, "  Response: %s\n", error->output);
+	}
+}
 
 /** Command-line data **/
 
@@ -229,12 +251,20 @@ char *get_bearer_token(int options_count, const char **options) {
  */
 char *find_user_id(char *client_id, char *bearer, const char *query) {
 	const char *usernames[1] = { query };
+	twitch_error error = { 0, 0, 0 };
+
 	twitch_helix_user_list *users = twitch_helix_get_users(
 		client_id,
 		bearer,
+		&error,
 		1,
 		usernames
 	);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		return NULL;
+	}
 
 	if (users == NULL) {
 		fprintf(stderr, "Error: failed to get user info\n");
@@ -265,15 +295,23 @@ char *find_user_id(char *client_id, char *bearer, const char *query) {
  * @param options List of command line arguments.
  */
 void get_games(const char *name, int options_count, const char **options) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_bearer_token(options_count, options);
 
 	twitch_helix_category_list *games = twitch_helix_get_all_categories(
 		client_id,
 		bearer,
+		&error,
 		name,
 		0
 	);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
 
 	if (games != NULL && games->count > 0) {
 		for (int index = 0; index < games->count; index++) {
@@ -300,6 +338,7 @@ void get_games(const char *name, int options_count, const char **options) {
  * @param options List of command line arguments.
  */
 void get_streams(const char *query, int options_count, const char **options) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_bearer_token(options_count, options);
 
@@ -307,10 +346,17 @@ void get_streams(const char *query, int options_count, const char **options) {
 		twitch_helix_search_all_channels(
 		client_id,
 		bearer,
+		&error,
 		query,
 		1, // Live-only
 		0
 	);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
 
 	if (streams != NULL && streams->count > 0) {
 		printf("Streams found: %d\n", streams->count);
@@ -353,6 +399,7 @@ void get_streams(const char *query, int options_count, const char **options) {
  * @param options List of command line arguments.
  */
 void get_top_games(const char *query, int options_count, const char **options) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_bearer_token(options_count, options);
 
@@ -365,10 +412,17 @@ void get_top_games(const char *query, int options_count, const char **options) {
 		exit(EXIT_FAILURE);
 	}
 
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
+
 	int size = 0, total = 0;
 	twitch_helix_game_list *games = twitch_helix_get_all_top_games(
 		client_id,
 		bearer,
+		&error,
 		limit
 	);
 
@@ -403,6 +457,7 @@ void get_channel_followers(
 	int options_count,
 	const char **options
 ) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_user_token(options_count, options, 1);
 	const char *usernames[1] = { query };
@@ -410,20 +465,27 @@ void get_channel_followers(
 	twitch_helix_user_list *users = twitch_helix_get_users(
 		client_id,
 		bearer,
+		&error,
 		1,
 		usernames
 	);
-	if (users == NULL) {
-		fprintf(stderr, "Error: failed to get user info\n");
-		free(client_id);
-		free(bearer);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
 		return;
 	}
+
+	if (users == NULL) {
+		fprintf(stderr, "Error: failed to get user info\n");
+		free(client_id); free(bearer);
+		return;
+	}
+
 	if (users->count == 0) {
 		fprintf(stderr, "Error: user not found\n");
 		twitch_helix_user_list_free(users);
-		free(client_id);
-		free(bearer);
+		free(client_id); free(bearer);
 		return;
 	}
 
@@ -432,6 +494,7 @@ void get_channel_followers(
 	twitch_helix_follower_list *followers = twitch_helix_get_all_channel_followers(
 		client_id,
 		bearer,
+		&error,
 		user->id,
 		NULL,
 		0
@@ -466,6 +529,7 @@ void get_channel_teams(
 	int options_count,
 	const char **options
 ) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_bearer_token(options_count, options);
 
@@ -474,15 +538,24 @@ void get_channel_teams(
 	twitch_helix_user_list *users = twitch_helix_get_users(
 		client_id,
 		bearer,
+		&error,
 		1,
 		usernames
 	);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
+
 	if (users == NULL) {
 		fprintf(stderr, "Error: failed to get user info\n");
 		free(client_id);
 		free(bearer);
 		return;
 	}
+
 	if (users->count == 0) {
 		fprintf(stderr, "Error: user not found\n");
 		twitch_helix_user_list_free(users);
@@ -496,8 +569,15 @@ void get_channel_teams(
 	twitch_helix_team_list *teams = twitch_helix_get_channel_teams(
 		client_id,
 		bearer,
+		&error,
 		user->id
 	);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
 
 	if (teams->count > 0) {
 		printf("Total team count: %d\n", teams->count);
@@ -525,20 +605,27 @@ void get_channel_videos(
 	int options_count,
 	const char **options
 ) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_bearer_token(options_count, options);
 	char *channel_id = find_user_id(client_id, bearer, query);
 
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
+
 	if (channel_id == NULL) {
 		printf("Channel '%s' not found\n", query);
-		free(client_id);
-		free(bearer);
+		free(client_id); free(bearer);
 		return;
 	}
 
 	twitch_helix_video_list *videos = twitch_helix_get_all_videos(
 		client_id,
 		bearer,
+		&error,
 		channel_id,
 		NULL,
 		0,
@@ -549,6 +636,13 @@ void get_channel_videos(
 		NULL,
 		20
 	);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
+
 	if (videos->count > 0) {
 		for (int index = 0; index < videos->count; index++) {
 			twitch_helix_video *video = videos->items[index];
@@ -591,15 +685,23 @@ void get_channel_videos(
  * @param options List of command line arguments.
  */
 void get_team(const char *query, int options_count, const char **options) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_bearer_token(options_count, options);
 
 	twitch_helix_team *team = twitch_helix_get_team(
 		client_id,
 		bearer,
+		&error,
 		query,
 		NULL
 	);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
 
 	if (team != NULL) {
 		printf(
@@ -667,6 +769,7 @@ void get_user(
 	int options_count,
 	const char **options
 ) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_bearer_token(options_count, options);
 
@@ -675,20 +778,30 @@ void get_user(
 	twitch_helix_user_list *users = twitch_helix_get_users(
 		client_id,
 		bearer,
+		&error,
 		1,
 		usernames
 	);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
+		return;
+	}
 
 	if (users != NULL) {
 		printf("Users: %d\n", users->count);
 		for (int idx = 0; idx < users->count; idx++) {
 			twitch_helix_user *user = users->items[idx];
 			printf(
-				"Username: %s\n  ID: %s\n  Display Name: %s\n  Created At: %s\n  Type: %s\n  Broadcaster type: %s\n  Description: %s\n",
+				"Username: %s\n  ID: %s\n  Display Name: %s\n  Created At: %s\n",
 				user->login,
 				user->id,
 				user->display_name,
-				user->created_at,
+				user->created_at
+			);
+
+			printf("Type: %s\n  Broadcaster type: %s\n  Description: %s\n",
 				user->type,
 				user->broadcaster_type,
 				user->description
@@ -715,6 +828,7 @@ void get_channel_follows(
 	int options_count,
 	const char **options
 ) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_user_token(options_count, options, 1);
 	const char *usernames[1] = { username };
@@ -722,40 +836,54 @@ void get_channel_follows(
 	twitch_helix_user_list *users = twitch_helix_get_users(
 		client_id,
 		bearer,
+		&error,
 		1,
 		usernames
 	);
 
-	if (users != NULL) {
-		if (users->count > 0) {
-			twitch_helix_user *user = users->items[0];
-			twitch_helix_channel_follow_list *follows =
-				twitch_helix_get_all_channel_follows(
-					client_id,
-					bearer,
-					user->id,
-					0
-				);
-			if (follows != NULL) {
-				printf("Follows: %d\n", follows->count);
-				for (int idx = 0; idx < follows->count; idx++) {
-					twitch_helix_channel_follow *follow = follows->items[idx];
-					printf("Name: %s [Login: %s] (Id: %s)\n",
-						follow->broadcaster_name,
-						follow->broadcaster_login,
-						follow->broadcaster_id
-					);
-				}
-				twitch_helix_channel_follow_list_free(follows);
-			} else {
-				fprintf(stderr, "Error: user with login '%s' not found\n", username);
-			}
-		}
-		twitch_helix_user_list_free(users);
-	} else {
-		fprintf(stderr, "Error: user with login '%s' not found\n", username);
+	if (users == NULL && error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id);
+		free(bearer);
+		return;
 	}
 
+	if (users->count <= 0) {
+		fprintf(stderr, "Error: user '%s' not found\n", username);
+	}
+
+	twitch_helix_user *user = users->items[0];
+	twitch_helix_channel_follow_list *follows =
+		twitch_helix_get_all_channel_follows(
+			client_id,
+			bearer,
+			&error,
+			user->id,
+			0
+		);
+
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		twitch_helix_user_list_free(users);
+		free(client_id);
+		free(bearer);
+		return;
+	}
+
+	if (follows != NULL) {
+		printf("Follows: %d\n", follows->count);
+		for (int idx = 0; idx < follows->count; idx++) {
+			twitch_helix_channel_follow *follow = follows->items[idx];
+			printf("Name: %s [Login: %s] (Id: %s)\n",
+				follow->broadcaster_name,
+				follow->broadcaster_login,
+				follow->broadcaster_id
+			);
+		}
+		twitch_helix_channel_follow_list_free(follows);
+	}
+
+	twitch_helix_user_list_free(users);
 	free(client_id);
 	free(bearer);
 }
@@ -772,6 +900,7 @@ void get_live_channel_follows(
 	int options_count,
 	const char **options
 ) {
+	twitch_error error = { 0, 0, 0 };
 	char *client_id = get_client_id(options_count, options);
 	char *bearer = get_user_token(options_count, options, 1);
 	const char *usernames[1] = { username };
@@ -779,18 +908,18 @@ void get_live_channel_follows(
 	twitch_helix_user_list *users = twitch_helix_get_users(
 		client_id,
 		bearer,
+		&error,
 		1,
 		usernames
 	);
 
-	if (users == NULL) {
-		fprintf(stderr, "Error: failed to get user info\n");
-		free(client_id);
-		free(bearer);
+	if (error.curl_code != CURLE_OK) {
+		print_error(&error);
+		free(client_id); free(bearer);
 		return;
 	}
 
-	if (users->count == 0) {
+	if (users == NULL || users->count == 0) {
 		fprintf(stderr, "Error: user not found\n");
 		twitch_helix_user_list_free(users);
 		free(client_id);
@@ -800,18 +929,19 @@ void get_live_channel_follows(
 
 	twitch_helix_user *user = users->items[0];
 
-	twitch_helix_channel_follow_list *follows = twitch_helix_get_all_channel_follows(
-		client_id,
-		bearer,
-		user->id,
-		0
-	);
+	twitch_helix_channel_follow_list *follows =
+		twitch_helix_get_all_channel_follows(
+			client_id,
+			bearer,
+			&error,
+			user->id,
+			0
+		);
 
-	if (follows == NULL) {
-		fprintf(stderr, "Error: user with login '%s' not found\n", username);
-		twitch_helix_user_list_free(users);
-		free(client_id);
-		free(bearer);
+	if (follows == NULL && error.curl_code != CURLE_OK) {
+		fprintf(stderr, "Error getting follows for %s\n", username);
+		print_error(&error);
+		free(client_id); free(bearer); twitch_helix_user_list_free(users);
 		return;
 	}
 
@@ -832,6 +962,7 @@ void get_live_channel_follows(
 	twitch_helix_stream_list *streams = twitch_helix_get_all_streams(
 		client_id,
 		bearer,
+		&error,
 		0,
 		NULL,
 		follows->count,
@@ -846,6 +977,11 @@ void get_live_channel_follows(
 		twitch_helix_channel_follow_list_free(follows);
 		free(client_id);
 		free(bearer);
+
+		if (error.curl_code != CURLE_OK) {
+			print_error(&error);
+		}
+
 		return;
 	} else {
 		for (int idx = 0; idx < streams->count; idx++) {

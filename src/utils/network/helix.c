@@ -30,12 +30,23 @@ extern size_t twitch_writefunc(
 CURLcode twitch_helix_get(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *url,
 	string_t *output
 ) {
 	// Initialize curl.
 	CURL *curl;
 	curl = curl_easy_init();
+
+	// Clear error data.
+	if (error != NULL) {
+		error->curl_code = CURLE_OK;
+		error->http_code = 0;
+		if (error->output != NULL) {
+			free(error->output);
+			error->output = NULL;
+		}
+	}
 
 	// Headers list.
 	struct curl_slist *headers = NULL;
@@ -64,6 +75,15 @@ CURLcode twitch_helix_get(
 	// Perform curl operation.
 	CURLcode code = curl_easy_perform(curl);
 
+	if (code == CURLE_HTTP_RETURNED_ERROR && error != NULL) {
+		error->curl_code = code;
+		long http = 0;
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(error->http_code));
+		if (output != NULL && output->ptr != NULL) {
+			error->output = output->ptr;
+		}
+	}
+
 	// Cleanup.
 	curl_slist_free_all(headers);
 	string_free(client_id_header);
@@ -75,29 +95,22 @@ CURLcode twitch_helix_get(
 json_value *twitch_helix_get_json(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *url
 ) {
 	// Get the output.
 	string_t *output = string_init();
-	CURLcode code = twitch_helix_get(client_id, auth, url, output);
+	CURLcode code = twitch_helix_get(client_id, auth, error, url, output);
 
 	// Check return code.
 	if (code == CURLE_HTTP_RETURNED_ERROR) {
-		fprintf(stderr, "Error at url '%s'\n", url);
-		string_free(output);
+		free(output);
 		return NULL;
 	}
-
-	// Dump
-	printf("%s\n", output->ptr);
 
 	// Parse.
 	json_value *value = json_parse(output->ptr, output->len);
 	string_free(output);
-
-	if (value == NULL) {
-		fprintf(stderr, "Failed to parse JSON.\n");
-	}
 
 	return value;
 }
@@ -133,6 +146,7 @@ void helix_append_cursor_params(
 void **helix_get_page(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	helix_page_url_builder builder,
 	void *params,
 	int limit,
@@ -143,8 +157,7 @@ void **helix_get_page(
 	int *total
 ) {
 	string_t *url = builder(params, limit, after);
-	printf("URL: %s", url->ptr);
-	json_value *value = twitch_helix_get_json(client_id, auth, url->ptr);
+	json_value *value = twitch_helix_get_json(client_id, auth, error, url->ptr);
 	string_free(url);
 
 	if (value == NULL) {
@@ -194,6 +207,7 @@ void **helix_get_page(
 void **get_all_helix_pages(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	helix_page_url_builder builder,
 	void *params,
 	parser_func parser,
@@ -213,6 +227,7 @@ void **get_all_helix_pages(
 		void **page = helix_get_page(
 			client_id,
 			auth,
+			error,
 			builder,
 			params,
 			min_int(PAGE_SIZE, (limit > 0) ? (limit - total) : 0),

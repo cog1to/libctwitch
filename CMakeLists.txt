@@ -27,6 +27,7 @@ add_library(ctwitch SHARED
   src/utils/network/network.c
   src/utils/parser/parser.c
   src/utils/data/data.c
+  src/common.c
   src/auth.c
   src/helix/data.c
   src/helix/users.c
@@ -76,6 +77,7 @@ add_executable(twitch-remote
   src/utils/network/network.c
   src/utils/parser/parser.c
   src/utils/data/data.c
+  src/common.c
   src/auth.c
   src/helix/data.c
   src/helix/users.c

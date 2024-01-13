@@ -97,6 +97,7 @@ string_t *helix_channel_follows_url_builder(
 twitch_helix_user_list *twitch_helix_get_users(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	int logins_count,
 	const char **logins
 ) {
@@ -109,6 +110,7 @@ twitch_helix_user_list *twitch_helix_get_users(
 	list->items = (twitch_helix_user **)helix_get_page(
 		client_id,
 		auth,
+		error,
 		&helix_users_url_builder,
 		(void *)&params,
 		0,
@@ -124,6 +126,7 @@ twitch_helix_user_list *twitch_helix_get_users(
 twitch_helix_user *twitch_helix_get_user(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *login
 ) {
 	const char *usernames[1] = { login };
@@ -132,6 +135,7 @@ twitch_helix_user *twitch_helix_get_user(
 	twitch_helix_user_list *users = twitch_helix_get_users(
 		client_id,
 		auth,
+		error,
 		1,
 		usernames
 	);
@@ -148,7 +152,7 @@ twitch_helix_user *twitch_helix_get_user(
 
 	// Copy the user data.
 	output = twitch_helix_user_alloc();
-	output->id = user->id;
+	output->id = immutable_string_copy(user->id);
 	output->login = immutable_string_copy(user->login);
 	output->display_name = immutable_string_copy(user->display_name);
 	output->type = immutable_string_copy(user->type);
@@ -164,6 +168,7 @@ twitch_helix_user *twitch_helix_get_user(
 twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *user_id,
 	const char *broadcaster_id,
 	int limit,
@@ -180,6 +185,7 @@ twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 	list->items = (twitch_helix_channel_follow **)helix_get_page(
 		client_id,
 		auth,
+		error,
 		&helix_channel_follows_url_builder,
 		(void *)&params,
 		limit,
@@ -195,6 +201,7 @@ twitch_helix_channel_follow_list *twitch_helix_get_channel_follows(
 twitch_helix_channel_follow_list *twitch_helix_get_all_channel_follows(
 	const char *client_id,
 	const char *auth,
+	twitch_error *error,
 	const char *user_id,
 	const char *broadcaster_id
 ) {
@@ -207,6 +214,7 @@ twitch_helix_channel_follow_list *twitch_helix_get_all_channel_follows(
 	follows->items = (twitch_helix_channel_follow **)get_all_helix_pages(
 		client_id,
 		auth,
+		error,
 		&helix_channel_follows_url_builder,
 		(void *)&params,
 		&parse_helix_channel_follow,
