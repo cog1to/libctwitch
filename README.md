@@ -63,7 +63,7 @@ It will redirect you to the URL containing an authorization code which you can
 exchange into user access token and a refresh token using
 `twitch_get_user_access_token()`.
 
-You can also refresh the expired tokens obtained from the authorization code
+You can also refresh expired tokens obtained from the authorization code
 flow using `twitch_refresh_access_token()`.
 
 # Contents
